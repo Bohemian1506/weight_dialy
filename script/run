@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# script/run — Dev Container 内でコマンドを実行するヘルパー
+#
+# 使い方:
+#   script/run "rails db:migrate"
+#   script/run "bundle add devise"
+#   script/run "rake -T"
+#
+# 仕組み:
+#   - docker compose のラベルで対象コンテナを動的発見 (リビルドで名前が変わっても追従)
+#   - mise の shim を PATH に通して ruby / rails / bundle を解決
+#   - 非対話用。rails console など TTY が要るものは VS Code 内ターミナルで実行する
+#
+# 前提:
+#   - Dev Container が起動していること (VS Code: Reopen in Container)
+#   - .devcontainer/compose.yaml の name: と service 名が下記と一致
+
+set -euo pipefail
+
+if [[ $# -eq 0 ]]; then
+  echo "Usage: script/run \"<command>\"" >&2
+  echo "Example: script/run \"rails db:migrate\"" >&2
+  exit 1
+fi
+
+CONTAINER=$(docker ps \
+  --filter "label=com.docker.compose.project=app" \
+  --filter "label=com.docker.compose.service=rails-app" \
+  --format "{{.Names}}" | head -n1)
+
+if [[ -z "$CONTAINER" ]]; then
+  echo "Error: Rails dev container is not running." >&2
+  echo "Start it via VS Code: 'Dev Containers: Reopen in Container'" >&2
+  exit 1
+fi
+
+docker exec -u vscode -w /workspaces/weight_dialy \
+  -e PATH="/home/vscode/.local/share/mise/shims:/home/vscode/.local/bin:/usr/local/bin:/usr/bin:/bin" \
+  "$CONTAINER" \
+  bash -c "$*"
