@@ -40,3 +40,7 @@
 # Claude Code (local-only settings, do not share)
 /.claude/settings.local.json
 /.claude/.credentials.json
+
+# Node (npm install output)
+/node_modules
+npm-debug.log*

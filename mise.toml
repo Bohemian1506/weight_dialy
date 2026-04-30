@@ -1,0 +1,10 @@
+# mise tool versions for weight_dialy
+#
+# Ruby は .ruby-version で管理 (Rails 慣習)。
+# Node は daisyUI / Tailwind 4 のプラグイン解決のために必要。
+#
+# 使い方: mise が入った環境で `mise install` を打つと両方入る。
+#         Dev Container の場合は postCreate で自動セットアップされる予定 (TODO)。
+
+[tools]
+node = "22"
