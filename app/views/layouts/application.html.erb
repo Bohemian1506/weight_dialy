@@ -4,7 +4,7 @@
     <title><%= content_for(:title) || "weight_dialy" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="App">
+    <meta name="application-name" content="weight_dialy">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -32,8 +32,6 @@
         <% if logged_in? %>
           <span class="mr-3 inline-block max-w-[8rem] truncate align-middle"><%= current_user.name %></span>
           <%= button_to "ログアウト", logout_path, method: :delete, class: "btn btn-ghost" %>
-        <% else %>
-          <%= button_to "Google でログイン", "/auth/google_oauth2", method: :post, class: "btn btn-primary", data: { turbo: false } %>
         <% end %>
       </div>
     </header>
