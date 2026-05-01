@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "App" %></title>
+    <title><%= content_for(:title) || "weight_dialy" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="App">
@@ -24,7 +24,28 @@
   </head>
 
   <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+    <header class="navbar bg-base-100 shadow-sm">
+      <div class="flex-1">
+        <%= link_to "weight_dialy", root_path, class: "btn btn-ghost text-xl" %>
+      </div>
+      <div class="flex-none">
+        <% if logged_in? %>
+          <span class="mr-3 inline-block max-w-[8rem] truncate align-middle"><%= current_user.name %></span>
+          <%= button_to "ログアウト", logout_path, method: :delete, class: "btn btn-ghost" %>
+        <% else %>
+          <%= button_to "Google でログイン", "/auth/google_oauth2", method: :post, class: "btn btn-primary", data: { turbo: false } %>
+        <% end %>
+      </div>
+    </header>
+
+    <% if flash[:notice] %>
+      <div class="alert alert-success container mx-auto mt-4"><%= flash[:notice] %></div>
+    <% end %>
+    <% if flash[:alert] %>
+      <div class="alert alert-error container mx-auto mt-4"><%= flash[:alert] %></div>
+    <% end %>
+
+    <main class="container mx-auto mt-4 px-5 flex">
       <%= yield %>
     </main>
   </body>
