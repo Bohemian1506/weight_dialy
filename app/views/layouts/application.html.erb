@@ -36,19 +36,22 @@
       </div>
     </header>
 
-    <%# flash はトースト風に画面上部 fixed で重ねる (document flow から外れるため、表示/非表示で下のコンテンツがズレない) %>
+    <%# flash はトースト風に画面上部 fixed で重ねる (document flow から外れるため、表示/非表示で下のコンテンツがズレない)。
+        top-24 (96px) は navbar 高さ 64px + 余白 16px + 将来 navbar を sticky 化した時の追加バッファ確保。
+        left-1/2 + -translate-x-1/2 で水平中央寄せ、w-[calc(100%-2rem)] で左右 16px の余白を保証。
+        opacity-0 + transition-opacity を初期に仕込んでおき、Stimulus の connect() で opacity-0 を外して fade-in する。 %>
     <% if flash[:notice] || flash[:alert] %>
-      <div class="fixed top-20 inset-x-4 z-50 mx-auto max-w-md space-y-2">
+      <div class="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md space-y-2">
         <% if flash[:notice] %>
-          <div class="alert alert-success" role="alert" data-controller="flash">
-            <span class="flex-1"><%= flash[:notice] %></span>
-            <button type="button" class="btn btn-ghost btn-circle" data-action="click->flash#close" aria-label="閉じる">✕</button>
+          <div class="alert alert-success shadow-lg opacity-0 transition-opacity duration-300" role="alert" data-controller="flash">
+            <span><%= flash[:notice] %></span>
+            <button type="button" class="btn btn-ghost btn-circle size-12" data-action="click->flash#close" aria-label="閉じる">✕</button>
           </div>
         <% end %>
         <% if flash[:alert] %>
-          <div class="alert alert-error" role="alert" data-controller="flash">
-            <span class="flex-1"><%= flash[:alert] %></span>
-            <button type="button" class="btn btn-ghost btn-circle" data-action="click->flash#close" aria-label="閉じる">✕</button>
+          <div class="alert alert-error shadow-lg opacity-0 transition-opacity duration-300" role="alert" data-controller="flash">
+            <span><%= flash[:alert] %></span>
+            <button type="button" class="btn btn-ghost btn-circle size-12" data-action="click->flash#close" aria-label="閉じる">✕</button>
           </div>
         <% end %>
       </div>
