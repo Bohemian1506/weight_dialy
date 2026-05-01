@@ -7,13 +7,19 @@
 set -euo pipefail
 
 input=$(cat)
-command=$(printf '%s' "$input" | jq -r '.tool_input.command // empty')
+
+# JSON が不正な場合は通す (誤検知を避ける)。実運用の Claude Code 入力は常に正しい JSON。
+command=$(printf '%s' "$input" | jq -r '.tool_input.command // empty' 2>/dev/null || true)
 
 if [[ -z "$command" ]]; then
   exit 0
 fi
 
-if [[ ! "$command" =~ git[[:space:]]+push ]]; then
+# `git push` を含むサブコマンドだけを抽出 (`;`, `&&`, `||`, `|` で区切る)
+# commit メッセージ等に "main" を含むケースを誤検知しないよう、push の引数列だけを対象にする。
+push_segments=$(printf '%s' "$command" | awk -v RS='[;&|]+' '/(^|[[:space:]])git[[:space:]]+push([[:space:]]|$)/')
+
+if [[ -z "$push_segments" ]]; then
   exit 0
 fi
 
@@ -24,7 +30,7 @@ fi
 #   - `git push origin :main` (削除も阻止)
 #   - `git push -u origin main`
 #   - `git push --force origin main`
-if printf '%s' "$command" | grep -Eq '(^|[[:space:]])main([[:space:]]|$)|:main([[:space:]]|$)'; then
+if printf '%s' "$push_segments" | grep -Eq '(^|[[:space:]])main([[:space:]]|$)|:main([[:space:]]|$)'; then
   cat >&2 <<'EOF'
 🚫 main ブランチへの直接 push はブロックされました。
 
