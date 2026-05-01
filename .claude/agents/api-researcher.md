@@ -59,3 +59,30 @@ tools: Bash, Read, Grep, Glob, WebFetch, WebSearch
 - 確証の無い情報を「公式」と書かない
 - WebSearch / WebFetch を使わずに記憶だけで答えない (古い情報の罠)
 - レポートを長文にしすぎない。実装者が 5 分で読める分量に圧縮
+
+## 起動前の注意 (Day 2 教訓)
+起動前に必ず WebSearch / WebFetch 権限の有無を確認する。権限がないと記憶ベース回答になり、古い情報の罠に落ちる。`.claude/settings.json` (or `settings.local.json`) の `permissions.allow` に `WebSearch` / `WebFetch` が含まれているか確認してから起動すること。
+
+権限が含まれていない場合は、`/permissions` コマンドか `.claude/settings.json` 直接編集で追加するか、調査自体を後続セッションに延期する。記憶ベースで回答させるくらいなら呼ばない方が安全。
+
+## 依頼時に渡してほしい情報
+- **調査対象**: API 名 / 仕様 / フォーマット (1 行で具体的に)
+- **用途**: 実装で何に使うか (1〜2 行。これにより調査の焦点が決まる)
+- **期限**: 急ぎ / 今日中 / 週末まで
+- **既知の前提 / 試したこと**: 既に読んだドキュメント / 既知の罠 / 関連 Issue
+- **報告サイズ目安**: 「実装者が 5 分で読める」「コードサンプルだけで良い」など
+
+## 依頼例
+```
+調査対象: Apple Shortcuts の Web Request アクションで HMAC 署名付き POST を送る方法
+用途: weight_dialy の Webhook 受信エンドポイントに対し、ユーザー側 Shortcut から認証付きで送信したい
+期限: Day 3 中 (本日中)
+既知の前提:
+- Shortcuts には「Get Contents of URL」アクションがあるのは知っている
+- カスタムヘッダーに HMAC を載せられるかが不明
+試したこと: 公式ドキュメントの Web Request 章を流し読みしたが、署名生成の例が見当たらない
+報告サイズ: 5 分で読めるサイズで OK。最小 Shortcut 設定例があると嬉しい
+```
+
+## 関連
+- 横断パターン (3 者並列レビュー / 引き継ぎ): `docs/agent-templates.md`
