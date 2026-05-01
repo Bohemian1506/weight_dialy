@@ -2,6 +2,7 @@ class User < ApplicationRecord
   has_secure_token :webhook_token
 
   has_many :step_records, dependent: :destroy
+  has_many :webhook_deliveries, dependent: :nullify  # 監査ログはユーザー削除後も保持
 
   validates :provider, presence: true
   validates :uid, presence: true, uniqueness: { scope: :provider }

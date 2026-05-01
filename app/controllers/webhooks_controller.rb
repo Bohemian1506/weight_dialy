@@ -1,11 +1,8 @@
-class WebhooksController < ApplicationController
-  # Webhook requests arrive with a Bearer token, not a browser session cookie.
-  # null_session discards any session data for this request without raising an
-  # exception, satisfying Rails' CSRF protection without skipping it entirely.
-  # (skip_forgery_protection / skip_before_action :verify_authenticity_token are avoided
-  # per project policy in CLAUDE.md)
-  protect_from_forgery with: :null_session
-
+class WebhooksController < ActionController::API
+  # API クライアント (Apple Shortcuts / curl) からの呼び出し専用エンドポイント。
+  # ActionController::API 継承は Rails 標準の API-only パターンで、CSRF 保護 / browser check / cookie /
+  # session を含まない (skip_forgery_protection 等の禁止 workaround とは別物 — そもそも入っていない)。
+  # 認証は Bearer token (authenticate_webhook!) で行う。
   before_action :read_raw_body
   before_action :authenticate_webhook!
 
@@ -15,7 +12,7 @@ class WebhooksController < ApplicationController
 
     unless records_data.is_a?(Array)
       record_delivery!(status: "invalid", error_message: "missing 'records' array")
-      render json: { error: "Invalid payload" }, status: :unprocessable_entity
+      render json: { error: "Invalid payload" }, status: :unprocessable_content
       return
     end
 
@@ -24,7 +21,12 @@ class WebhooksController < ApplicationController
     render json: { accepted: accepted }, status: :ok
   rescue JSON::ParserError => e
     record_delivery!(status: "invalid", error_message: "JSON parse error: #{e.message.truncate(120)}")
-    render json: { error: "Invalid payload" }, status: :unprocessable_entity
+    render json: { error: "Invalid payload" }, status: :unprocessable_content
+  rescue ActiveRecord::RecordInvalid => e
+    # 個々のレコードのバリデーション違反 (負数 / 不正な日付等) を 500 ではなく 422 + 監査ログで返す。
+    # rails-implementer の意図 (全体失敗方式) を実装まで貫徹するため。
+    record_delivery!(status: "invalid", error_message: "RecordInvalid: #{e.message.truncate(120)}")
+    render json: { error: "Invalid payload" }, status: :unprocessable_content
   end
 
   private
@@ -32,8 +34,16 @@ class WebhooksController < ApplicationController
   # Read the raw body once and store it for both authentication and parsing.
   # JSON middleware can consume the IO stream, so reading here ensures we always
   # have the original bytes regardless of middleware ordering.
+  # Size cap (1MB) is a DoS guard — a single day's HealthKit aggregate is well under 1KB,
+  # so 1MB is generous; payloads above this are rejected with 413 before any parsing.
+  MAX_BODY_BYTES = 1.megabyte
+
   def read_raw_body
-    @raw_body = request.body.read
+    @raw_body = request.body.read(MAX_BODY_BYTES + 1)
+    if @raw_body && @raw_body.bytesize > MAX_BODY_BYTES
+      render json: { error: "Payload too large" }, status: :content_too_large and return
+    end
+    @raw_body ||= ""
     request.body.rewind
   end
 
@@ -53,7 +63,7 @@ class WebhooksController < ApplicationController
 
     # Intentionally vague: do not reveal whether the token or the user was the problem.
     record_delivery!(status: "unauthorized", error_message: "bearer token mismatch or missing", user: nil)
-    render json: { error: "Unauthorized" }, status: :unauthorized
+    render json: { error: "Unauthorized" }, status: :unauthorized and return
   end
 
   def extract_bearer_token
@@ -62,26 +72,32 @@ class WebhooksController < ApplicationController
 
   # Upsert each day's record, updating only the keys present in the payload.
   # Keys absent from the payload are left unchanged (partial-update semantics).
+  # All-or-nothing: wrap in a transaction so that if any record fails validation
+  # the entire batch rolls back and the caller can safely retry the whole payload.
   def upsert_records(records_data)
     accepted = 0
 
-    records_data.each do |entry|
-      recorded_on = entry["recorded_on"]
-      next if recorded_on.blank?
+    StepRecord.transaction do
+      records_data.each do |entry|
+        recorded_on = entry["recorded_on"]
+        next if recorded_on.blank?
 
-      record = StepRecord.find_or_initialize_by(user: @webhook_user, recorded_on: recorded_on)
+        record = StepRecord.find_or_initialize_by(user: @webhook_user, recorded_on: recorded_on)
 
-      # Slice only the keys the caller sent; compact removes nils so that
-      # missing keys do not overwrite existing values with nil/0.
-      updates = {
-        steps:           entry["steps"],
-        distance_meters: entry["distance_meters"],
-        flights_climbed: entry["flights_climbed"]
-      }.compact
+        # Slice only the keys the caller sent; compact removes nils so that
+        # missing keys do not overwrite existing values with nil/0.
+        # NOTE: we cannot distinguish "key absent" from "explicit 0" because both
+        # arrive as falsy in JSON; partial-update semantics treat absent ≠ 0.
+        updates = {
+          steps:           entry["steps"],
+          distance_meters: entry["distance_meters"],
+          flights_climbed: entry["flights_climbed"]
+        }.compact
 
-      record.assign_attributes(updates)
-      record.save!
-      accepted += 1
+        record.assign_attributes(updates)
+        record.save!
+        accepted += 1
+      end
     end
 
     accepted
