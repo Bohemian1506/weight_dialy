@@ -1,4 +1,8 @@
 class User < ApplicationRecord
+  has_secure_token :webhook_token
+
+  has_many :step_records, dependent: :destroy
+
   validates :provider, presence: true
   validates :uid, presence: true, uniqueness: { scope: :provider }
   validates :email, presence: true
