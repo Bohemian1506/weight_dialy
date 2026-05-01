@@ -3,7 +3,13 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "WebFetch"
+      "WebFetch(domain:developer.apple.com)",
+      "WebFetch(domain:support.apple.com)",
+      "WebFetch(domain:developers.strava.com)",
+      "WebFetch(domain:guides.rubyonrails.org)",
+      "WebFetch(domain:api.rubyonrails.org)",
+      "WebFetch(domain:docs.github.com)",
+      "WebFetch(domain:api.github.com)"
     ]
   },
   "hooks": {
