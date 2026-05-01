@@ -21,6 +21,9 @@ RSpec.describe "Home", type: :request do
         expect(response.body).not_to include("Day 1: daisyUI 動作確認")
       end
 
+      # 過去のダミーボタン (Primary / Secondary / Accent) の回帰防止:
+      # button_to が生成する <button>...</button> のボタンテキストとして
+      # 該当文字列が現れないことを `>Primary<` のような囲い文字で検証する
       it "旧ダミーボタン Primary を含まない" do
         expect(response.body).not_to include(">Primary<")
       end
@@ -51,7 +54,7 @@ RSpec.describe "Home", type: :request do
         expect(response.body).to include("ようこそ、#{user.name}さん。")
       end
 
-      it "ホーム本体の Google でログインボタンを表示しない" do
+      it "Google でログインボタンをどこにも表示しない" do
         expect(response.body).not_to include("Google でログイン")
       end
 

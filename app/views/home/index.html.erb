@@ -3,13 +3,14 @@
     <div class="card-body items-center text-center">
       <h1 class="card-title text-3xl">weight_dialy</h1>
       <p class="text-base-content/70">日常の小さな勝ちを、自動で拾って褒める。</p>
-      <div class="card-actions mt-4">
-        <% if logged_in? %>
-          <p class="text-base-content">ようこそ、<%= current_user.name %>さん。</p>
-        <% else %>
+      <% if logged_in? %>
+        <p class="text-base-content mt-4">ようこそ、<%= current_user.name %>さん。</p>
+      <% else %>
+        <div class="card-actions mt-4">
+          <%# OmniAuth ミドルウェアが /auth/:provider を処理するため named route なし %>
           <%= button_to "Google でログイン", "/auth/google_oauth2", method: :post, class: "btn btn-primary", data: { turbo: false } %>
-        <% end %>
-      </div>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>
