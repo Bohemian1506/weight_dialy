@@ -16,6 +16,11 @@
 4. ブランチで作業 → コミット → プッシュ → PR (`gh pr create --base main`)
 5. マージ後、ブランチ削除
 
+#### 二段構えのガード (実装済み)
+- **Claude Code 側**: `.claude/hooks/block-main-push.sh` が PreToolUse hook で `git push ... main` をブロック
+- **Git 側**: `.githooks/pre-push` が人間が直接打った場合も阻止
+- **clone 直後の必須セットアップ**: `git config core.hooksPath .githooks` (bin/setup から自動設定)
+
 ---
 
 ## 📚 プロジェクト概要
