@@ -18,42 +18,50 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%# Includes all stylesheet files in app/assets/stylesheets (sketchy.css も含む) %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+
+    <%# sketchy テーマで使う手書き風フォント。display=swap で FOUC を最小化 %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+
+    <%# JS 無効環境フォールバック: flash の opacity-0 を強制解除して永続不可視を防ぐ。
+        HTML5 仕様上 <noscript><style> は <head> 内に置くのが正 (body 内は実装依存)。 %>
+    <noscript><style>[data-controller="flash"] { opacity: 1 !important; }</style></noscript>
+
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-base-200">
-    <header class="navbar bg-base-100 shadow-sm">
-      <div class="flex-1">
-        <%= link_to "weight_dialy", root_path, class: "btn btn-ghost text-xl" %>
-      </div>
-      <div class="flex-none">
+  <body>
+    <header class="sketch-navbar">
+      <%= link_to root_path, class: "sketch-navbar-title" do %>
+        weight <span class="sketch-swoosh">daily.</span>
+      <% end %>
+      <div class="sketch-navbar-right">
         <% if logged_in? %>
-          <span class="mr-3 inline-block max-w-[8rem] truncate align-middle"><%= current_user.name %></span>
-          <%= button_to "ログアウト", logout_path, method: :delete, class: "btn btn-ghost" %>
+          <span class="sketch-navbar-name"><%= current_user.name %></span>
+          <%= button_to "ログアウト", logout_path, method: :delete, class: "sketch-btn" %>
         <% end %>
       </div>
     </header>
 
     <%# flash はトースト風に画面上部 fixed で重ねる (document flow から外れるため、表示/非表示で下のコンテンツがズレない)。
-        top-24 (96px) は navbar 高さ 64px + 余白 16px + 将来 navbar を sticky 化した時の追加バッファ確保。
-        left-1/2 + -translate-x-1/2 で水平中央寄せ、w-[calc(100%-2rem)] で左右 16px の余白を保証。
-        FOUC 対策: 初期に opacity-0 を仕込んで HTML レンダ直後から透明にし、Stimulus connect() で外して fade-in する。
-        JS 無効環境フォールバック: <noscript> で opacity を 1 に強制復帰させるため flash が永遠に消える事故を防ぐ。 %>
+        top-24 (96px) は navbar 高さ + 余白 + 将来 navbar を sticky 化した時の追加バッファ。
+        FOUC 対策: 初期 opacity-0 + Stimulus connect() で fade-in。JS 無効フォールバックは <head> の <noscript><style> 参照。
+        見た目は sketchy トーストに差し替え (sketch-toast)、フェード挙動 (flash_controller.js) は変更しない。 %>
     <% if flash[:notice] || flash[:alert] %>
-      <noscript><style>[data-controller="flash"] { opacity: 1 !important; }</style></noscript>
       <div class="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md space-y-2">
         <% if flash[:notice] %>
-          <div class="alert alert-success shadow-lg opacity-0 transition-opacity duration-300" role="alert" data-controller="flash">
-            <span><%= flash[:notice] %></span>
-            <button type="button" class="btn btn-ghost btn-circle size-12" data-action="click->flash#close" aria-label="閉じる">✕</button>
+          <div class="sketch-toast notice opacity-0" role="alert" data-controller="flash">
+            <span class="sketch-toast-message"><%= flash[:notice] %></span>
+            <button type="button" class="sketch-toast-close" data-action="click->flash#close" aria-label="閉じる">✕</button>
           </div>
         <% end %>
         <% if flash[:alert] %>
-          <div class="alert alert-error shadow-lg opacity-0 transition-opacity duration-300" role="alert" data-controller="flash">
-            <span><%= flash[:alert] %></span>
-            <button type="button" class="btn btn-ghost btn-circle size-12" data-action="click->flash#close" aria-label="閉じる">✕</button>
+          <div class="sketch-toast alert opacity-0" role="alert" data-controller="flash">
+            <span class="sketch-toast-message"><%= flash[:alert] %></span>
+            <button type="button" class="sketch-toast-close" data-action="click->flash#close" aria-label="閉じる">✕</button>
           </div>
         <% end %>
       </div>
