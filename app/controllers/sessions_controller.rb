@@ -1,6 +1,13 @@
 class SessionsController < ApplicationController
   def create
-    user = User.from_omniauth(request.env["omniauth.auth"])
+    auth = request.env["omniauth.auth"]
+    if auth.nil?
+      Rails.logger.error("OAuth login failed: omniauth.auth is nil")
+      return redirect_to root_path, alert: "ログインに失敗しました"
+    end
+
+    user = User.from_omniauth(auth)
+    reset_session
     session[:user_id] = user.id
     redirect_to root_path, notice: "ログインしました"
   rescue ActiveRecord::RecordInvalid => e
@@ -9,7 +16,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    session.delete(:user_id)
+    reset_session
     redirect_to root_path, notice: "ログアウトしました"
   end
 

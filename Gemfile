@@ -66,12 +66,12 @@ group :development, :test do
 
   # Factory Bot for test fixtures [https://github.com/thoughtbot/factory_bot_rails]
   gem "factory_bot_rails"
-
-  # Load environment variables from .env [https://github.com/bkeepers/dotenv]
-  gem "dotenv-rails"
 end
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Load environment variables from .env (dev only — prod uses Rails credentials) [https://github.com/bkeepers/dotenv]
+  gem "dotenv-rails"
 end

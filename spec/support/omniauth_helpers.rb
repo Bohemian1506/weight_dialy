@@ -1,4 +1,4 @@
-# OmniAuth テストモードの有効化と認証ハッシュ生成ヘルパー
+# OmniAuth テストモード関連のヘルパー
 #
 # OmniAuth はデフォルトで GET /auth/:provider/callback への直アクセスを
 # 禁止しているため、テストモードに切り替えてモックデータを差し込む。
@@ -6,10 +6,8 @@
 #   before { mock_google_oauth2(uid: "123", email: "test@example.com") }
 #   get auth_callback_path(provider: "google_oauth2")
 #
-# テストが終わったら after で reset_omniauth_mocks を呼ぶか、
-# 後述の after ブロックに委ねる (rails_helper.rb 側でリセット済み)。
-
-OmniAuth.config.test_mode = true
+# test_mode のグローバル副作用を避けるため、有効化は RSpec.configure 内で行う
+# (トップレベルで設定すると model spec など全 spec に副作用が及ぶため)。
 
 module OmniauthHelpers
   # Google OAuth2 モック認証ハッシュをアプリの env にセットする。
@@ -36,6 +34,10 @@ module OmniauthHelpers
 end
 
 RSpec.configure do |config|
+  config.before(:suite) do
+    OmniAuth.config.test_mode = true
+  end
+
   config.include OmniauthHelpers, type: :request
 
   config.after(:each, type: :request) do
