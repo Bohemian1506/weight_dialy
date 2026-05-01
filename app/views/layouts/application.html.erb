@@ -36,16 +36,26 @@
       </div>
     </header>
 
-    <% if flash[:notice] %>
-      <div class="alert alert-success container mx-auto mt-4" role="alert" data-controller="flash">
-        <span><%= flash[:notice] %></span>
-        <button type="button" class="btn btn-ghost btn-circle" data-action="click->flash#close" aria-label="閉じる">×</button>
-      </div>
-    <% end %>
-    <% if flash[:alert] %>
-      <div class="alert alert-error container mx-auto mt-4" role="alert" data-controller="flash">
-        <span><%= flash[:alert] %></span>
-        <button type="button" class="btn btn-ghost btn-circle" data-action="click->flash#close" aria-label="閉じる">×</button>
+    <%# flash はトースト風に画面上部 fixed で重ねる (document flow から外れるため、表示/非表示で下のコンテンツがズレない)。
+        top-24 (96px) は navbar 高さ 64px + 余白 16px + 将来 navbar を sticky 化した時の追加バッファ確保。
+        left-1/2 + -translate-x-1/2 で水平中央寄せ、w-[calc(100%-2rem)] で左右 16px の余白を保証。
+        FOUC 対策: 初期に opacity-0 を仕込んで HTML レンダ直後から透明にし、Stimulus connect() で外して fade-in する。
+        JS 無効環境フォールバック: <noscript> で opacity を 1 に強制復帰させるため flash が永遠に消える事故を防ぐ。 %>
+    <% if flash[:notice] || flash[:alert] %>
+      <noscript><style>[data-controller="flash"] { opacity: 1 !important; }</style></noscript>
+      <div class="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md space-y-2">
+        <% if flash[:notice] %>
+          <div class="alert alert-success shadow-lg opacity-0 transition-opacity duration-300" role="alert" data-controller="flash">
+            <span><%= flash[:notice] %></span>
+            <button type="button" class="btn btn-ghost btn-circle size-12" data-action="click->flash#close" aria-label="閉じる">✕</button>
+          </div>
+        <% end %>
+        <% if flash[:alert] %>
+          <div class="alert alert-error shadow-lg opacity-0 transition-opacity duration-300" role="alert" data-controller="flash">
+            <span><%= flash[:alert] %></span>
+            <button type="button" class="btn btn-ghost btn-circle size-12" data-action="click->flash#close" aria-label="閉じる">✕</button>
+          </div>
+        <% end %>
       </div>
     <% end %>
 
