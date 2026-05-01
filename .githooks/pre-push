@@ -5,6 +5,10 @@
 #
 # 有効化: clone 直後に `git config core.hooksPath .githooks` を実行する。
 # bin/setup から自動設定されるため、通常は手動設定不要。
+#
+# UX 設計判断 (PR #5 review): エラーメッセージの「正しい手順」は軽い 1 行追記で済ませており、
+# 完全な場合分け (main にいる場合 / 作業ブランチにいる場合) は採用していない。
+# 後輩スクール生から「混乱した」フィードバックが来たら、完全分岐に拡張する。
 
 set -euo pipefail
 
@@ -13,16 +17,17 @@ protected_branch="main"
 # 標準入力で `<local_ref> <local_sha> <remote_ref> <remote_sha>` 形式で push 内容が渡される
 while read -r local_ref local_sha remote_ref remote_sha; do
   if [[ "$remote_ref" == "refs/heads/$protected_branch" ]]; then
-    cat >&2 <<EOF
-🚫 main ブランチへの直接 push はブロックされました。
+    cat >&2 <<'EOF'
+🚫 [pre-push] main ブランチへの直接 push はブロックされました。
 
 理由: weight_dialy では「main 直コミット禁止 / PR 経由マージ」の運用ルールを採用しています。
-詳細: CLAUDE.md の「絶対ルール」を参照。
+詳細: CLAUDE.md (プロジェクトルート) の「絶対ルール」を参照。
 
 正しい手順:
-  1. git checkout -b feature/<内容>
-  2. 作業 → コミット → git push -u origin feature/<内容>
-  3. gh pr create --base main
+  1. git checkout -b feature/<内容>     ← すでに作業ブランチにいる場合は 3 から
+  2. 作業 → コミット
+  3. git push -u origin feature/<内容>
+  4. gh pr create --base main
 EOF
     exit 1
   fi
