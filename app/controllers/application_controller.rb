@@ -17,4 +17,10 @@ class ApplicationController < ActionController::Base
   def logged_in?
     current_user.present?
   end
+
+  def require_login
+    return if logged_in?
+
+    redirect_to root_path, alert: "ログインが必要です"
+  end
 end

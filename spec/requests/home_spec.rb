@@ -51,7 +51,10 @@ RSpec.describe "Home", type: :request do
       end
 
       it "ようこそメッセージにユーザー名を含む" do
-        expect(response.body).to include("ようこそ、#{user.name}さん。")
+        # PR #30 (sketchy 化) で <b>name</b> でラップ + 半角スペース挿入する形に変更されたため、
+        # 文字列完全一致ではなく構成要素を独立して検証する。
+        expect(response.body).to include("ようこそ、")
+        expect(response.body).to include(user.name)
       end
 
       it "Google でログインボタンをどこにも表示しない" do
