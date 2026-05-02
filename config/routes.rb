@@ -16,7 +16,7 @@ Rails.application.routes.draw do
   delete "/logout", to: "sessions#destroy", as: :logout
 
   # Apple Shortcuts → Rails webhook endpoint (Bearer token auth, no CSRF cookie needed)
-  post "/webhooks/health_data", to: "webhooks#health_data"
+  post "/webhooks/health_data", to: "webhooks#health_data", as: :webhooks_health_data
 
   # Settings: webhook token 表示 / 再生成
   get  "/settings",               to: "settings#show",            as: :settings
