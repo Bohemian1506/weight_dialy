@@ -15,6 +15,9 @@ Rails.application.routes.draw do
   get "/auth/failure", to: "sessions#failure", as: :auth_failure
   delete "/logout", to: "sessions#destroy", as: :logout
 
+  # Apple Shortcuts → Rails webhook endpoint (Bearer token auth, no CSRF cookie needed)
+  post "/webhooks/health_data", to: "webhooks#health_data"
+
   # Defines the root path route ("/")
   root "home#index"
 end

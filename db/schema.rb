@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_01_051150) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_01_232659) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "step_records", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "distance_meters", default: 0, null: false
+    t.integer "flights_climbed", default: 0, null: false
+    t.date "recorded_on", null: false
+    t.integer "steps", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id", "recorded_on"], name: "index_step_records_on_user_id_and_recorded_on", unique: true
+    t.index ["user_id"], name: "index_step_records_on_user_id"
+  end
 
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -22,6 +34,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_01_051150) do
     t.string "provider", null: false
     t.string "uid", null: false
     t.datetime "updated_at", null: false
+    t.string "webhook_token"
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
+    t.index ["webhook_token"], name: "index_users_on_webhook_token", unique: true
   end
+
+  create_table "webhook_deliveries", force: :cascade do |t|
+    t.string "error_message"
+    t.jsonb "payload", default: {}, null: false
+    t.datetime "received_at", null: false
+    t.string "status", null: false
+    t.bigint "user_id"
+    t.index ["received_at"], name: "index_webhook_deliveries_on_received_at"
+    t.index ["user_id"], name: "index_webhook_deliveries_on_user_id"
+  end
+
+  add_foreign_key "step_records", "users"
+  add_foreign_key "webhook_deliveries", "users"
 end

@@ -40,6 +40,31 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe "has_secure_token :webhook_token" do
+    it "auto-generates webhook_token on create" do
+      user = create(:user)
+      expect(user.webhook_token).not_to be_nil
+    end
+
+    it "generates a token of at least 24 characters" do
+      user = create(:user)
+      expect(user.webhook_token.length).to be >= 24
+    end
+
+    it "generates unique tokens for different users" do
+      user1 = create(:user)
+      user2 = create(:user)
+      expect(user1.webhook_token).not_to eq(user2.webhook_token)
+    end
+
+    it "allows regenerating the token via regenerate_webhook_token" do
+      user = create(:user)
+      original_token = user.webhook_token
+      user.regenerate_webhook_token
+      expect(user.reload.webhook_token).not_to eq(original_token)
+    end
+  end
+
   describe ".from_omniauth" do
     let(:auth) do
       OmniAuth::AuthHash.new(
