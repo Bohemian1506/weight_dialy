@@ -1,0 +1,18 @@
+<%# 未ログインユーザー向けバナー。デモデータ閲覧中であることを示す。 %>
+<div class="sketch-banner sketch-banner-guest" role="banner">
+  <div class="sketch-banner-body">
+    <span class="sketch-banner-icon">👀</span>
+    <div>
+      <p class="sketch-banner-text">
+        これは<strong>サンプルデータ</strong>です。Google でログインすると、自分の歩数データを記録できます。
+      </p>
+    </div>
+  </div>
+  <div class="sketch-banner-action">
+    <%# OmniAuth ミドルウェアが /auth/:provider を処理するため named route なし %>
+    <%= button_to "Google でログイン", "/auth/google_oauth2",
+          method: :post,
+          class: "sketch-btn sketch-btn-primary",
+          data: { turbo: false } %>
+  </div>
+</div>
