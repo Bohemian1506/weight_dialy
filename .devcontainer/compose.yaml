@@ -15,8 +15,12 @@ services:
     # Uncomment the next line to use a non-root user for all processes.
     # user: vscode
 
-    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
+    # WSL2 host で動かす ngrok から container 内 Rails に届かせるため、host:3000 に直接 publish する。
+    # devcontainer.json の forwardPorts は VS Code (Windows) 側にしか forward されないため不足。
+    # Codespace では ports が無視されるが、ローカル Dev Container の動作には影響しない。
+    ports:
+    - "3000:3000"
+
     depends_on:
     - postgres
 
