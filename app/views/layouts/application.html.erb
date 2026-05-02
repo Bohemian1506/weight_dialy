@@ -41,6 +41,7 @@
       <div class="sketch-navbar-right">
         <% if logged_in? %>
           <span class="sketch-navbar-name"><%= current_user.name %></span>
+          <%= link_to "設定", settings_path, class: "sketch-btn" %>
           <%= button_to "ログアウト", logout_path, method: :delete, class: "sketch-btn" %>
         <% end %>
       </div>

@@ -18,6 +18,10 @@ Rails.application.routes.draw do
   # Apple Shortcuts → Rails webhook endpoint (Bearer token auth, no CSRF cookie needed)
   post "/webhooks/health_data", to: "webhooks#health_data"
 
+  # Settings: webhook token 表示 / 再生成
+  get  "/settings",               to: "settings#show",            as: :settings
+  post "/settings/webhook_token", to: "settings#regenerate_token", as: :regenerate_webhook_token
+
   # Defines the root path route ("/")
   root "home#index"
 end
