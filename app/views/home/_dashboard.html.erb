@@ -1,0 +1,265 @@
+<%#
+  Dashboard partial — Wireframe v3 の sketchy 再現版。
+  ローカル変数: display_name, records, today_record, streak, advice
+  duck typing: records の各要素は recorded_on / steps / distance_meters / flights_climbed / estimated_kcal を持つ。
+%>
+
+<%# ---- SVG チャート計算 ---- %>
+<%
+  # 表示する bar の最大高さ (px)
+  chart_height   = 180
+  bar_width      = 12
+  svg_width      = 500
+  svg_height     = 200
+
+  # kcal 最大値 (0 除外; 最低でも 1 にしてゼロ除算を防ぐ)
+  max_kcal = records.map(&:estimated_kcal).max.to_i
+  max_kcal = 1 if max_kcal < 1
+
+  # baseline y 座標 (bar の底辺)
+  baseline_y = 180
+
+  # 1 bar あたりの水平ピッチ
+  n_bars = [ records.size, 1 ].max
+  pitch  = (svg_width.to_f / n_bars).round(2)
+
+  # 各 bar の属性を計算
+  bars = records.each_with_index.map do |r, idx|
+    kcal    = r.estimated_kcal
+    bar_h   = [ (kcal.to_f / max_kcal * chart_height).round, 2 ].max
+    x       = (pitch * idx + (pitch - bar_width) / 2.0).round(2)
+    y       = baseline_y - bar_h
+    is_today = r.recorded_on == Date.current
+    is_rest  = r.steps.zero?
+
+    fill = if is_today
+             "#ffd23f"   # 黄色 = 本日
+           elsif is_rest
+             "#cfcfcf"   # 灰色 = 休息日 / 記録なし
+           else
+             "#7ac74f"   # 緑 = 通常
+           end
+
+    { x: x, y: y, h: bar_h, fill: fill, kcal: kcal, is_today: is_today }
+  end
+
+  # 7 日移動平均線のポイント (bar の中心 x, 移動平均 kcal を y に変換)
+  window = 7
+  ma_points = records.each_with_index.map do |_r, idx|
+    slice     = records[ [idx - window + 1, 0].max .. idx ]
+    avg_kcal  = slice.sum(&:estimated_kcal).to_f / slice.size
+    cx        = (pitch * idx + pitch / 2.0).round(2)
+    cy        = (baseline_y - avg_kcal / max_kcal * chart_height).round(2)
+    "#{cx},#{cy}"
+  end.join(" ")
+
+  # 今日の表示数値
+  today_kcal  = today_record&.estimated_kcal.to_i
+  today_steps = today_record&.steps.to_i
+  today_dist  = today_record ? (today_record.distance_meters / 1000.0).round(1) : 0
+  today_flights = today_record&.flights_climbed.to_i
+
+  # Day N = records のうち steps > 0 の日数
+  active_days = records.count { |r| r.steps.positive? }
+
+  # ストリーク曜日表示用 (今週 月〜日)
+  today_wday = Date.current.wday  # 0=日, 1=月 ... 6=土
+  week_days  = %w[月 火 水 木 金 土 日]
+  # 今週の月曜日を起点に 7 日分の Date を生成
+  this_monday = Date.current - ((today_wday == 0 ? 7 : today_wday) - 1)
+  week_dates  = (0..6).map { |i| this_monday + i }
+  week_presence = records.each_with_object({}) { |r, h| h[r.recorded_on] = r.steps.positive? }
+%>
+
+<%# ---- トップバー ---- %>
+<div class="sketch-topbar">
+  <div>
+    <div class="sketch-label">
+      <%= ["おはようございます", "こんにちは", "こんばんは"][[ [Time.current.hour / 6, 2].min, 0 ].max] %>
+    </div>
+    <div class="sketch-hh">
+      <%= display_name %>さん
+      <span class="sketch-small">／ Day <%= active_days %></span>
+    </div>
+  </div>
+  <div style="text-align: right;">
+    <div class="sketch-small">きょうの消費</div>
+    <div class="sketch-hh">+<%= today_kcal %> <span class="sketch-hl-yellow">kcal</span></div>
+  </div>
+</div>
+
+<%# ---- メイングリッド (チャート + AI/ストリーク) ---- %>
+<div class="sketch-main-grid">
+
+  <%# 左: 消費カロリー 30 日チャート %>
+  <div class="sketch-box">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+      <h2 class="sketch-h" style="margin: 0;">消費カロリー（30日）</h2>
+      <div class="sketch-small">「プラスα」の積み上げだけ</div>
+    </div>
+
+    <svg viewBox="0 0 <%= svg_width %> <%= svg_height %>"
+         class="sketch-chart-svg"
+         role="img"
+         aria-label="30日間の消費カロリーチャート">
+
+      <%# グリッド線 %>
+      <g stroke="#000" stroke-opacity="0.08" stroke-width="1">
+        <line x1="0" y1="<%= (baseline_y * 0.25).round %>" x2="<%= svg_width %>" y2="<%= (baseline_y * 0.25).round %>"/>
+        <line x1="0" y1="<%= (baseline_y * 0.5).round %>"  x2="<%= svg_width %>" y2="<%= (baseline_y * 0.5).round %>"/>
+        <line x1="0" y1="<%= (baseline_y * 0.75).round %>" x2="<%= svg_width %>" y2="<%= (baseline_y * 0.75).round %>"/>
+      </g>
+
+      <%# ベースライン %>
+      <line x1="0" y1="<%= baseline_y %>" x2="<%= svg_width %>" y2="<%= baseline_y %>"
+            stroke="#1a1a1a" stroke-width="1.5"/>
+
+      <%# Y 軸ラベル %>
+      <text x="4" y="<%= baseline_y - 2 %>"
+            font-family="Patrick Hand" font-size="11" fill="#6e6b60">0</text>
+      <text x="4" y="<%= (baseline_y - chart_height + 12).round %>"
+            font-family="Patrick Hand" font-size="11" fill="#6e6b60">
+        <%= max_kcal %>kc
+      </text>
+
+      <%# 棒グラフ %>
+      <% bars.each do |bar| %>
+        <rect x="<%= bar[:x] %>"
+              y="<%= bar[:y] %>"
+              width="<%= bar_width %>"
+              height="<%= bar[:h] %>"
+              fill="<%= bar[:fill] %>"
+              stroke="#1a1a1a"
+              stroke-width="<%= bar[:is_today] ? 2 : 1.2 %>"/>
+        <% if bar[:is_today] %>
+          <text x="<%= (bar[:x] + bar_width / 2.0).round(1) %>"
+                y="<%= [bar[:y] - 4, 12].max %>"
+                font-family="Patrick Hand" font-size="11"
+                text-anchor="middle" fill="#1a1a1a">今日</text>
+        <% end %>
+      <% end %>
+
+      <%# 7 日移動平均線 (オレンジ点線) %>
+      <% if records.size >= 2 %>
+        <polyline fill="none"
+                  stroke="#ff7a45"
+                  stroke-width="2"
+                  stroke-dasharray="4 3"
+                  points="<%= ma_points %>"/>
+      <% end %>
+    </svg>
+
+    <%# 凡例 %>
+    <div style="display: flex; gap: 14px; margin-top: 6px; flex-wrap: wrap;" class="sketch-small">
+      <span><span class="sketch-sw" style="background: #7ac74f;"></span>その日のプラスα消費</span>
+      <span><span class="sketch-sw" style="background: #cfcfcf;"></span>記録なし・休息日</span>
+      <span><span class="sketch-sw" style="background: #ffd23f;"></span>本日</span>
+      <span><span class="sketch-sw" style="background: #ff7a45;"></span>7日移動平均</span>
+    </div>
+  </div>
+
+  <%# 右: AI 提案 + ストリーク %>
+  <div class="sketch-side">
+
+    <%# AI プラマイ提案カード %>
+    <div class="sketch-box dashed" style="background: #fff7e0;">
+      <div style="display: flex; align-items: flex-start; gap: 10px;">
+        <div class="sketch-ai-avatar" aria-hidden="true">AI</div>
+        <div style="flex: 1;">
+          <h3 class="sketch-h"><%= advice.headline %></h3>
+          <div class="sketch-small">
+            きょうのプラスα消費 <strong>+<%= today_kcal %> kcal</strong> なら…
+          </div>
+          <ul style="margin: 8px 0 0 16px; padding: 0; list-style: disc;">
+            <% advice.items.each do |item| %>
+              <li class="sketch-body-text" style="line-height: 1.6;">
+                <%= item.name %>（<%= item.kcal %>kcal）
+                <% if item.label %>
+                  <span class="<%= item.label == "余裕" ? "sketch-hl-green" : "sketch-hl-yellow" %>">
+                    <%= item.label %>
+                  </span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+          <div style="margin-top: 10px;">
+            <span class="sketch-btn" style="cursor: default; opacity: 0.6;"
+                  title="この機能は近日公開予定です">
+              <%= advice.button_label %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ストリークカード %>
+    <div class="sketch-box">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="sketch-h" style="margin: 0;">🔥 ストリーク</h3>
+        <span class="sketch-small">今週</span>
+      </div>
+
+      <div class="sketch-streak-row">
+        <% week_dates.each_with_index do |date, idx| %>
+          <%
+            is_today_cell = date == Date.current
+            is_future     = date > Date.current
+            has_record    = week_presence[date]
+            cell_class = if is_today_cell
+                           "today"
+                         elsif is_future
+                           "future"
+                         elsif has_record
+                           "done"
+                         else
+                           "empty"
+                         end
+          %>
+          <div class="sketch-streak-cell">
+            <div class="sketch-streak-dot <%= cell_class %>" aria-label="<%= week_days[idx] %>"></div>
+            <div class="sketch-small"><%= week_days[idx] %></div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="sketch-small" style="margin-top: 8px;">
+        連続 <strong><%= streak %> 日</strong>
+        <% if streak >= 14 %>
+          &#127881; 2週間継続達成！
+        <% elsif streak >= 7 %>
+          &#127881; 1週間継続達成！
+        <% elsif streak > 0 %>
+          — あと <%= 7 - streak %> 日で「1週間継続」
+        <% end %>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<%# ---- 下段 4 カード ---- %>
+<div class="sketch-bottom-grid">
+  <div class="sketch-box filled">
+    <div class="sketch-label">⬆ 階段</div>
+    <div class="sketch-hh">+<%= today_flights %> <span class="sketch-small">段</span></div>
+    <div class="sketch-small">自動検出</div>
+  </div>
+
+  <div class="sketch-box filled">
+    <div class="sketch-label">🚶 余分歩き</div>
+    <div class="sketch-hh">+<%= today_dist %> <span class="sketch-small">km</span></div>
+    <div class="sketch-small">ルートから推定</div>
+  </div>
+
+  <div class="sketch-box filled">
+    <div class="sketch-label">🔥 消費</div>
+    <div class="sketch-hh">+<%= today_kcal %> <span class="sketch-small">kcal</span></div>
+    <div class="sketch-small">≒ アイス 1 個ぶん</div>
+  </div>
+
+  <div class="sketch-box accent">
+    <div class="sketch-label">きょうの合計歩数</div>
+    <div class="sketch-hh"><%= number_with_delimiter(today_steps) %></div>
+    <div class="sketch-small">スマホ連携で自動記録</div>
+  </div>
+</div>

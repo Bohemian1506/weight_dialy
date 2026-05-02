@@ -13,8 +13,8 @@ RSpec.describe "Home", type: :request do
         expect(response.body).to include("Google でログイン")
       end
 
-      it "ようこそメッセージを表示しない" do
-        expect(response.body).not_to include("ようこそ")
+      it "ゲストバナーを表示する" do
+        expect(response.body).to include("サンプルデータ")
       end
 
       it "過去のダミーバッジ文字列を含まない" do
@@ -37,7 +37,7 @@ RSpec.describe "Home", type: :request do
       end
     end
 
-    context "ログイン時" do
+    context "ログイン時 (データなし = :empty 状態)" do
       let(:user) { create(:user) }
 
       before do
@@ -50,16 +50,17 @@ RSpec.describe "Home", type: :request do
         expect(response).to have_http_status(:ok)
       end
 
-      it "ようこそメッセージにユーザー名を含む" do
-        expect(response.body).to include("ようこそ、#{user.name}さん。")
+      it "ダッシュボードのトップバーにユーザー名を含む" do
+        # display_name = current_user.name がトップバーに表示される
+        expect(response.body).to include(user.name)
+      end
+
+      it "empty バナーに設定リンクを表示する" do
+        expect(response.body).to include("/settings")
       end
 
       it "Google でログインボタンをどこにも表示しない" do
         expect(response.body).not_to include("Google でログイン")
-      end
-
-      it "ヘッダにユーザー名を表示する" do
-        expect(response.body).to include(user.name)
       end
 
       it "ヘッダにログアウトボタンを表示する" do

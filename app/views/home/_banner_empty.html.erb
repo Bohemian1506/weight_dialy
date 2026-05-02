@@ -1,0 +1,16 @@
+<%# ログイン済みだがデータ未登録ユーザー向けバナー。Apple Shortcuts 設定を促す。 %>
+<div class="sketch-banner sketch-banner-empty" role="banner">
+  <div class="sketch-banner-body">
+    <span class="sketch-banner-icon">👋</span>
+    <div>
+      <p class="sketch-banner-text">
+        ようこそ！ <strong>Apple Shortcuts</strong> を設定すると、あなたの実データが表示されます。
+        下はサンプルデータで作ったイメージです。
+      </p>
+    </div>
+  </div>
+  <div class="sketch-banner-action">
+    <%# PR #33 (settings) 未マージのため /settings をハードコード %>
+    <%= link_to "設定する →", "/settings", class: "sketch-btn sketch-btn-primary" %>
+  </div>
+</div>

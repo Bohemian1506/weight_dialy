@@ -1,0 +1,16 @@
+<%# Android ユーザー向けバナー。現状サポート外であることを丁寧に伝える。 %>
+<div class="sketch-banner sketch-banner-android" role="banner">
+  <div class="sketch-banner-body">
+    <span class="sketch-banner-icon">🤖</span>
+    <div>
+      <p class="sketch-banner-text">
+        <strong>Android 版</strong>は鋭意制作中です。現在はサンプルデータで体験のみとなります。
+        iPhone をお持ちの方は Apple Shortcuts 連携で自動記録できます。
+      </p>
+    </div>
+  </div>
+  <div class="sketch-banner-action">
+    <%# PR #33 (settings) 未マージのため /settings をハードコード %>
+    <%= link_to "設定を見る", "/settings", class: "sketch-btn" %>
+  </div>
+</div>

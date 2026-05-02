@@ -1,20 +1,23 @@
-<%# min-h は 100vh から navbar (約 60px) + <main> の mt-4 (1rem) を引いた高さ。
-    layout 側の <main class="... mt-4"> や navbar padding を変更したら本値も合わせて見直す。 %>
-<div class="min-h-[calc(100vh-5rem)] flex items-center justify-center">
-  <div class="sketch-page-narrow w-full">
-    <div class="sketch-box" style="text-align: center;">
-      <h1 class="sketch-hh" style="margin-bottom: 8px;">weight <span class="sketch-swoosh">daily.</span></h1>
-      <p class="sketch-body-text">日常の小さな勝ちを、自動で拾って褒める。</p>
-      <% if logged_in? %>
-        <p class="sketch-body-text" style="margin-top: 16px;">
-          ようこそ、<b><%= current_user.name %></b> さん。
-        </p>
-      <% else %>
-        <div style="margin-top: 16px;">
-          <%# OmniAuth ミドルウェアが /auth/:provider を処理するため named route なし %>
-          <%= button_to "Google でログイン", "/auth/google_oauth2", method: :post, class: "sketch-btn sketch-btn-primary", data: { turbo: false } %>
-        </div>
-      <% end %>
-    </div>
-  </div>
+<%# ホーム画面 — 状態別バナー + dashboard 本体。
+    @dashboard_state が :iphone_with_data のときのみ実データ、それ以外はデモデータ。
+    バナーは最大1つだけ表示される。 %>
+
+<%# 状態別バナー (ゲスト / Android / データなし) %>
+<% case @dashboard_state %>
+<% when :guest %>
+  <%= render "banner_guest" %>
+<% when :android %>
+  <%= render "banner_android" %>
+<% when :empty %>
+  <%= render "banner_empty" %>
+<% end %>
+
+<%# Dashboard 本体 (全状態共通) %>
+<div class="sketch-dashboard">
+  <%= render "dashboard",
+        display_name: @display_name,
+        records:      @records,
+        today_record: @today_record,
+        streak:       @streak,
+        advice:       @advice %>
 </div>
