@@ -93,6 +93,12 @@
 - Hotwire ファースト (Turbo Frame / Stream / Stimulus)。SPA 化しない
 - N+1 防止: `.includes` / `.preload` を意識
 
+### 🎨 スタイル使い分けルール
+
+- **コンポーネント**: `app/assets/stylesheets/sketchy.css` の `sketch-*` クラスを正とする
+- **Tailwind utility**: `flex` / `grid` / `mt-4` / `container` 等のレイアウト用ユーティリティは引き続き使用 OK
+- **daisyUI コンポーネント** (`btn` / `card` / `navbar` / `alert` 等): **新規利用禁止**。既存箇所も触ったタイミングで `sketch-*` に置換
+
 ---
 
 ## ⚠️ やってはいけないこと

@@ -1,0 +1,121 @@
+/*
+ * sketchy.css — Claude Design v3 由来の手書き風テーマ。
+ *
+ * 大枠のみ提供 (テーマ変数 / body / navbar / box / btn / toast / 文字サイズ)。
+ * 個別画面 (ダッシュボードチャート等) のクラスは、機能実装時にこのファイルへ追記する。
+ *
+ * フォント (Patrick Hand / Caveat / Kalam) は layout の <head> で <link> 読込済み前提。
+ * → 将来 CSP を有効化する場合は font-src に fonts.gstatic.com、style-src に fonts.googleapis.com を許可リスト追加が必要。
+ */
+
+:root {
+  --ink: #1a1a1a;
+  --ink-2: #3a3a3a;
+  --paper: #fbf8f1;
+  --paper-2: #f3eee0;
+  --muted: #6e6b60;
+  --accent: #ff7a45;
+  --accent-2: #ffd23f;
+  --accent-3: #4ea8de;
+  --accent-4: #7ac74f;
+}
+
+/* body 全体を紙質背景に。layout から bg-base-200 は外す前提。 */
+body {
+  background: var(--paper);
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(0,0,0,0.025) 0 1px, transparent 1px),
+    radial-gradient(circle at 80% 60%, rgba(0,0,0,0.02) 0 1px, transparent 1px);
+  background-size: 8px 8px, 12px 12px;
+  color: var(--ink);
+  font-family: 'Patrick Hand', 'Kalam', system-ui, sans-serif;
+}
+
+/* ---------- navbar ---------- */
+.sketch-navbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; gap: 12px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--paper);
+}
+.sketch-navbar-title {
+  font-family: 'Caveat', cursive; font-weight: 700; font-size: 32px;
+  line-height: 1; color: var(--ink); text-decoration: none;
+}
+/* "daily." の下に黄色マーカーを引く swoosh 装飾。
+   SVG 背景画像で上下端にゆらぎを入れた蛍光ペン跡を描く (linear-gradient は直線で機械的に見えるため不採用)。
+   preserveAspectRatio=none で文字幅に応じて横に伸縮、background-size で文字の下半分にだけ帯を表示。 */
+.sketch-swoosh {
+  display: inline-block;
+  padding: 0 6px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 42%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30' preserveAspectRatio='none'><path d='M0,8 C18,0 38,12 56,3 C74,0 88,11 100,4 L100,25 C82,29 62,22 44,26 C26,30 12,23 0,27 Z' fill='%23ffd23f' fill-opacity='0.95'/></svg>");
+}
+.sketch-navbar-right { display: flex; align-items: center; gap: 12px; }
+.sketch-navbar-name {
+  font-family: 'Kalam', cursive; font-size: 14px; color: var(--ink-2);
+  max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ---------- button ---------- */
+/* button_to が <form> でラップするため :active のずれを安定させる工夫が必要 */
+.sketch-btn {
+  display: inline-block; border: 2px solid var(--ink); background: var(--paper);
+  font-family: 'Caveat', cursive; font-size: 18px; padding: 4px 14px; border-radius: 6px;
+  color: var(--ink); text-decoration: none; cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.sketch-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
+.sketch-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
+/* primary は #ff7a45 + 黒文字 (6.73:1) で WCAG AA 合格。白文字 (2.59:1) は不可。 */
+.sketch-btn-primary { background: var(--accent); color: var(--ink); }
+.sketch-btn-primary:hover { background: var(--accent); color: var(--ink); }
+
+/* ---------- box / card ---------- */
+.sketch-box {
+  border: 2px solid var(--ink); border-radius: 6px; background: var(--paper); padding: 16px;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.sketch-box.dashed { border-style: dashed; }
+.sketch-box.filled { background: var(--paper-2); }
+.sketch-box.accent { background: var(--accent); color: #fff; }
+.sketch-box.accent .sketch-label,
+.sketch-box.accent .sketch-small { color: rgba(255,255,255,.85); }
+
+/* ---------- typography ---------- */
+.sketch-h  { font-family: 'Caveat', cursive; font-weight: 700; font-size: 24px; margin: 0 0 6px; line-height: 1.1; }
+.sketch-hh { font-family: 'Caveat', cursive; font-size: 30px; margin: 0; line-height: 1.1; }
+.sketch-label { font-family: 'Kalam', cursive; font-size: 13px; color: var(--muted); }
+.sketch-small { font-family: 'Kalam', cursive; font-size: 12px; color: var(--ink-2); }
+.sketch-body-text { font-family: 'Kalam', cursive; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+
+/* highlight (黄/緑のマーカー風) */
+.sketch-hl-yellow { background: var(--accent-2); padding: 0 4px; }
+.sketch-hl-green  { background: var(--accent-4); padding: 0 4px; }
+
+/* ---------- flash toast ---------- */
+/* daisyUI alert を sketchy トーストに差し替え。
+   PR #25 で詰めた flash_controller.js の fade-out 挙動 (opacity transition) はそのまま動かすため、
+   transition: opacity を残し、初期 opacity-0 / 表示時 opacity-1 のクラスは layout 側で付ける。 */
+.sketch-toast {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  border: 2px solid var(--ink); border-radius: 6px; padding: 12px 14px;
+  box-shadow: 4px 4px 0 var(--ink);
+  font-family: 'Kalam', cursive; font-size: 14px; line-height: 1.45; color: var(--ink);
+  transition: opacity .3s;
+}
+.sketch-toast.notice { background: #e7f5d9; }
+.sketch-toast.alert  { background: #ffd9d9; }
+.sketch-toast-message { flex: 1; }
+.sketch-toast-close {
+  background: transparent; border: none; cursor: pointer; padding: 0;
+  width: 32px; height: 32px; flex-shrink: 0;
+  font-family: 'Caveat', cursive; font-size: 24px; line-height: 1; color: var(--ink);
+}
+.sketch-toast-close:hover { color: var(--accent); }
+
+/* ---------- page wrappers (汎用) ---------- */
+.sketch-page-narrow { max-width: 26rem; margin: 0 auto; padding: 24px 4px; }

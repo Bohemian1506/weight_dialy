@@ -1,16 +1,18 @@
-<%# min-h は 100vh から navbar (4rem) + <main> の mt-4 (1rem) を引いた高さ。
-    layout 側の <main class="... mt-4"> を変更したら本値も合わせて見直す。 %>
+<%# min-h は 100vh から navbar (約 60px) + <main> の mt-4 (1rem) を引いた高さ。
+    layout 側の <main class="... mt-4"> や navbar padding を変更したら本値も合わせて見直す。 %>
 <div class="min-h-[calc(100vh-5rem)] flex items-center justify-center">
-  <div class="card w-full max-w-sm mx-auto bg-base-100 shadow-xl">
-    <div class="card-body items-center text-center">
-      <h1 class="card-title text-3xl">weight_dialy</h1>
-      <p class="text-base-content/70">日常の小さな勝ちを、自動で拾って褒める。</p>
+  <div class="sketch-page-narrow w-full">
+    <div class="sketch-box" style="text-align: center;">
+      <h1 class="sketch-hh" style="margin-bottom: 8px;">weight <span class="sketch-swoosh">daily.</span></h1>
+      <p class="sketch-body-text">日常の小さな勝ちを、自動で拾って褒める。</p>
       <% if logged_in? %>
-        <p class="text-base-content mt-4">ようこそ、<%= current_user.name %>さん。</p>
+        <p class="sketch-body-text" style="margin-top: 16px;">
+          ようこそ、<b><%= current_user.name %></b> さん。
+        </p>
       <% else %>
-        <div class="card-actions mt-4">
+        <div style="margin-top: 16px;">
           <%# OmniAuth ミドルウェアが /auth/:provider を処理するため named route なし %>
-          <%= button_to "Google でログイン", "/auth/google_oauth2", method: :post, class: "btn btn-primary", data: { turbo: false } %>
+          <%= button_to "Google でログイン", "/auth/google_oauth2", method: :post, class: "sketch-btn sketch-btn-primary", data: { turbo: false } %>
         </div>
       <% end %>
     </div>
