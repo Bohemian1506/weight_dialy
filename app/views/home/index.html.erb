@@ -12,6 +12,14 @@
   <%= render "banner_empty" %>
 <% end %>
 
+<%# 実データ ON でない時は dashboard 上部に「※ サンプルデータ」明示 (誤認防止)。
+    iphone_with_data 状態ではバナーも非表示なので、表示中の dashboard が完全に「自分のデータ」になる。 %>
+<% if @dashboard_state != :iphone_with_data %>
+  <div class="sketch-small" style="text-align: right; margin: 8px 0 -4px; padding: 0 4px; color: var(--muted);">
+    ※ 表示中の数値はサンプルデータです
+  </div>
+<% end %>
+
 <%# Dashboard 本体 (全状態共通) %>
 <div class="sketch-dashboard">
   <%= render "dashboard",

@@ -30,8 +30,10 @@ class DemoDataService
     end
   end
 
-  def self.sample_records
-    srand(SEED)
+  # Service 命名規則 (.call) に統一。`sample_records` は内部 alias として残す互換性は不要。
+  def self.call
+    # ローカル PRNG を使用してグローバル srand 副作用を回避 (Puma マルチスレッド汚染防止)。
+    rng     = Random.new(SEED)
     records = []
 
     30.times do |i|
@@ -44,9 +46,9 @@ class DemoDataService
         pattern = RECENT_7_PATTERN[i]
         records << DemoRecord.new(date, pattern[:steps], pattern[:distance_meters], pattern[:flights_climbed])
       else
-        steps    = rand(5_000..9_000)
-        distance = rand(3_000..7_000)
-        flights  = rand(5..18)
+        steps    = rng.rand(5_000..9_000)
+        distance = rng.rand(3_000..7_000)
+        flights  = rng.rand(5..18)
         records << DemoRecord.new(date, steps, distance, flights)
       end
     end

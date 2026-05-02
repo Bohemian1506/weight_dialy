@@ -81,15 +81,17 @@ body {
 }
 .sketch-box.dashed { border-style: dashed; }
 .sketch-box.filled { background: var(--paper-2); }
-.sketch-box.accent { background: var(--accent); color: #fff; }
+/* accent: オレンジ + 黒文字 (6.73:1) で WCAG AA 合格。白文字 (2.59:1) は不可。 */
+.sketch-box.accent { background: var(--accent); color: var(--ink); }
 .sketch-box.accent .sketch-label,
-.sketch-box.accent .sketch-small { color: rgba(255,255,255,.85); }
+.sketch-box.accent .sketch-small { color: var(--ink-2); }
 
 /* ---------- typography ---------- */
 .sketch-h  { font-family: 'Caveat', cursive; font-weight: 700; font-size: 24px; margin: 0 0 6px; line-height: 1.1; }
 .sketch-hh { font-family: 'Caveat', cursive; font-size: 30px; margin: 0; line-height: 1.1; }
-.sketch-label { font-family: 'Kalam', cursive; font-size: 13px; color: var(--muted); }
-.sketch-small { font-family: 'Kalam', cursive; font-size: 12px; color: var(--ink-2); }
+/* font-size 14px 統一 (モバイル + プロジェクタ可読性、design-reviewer 指摘) */
+.sketch-label { font-family: 'Kalam', cursive; font-size: 14px; color: var(--muted); }
+.sketch-small { font-family: 'Kalam', cursive; font-size: 14px; color: var(--ink-2); }
 .sketch-body-text { font-family: 'Kalam', cursive; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
 
 /* highlight (黄/緑のマーカー風) */

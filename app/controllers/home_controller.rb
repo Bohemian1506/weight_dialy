@@ -2,7 +2,7 @@ class HomeController < ApplicationController
   def index
     @dashboard_state = determine_state
     @display_name    = current_user&.name || "ユウキ"
-    @records         = fetch_records
+    @records         = fetch_records(@dashboard_state)
     @today_record    = @records.find { |r| r.recorded_on == Date.current } || @records.last
     @streak          = StreakCalculatorService.call(@records)
     @advice          = CalorieAdviceService.call(@today_record&.estimated_kcal.to_i)
@@ -20,14 +20,15 @@ class HomeController < ApplicationController
     :empty
   end
 
-  def fetch_records
-    if @dashboard_state == :iphone_with_data
+  # 状態を引数で明示的に受け取って暗黙の呼び出し順依存を排除する。
+  def fetch_records(state)
+    if state == :iphone_with_data
       current_user.step_records
                   .where(recorded_on: 30.days.ago.to_date..Date.current)
                   .order(:recorded_on)
                   .to_a
     else
-      DemoDataService.sample_records
+      DemoDataService.call
     end
   end
 end
