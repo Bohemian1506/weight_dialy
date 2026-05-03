@@ -90,6 +90,33 @@ body {
 .sketch-box.accent .sketch-label,
 .sketch-box.accent .sketch-small { color: var(--ink-2); }
 
+/* ---------- webhook delivery history (Settings 画面) ---------- */
+/* 受信履歴の各行を縦並びリストで表示。time / status / count / error_message を flex で配置。
+   配色は status 別 (success=緑系 / invalid=オレンジ系 / unauthorized=赤系) で WCAG AA 黒文字コントラスト。 */
+.sketch-webhook-history { list-style: none; padding: 0; margin: 0; }
+.sketch-webhook-history-item {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 8px 0; border-bottom: 1px dashed var(--muted);
+  font-family: 'Kalam', cursive; font-size: 14px; color: var(--ink-2);
+}
+.sketch-webhook-history-item:last-child { border-bottom: none; }
+.sketch-webhook-history-time { color: var(--ink-2); }
+.sketch-webhook-history-count { color: var(--muted); }
+.sketch-webhook-history-error {
+  flex-basis: 100%; margin: 4px 0 0; padding: 4px 8px;
+  background: var(--paper-2); border-radius: 4px;
+  color: var(--ink-2); font-size: 13px; line-height: 1.4;
+}
+
+/* status バッジ。border-radius + padding + 黒文字 (6.73:1 / 7:1+) で AA 確実。 */
+.sketch-status {
+  display: inline-block; padding: 2px 8px; border: 1px solid var(--ink); border-radius: 4px;
+  font-family: 'Kalam', cursive; font-size: 13px; line-height: 1.2; color: var(--ink);
+}
+.sketch-status-success      { background: var(--accent-4); }   /* 緑 (#7ac74f) + 黒文字 = AA */
+.sketch-status-invalid      { background: var(--accent); }     /* オレンジ (#ff7a45) + 黒文字 6.73:1 = AA */
+.sketch-status-unauthorized { background: #ffd9d9; }            /* 赤系。MVP では非表示だが将来 #55 で使う */
+
 /* ---------- typography ---------- */
 .sketch-h  { font-family: 'Caveat', cursive; font-weight: 700; font-size: 24px; margin: 0 0 6px; line-height: 1.1; }
 .sketch-hh { font-family: 'Caveat', cursive; font-size: 30px; margin: 0; line-height: 1.1; }

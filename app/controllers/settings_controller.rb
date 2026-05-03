@@ -1,11 +1,17 @@
 class SettingsController < ApplicationController
   before_action :require_login
 
+  WEBHOOK_HISTORY_LIMIT = 5
+
   def show
     @webhook_token = current_user.webhook_token
     # _url ヘルパは request 由来で絶対 URL を組み立てるため、host 引数は不要 (二重指定リスク回避)。
     # 本番デプロイ時は config.action_controller.default_url_options or config.hosts でホスト解決を制御する。
     @webhook_url = webhooks_health_data_url
+    # unauthorized 試行 (user_id = nil) は MVP では非表示。設定で切替可能化は #55 で対応予定。
+    @webhook_deliveries = current_user.webhook_deliveries
+                                      .order(received_at: :desc)
+                                      .limit(WEBHOOK_HISTORY_LIMIT)
   end
 
   def regenerate_token
