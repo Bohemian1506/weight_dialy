@@ -61,9 +61,13 @@ body {
 
 /* ---------- button ---------- */
 /* button_to が <form> でラップするため :active のずれを安定させる工夫が必要 */
+/* padding は WCAG 2.5.5 / Apple HIG が定める最小タップ領域 44×44px を満たすために拡大している。
+   border-box 環境 (Tailwind 4 preflight 適用) で font-size 18px × line-height 1.4 + 上下 padding 20px ≒ 45px。
+   縮める誘惑が出たときは iPhone 実機で誤タップが増えることを思い出すこと。
+   line-height を 1.4 未満に変えた場合は `min-height: 44px;` を追加して保険をかけること。 */
 .sketch-btn {
   display: inline-block; border: 2px solid var(--ink); background: var(--paper);
-  font-family: 'Caveat', cursive; font-size: 18px; padding: 4px 14px; border-radius: 6px;
+  font-family: 'Caveat', cursive; font-size: 18px; padding: 10px 16px; border-radius: 6px;
   color: var(--ink); text-decoration: none; cursor: pointer;
   box-shadow: 2px 2px 0 var(--ink);
   transition: transform .08s ease, box-shadow .08s ease;
