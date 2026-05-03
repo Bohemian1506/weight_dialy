@@ -69,6 +69,22 @@ RSpec.describe "Settings", type: :request do
       it "レスポンスボディに「Step 3」を含む" do
         expect(response.body).to include("Step 3")
       end
+
+      it "Step 3 に iCloud Shortcut の配布リンクを含む" do
+        expect(response.body).to include("https://www.icloud.com/shortcuts/d2fb3cca3a3e47549577231a011dffee")
+      end
+
+      it "Step 3 のボタン文言が「ショートカットをインストール」である" do
+        expect(response.body).to include("ショートカットをインストール")
+      end
+
+      it "iCloud リンクが target=\"_blank\" + rel=\"noopener noreferrer\" 付きで描画される" do
+        # 属性順は Rails / link_to に依存し変動しうるため、a タグ抽出後に個別検査する
+        link_tag = response.body[%r{<a\b[^>]*href="https://www\.icloud\.com/shortcuts/[^"]+"[^>]*>}]
+        expect(link_tag).not_to be_nil, "iCloud Shortcut リンクの a タグが見つからない"
+        expect(link_tag).to include('target="_blank"')
+        expect(link_tag).to include('rel="noopener noreferrer"')
+      end
     end
   end
 
