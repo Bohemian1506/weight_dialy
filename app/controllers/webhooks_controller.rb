@@ -3,6 +3,12 @@ class WebhooksController < ActionController::API
   # ActionController::API 継承は Rails 標準の API-only パターンで、CSRF 保護 / browser check / cookie /
   # session を含まない (skip_forgery_protection 等の禁止 workaround とは別物 — そもそも入っていない)。
   # 認証は Bearer token (authenticate_webhook!) で行う。
+
+  # ペイロード形式違反 (recorded_on の形式不正など) を表す内部例外。
+  # JSON::ParserError や RecordInvalid と並列で 422 + 監査ログ経路に流すために導入。
+  # webhook 受信エンドポイントは「機械同士の契約」なので fail-fast (silent 正規化しない) 方針。
+  InvalidPayload = Class.new(StandardError)
+
   before_action :read_raw_body
   before_action :authenticate_webhook!
 
@@ -21,6 +27,9 @@ class WebhooksController < ActionController::API
     render json: { accepted: accepted }, status: :ok
   rescue JSON::ParserError => e
     record_delivery!(status: "invalid", error_message: "JSON parse error: #{e.message.truncate(120)}")
+    render json: { error: "Invalid payload" }, status: :unprocessable_content
+  rescue InvalidPayload => e
+    record_delivery!(status: "invalid", error_message: e.message.truncate(120))
     render json: { error: "Invalid payload" }, status: :unprocessable_content
   rescue ActiveRecord::RecordInvalid => e
     # 個々のレコードのバリデーション違反 (負数 / 不正な日付等) を 500 ではなく 422 + 監査ログで返す。
@@ -70,6 +79,29 @@ class WebhooksController < ActionController::API
     request.headers["Authorization"]&.delete_prefix("Bearer ")&.strip
   end
 
+  # Strict ISO 8601 (yyyy-MM-dd) parser. 配布版 Apple Shortcut は yyyy-MM-dd zero-padded で送る契約のため、
+  # それ以外のフォーマット (yyyy/MM/dd, M/d/yyyy 米国式 vs 欧州式) を Date.parse で寛容に解釈すると
+  # 「同じ日のつもりが別日として保存」「2 月のデータが 5 月になる」事故を生むため reject する。
+  #
+  # NOTE: Date.strptime("%Y-%m-%d") は仕様上 zero padding 不足 ("2026-5-3") を許容してしまうため、
+  # 正規表現で「正確に 4-2-2 桁」を先に検査してから Date.strptime に渡す二段構え。
+  ISO_DATE_FORMAT = /\A\d{4}-\d{2}-\d{2}\z/
+
+  # truncate を inspect の前にかけることで、攻撃者が巨大な recorded_on 値 (1MB body キャップ内で
+  # 数百 KB を詰める) を送った時に、エラーメッセージ生成段階で巨大文字列が一時的にヒープに乗るのを防ぐ。
+  def parse_recorded_on(raw)
+    raise InvalidPayload, "recorded_on is required" if raw.blank?
+    raw_str = raw.to_s
+    truncated = raw_str.truncate(40).inspect
+    unless raw_str.match?(ISO_DATE_FORMAT)
+      raise InvalidPayload, "recorded_on must be yyyy-MM-dd format: got #{truncated}"
+    end
+    Date.strptime(raw_str, "%Y-%m-%d")
+  rescue Date::Error
+    # 月日の値域違反 (例: "2026-13-99")
+    raise InvalidPayload, "recorded_on must be yyyy-MM-dd format: got #{truncated}"
+  end
+
   # Upsert each day's record, updating only the keys present in the payload.
   # Keys absent from the payload are left unchanged (partial-update semantics).
   # All-or-nothing: wrap in a transaction so that if any record fails validation
@@ -79,8 +111,7 @@ class WebhooksController < ActionController::API
 
     StepRecord.transaction do
       records_data.each do |entry|
-        recorded_on = entry["recorded_on"]
-        next if recorded_on.blank?
+        recorded_on = parse_recorded_on(entry["recorded_on"])
 
         record = StepRecord.find_or_initialize_by(user: @webhook_user, recorded_on: recorded_on)
 
