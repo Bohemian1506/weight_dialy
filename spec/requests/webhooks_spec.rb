@@ -275,14 +275,17 @@ RSpec.describe "POST /webhooks/health_data", type: :request do
   end
 
   # ---------------------------------------------------------------------------
-  # Case 9: Entry without recorded_on is silently skipped
+  # Case 9: Entry missing recorded_on → 422 全件 rollback (Issue #51 で silent skip から変更)
   # ---------------------------------------------------------------------------
-  describe "Case 9: entries missing recorded_on are silently skipped" do
+  # 旧仕様: silent skip (= 該当レコードだけ無視して続行)。
+  # 新仕様: webhook は機械同士の契約。recorded_on は必須なので、欠損は契約違反として 422 reject + rollback。
+  # 同種の挙動: Case 11 (record validation 失敗で全件 rollback) と一貫。
+  describe "Case 9: entry missing recorded_on returns 422 and rolls back" do
     let(:payload) do
       {
         records: [
           { recorded_on: "2026-05-01", steps: 100 },
-          { steps: 200 },                             # no recorded_on → skip
+          { steps: 200 },                             # no recorded_on → reject 全体
           { recorded_on: "2026-05-02", steps: 300 }
         ]
       }
@@ -290,26 +293,94 @@ RSpec.describe "POST /webhooks/health_data", type: :request do
 
     before { post_health_data(payload) }
 
-    it "returns HTTP 200" do
-      expect(response).to have_http_status(:ok)
+    it "returns HTTP 422" do
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
-    it "returns accepted: 2 (skipped entry not counted)" do
-      expect(response.parsed_body).to eq("accepted" => 2)
+    it "returns the Invalid payload error body" do
+      expect(response.parsed_body).to eq("error" => "Invalid payload")
     end
 
-    it "creates exactly 2 StepRecords" do
-      expect(StepRecord.count).to eq(2)
+    it "rolls back ALL records, leaving 0 in DB" do
+      expect(StepRecord.count).to eq(0)
     end
 
-    it "does not create a record for the entry missing recorded_on" do
-      created_dates = StepRecord.pluck(:recorded_on)
-      expect(created_dates).to contain_exactly(Date.new(2026, 5, 1), Date.new(2026, 5, 2))
+    it "records a WebhookDelivery with status 'invalid'" do
+      expect(WebhookDelivery.last.status).to eq("invalid")
     end
 
-    # NOTE: This 'silent skip' behavior was a deliberate judgment call by
-    # rails-implementer. If the spec changes to return an error instead,
-    # update this example and Case 9 as a pair.
+    it "includes 'recorded_on is required' in the error_message" do
+      expect(WebhookDelivery.last.error_message).to include("recorded_on is required")
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Case 13: recorded_on の形式違反 → 422 (Issue #51)
+  # ---------------------------------------------------------------------------
+  # 配布版 Apple Shortcut は yyyy-MM-dd zero-padded で送る契約。それ以外は Date.strptime が失敗 → 422 reject。
+  # Date.parse の寛容解釈 (例: "5/3/2026" を米国式 May 3 と決めて保存) による silent 事故を防ぐため、
+  # 形式違反は明示的に reject する fail-fast 設計。
+  describe "Case 13: recorded_on format violations return 422" do
+    shared_examples "rejects malformed recorded_on" do |bad_value|
+      describe "with recorded_on = #{bad_value.inspect}" do
+        before { post_health_data({ records: [ { recorded_on: bad_value, steps: 100 } ] }) }
+
+        it "returns HTTP 422" do
+          expect(response).to have_http_status(:unprocessable_content)
+        end
+
+        it "does not create any StepRecord" do
+          expect(StepRecord.count).to eq(0)
+        end
+
+        it "records a WebhookDelivery with status 'invalid'" do
+          expect(WebhookDelivery.last.status).to eq("invalid")
+        end
+
+        it "mentions 'recorded_on must be yyyy-MM-dd' in the error_message" do
+          expect(WebhookDelivery.last.error_message).to include("recorded_on must be yyyy-MM-dd")
+        end
+      end
+    end
+
+    # スラッシュ区切り (Apple Shortcuts の locale や別ツール由来でありがち)
+    include_examples "rejects malformed recorded_on", "2026/05/03"
+    # zero padding 不足 (yyyy-M-d)
+    include_examples "rejects malformed recorded_on", "2026-5-3"
+    # 米国式 / 欧州式の解釈分岐リスクあり
+    include_examples "rejects malformed recorded_on", "5/3/2026"
+    # 完全な不正値
+    include_examples "rejects malformed recorded_on", "abc"
+    # 日本語表記
+    include_examples "rejects malformed recorded_on", "2026年5月3日"
+    # 月日の値域違反 (正規表現は通過するが Date::Error rescue ルートに落ちる) — 二段構えの第二段の回帰テスト
+    include_examples "rejects malformed recorded_on", "2026-13-99"
+
+    # 空文字も 422 (Case 9 で nil/未指定はカバー、ここは "" の明示テスト)
+    describe "with recorded_on = \"\"" do
+      before { post_health_data({ records: [ { recorded_on: "", steps: 100 } ] }) }
+
+      it "returns HTTP 422" do
+        expect(response).to have_http_status(:unprocessable_content)
+      end
+
+      it "mentions 'recorded_on is required' in the error_message (blank check)" do
+        expect(WebhookDelivery.last.error_message).to include("recorded_on is required")
+      end
+    end
+
+    # 正常系の境界値: zero-padded yyyy-MM-dd は引き続き 200 で通る (回帰防止)
+    describe "with recorded_on = \"2026-05-03\" (valid)" do
+      before { post_health_data({ records: [ { recorded_on: "2026-05-03", steps: 100 } ] }) }
+
+      it "returns HTTP 200" do
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "creates the StepRecord" do
+        expect(StepRecord.count).to eq(1)
+      end
+    end
   end
 
   # ---------------------------------------------------------------------------
