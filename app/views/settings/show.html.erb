@@ -44,14 +44,19 @@
     </div>
   </div>
 
-  <%# Step 3: 完了メッセージ。iCloud Shortcut 公開リンクは Phase 2 で実機作成後に差し込む。 %>
+  <%# Step 3: iCloud 公開済み Shortcut の配布リンク %>
   <p class="sketch-label" style="margin-bottom: 6px;">Step 3</p>
   <div class="sketch-box" style="margin-bottom: 32px;">
-    <p class="sketch-h" style="margin-bottom: 8px;">🎉 以上で設定完了です</p>
-    <p class="sketch-body-text">
-      あとは iPhone のショートカットアプリを開いて、Step 1 と Step 2 でコピーした内容を貼り付けるだけ。<br>
-      事前作成済み Shortcut の配布リンクは現在準備中、近日中にここに表示されます。
+    <p class="sketch-h" style="margin-bottom: 8px;">🎉 あとはショートカットを入れるだけ</p>
+    <p class="sketch-body-text" style="margin-bottom: 16px;">
+      下のボタンから iPhone に Shortcut を追加 → 初回実行時に Step 1 でコピーした値を貼り付ければ完了です。
     </p>
+    <%= link_to "ショートカットをインストール",
+          "https://www.icloud.com/shortcuts/d2fb3cca3a3e47549577231a011dffee",
+          class: "sketch-btn sketch-btn-primary",
+          target: "_blank",
+          rel: "noopener noreferrer" %>
+    <p class="sketch-small" style="margin: 8px 0 0;">タップで iCloud が開きます</p>
   </div>
 
   <%# 危険ゾーン: トークン再生成 %>
