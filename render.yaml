@@ -1,0 +1,45 @@
+# Render Blueprint (Infrastructure as Code).
+# 初回デプロイ: Render Dashboard で「New Blueprint」→ 本リポジトリを指定。
+# 継続デプロイ: main への push を Render が検知して自動デプロイ。
+#
+# 環境変数の sync: false は「Render Dashboard で手動入力」の意味 (= secret は YAML に書かない)。
+# RAILS_MASTER_KEY: ローカルの config/master.key の中身を Dashboard に貼り付け。
+# APP_HOST: Render が発行するドメイン (例: weight-dialy.onrender.com)、確定後に手動設定。
+
+services:
+  - type: web
+    name: weight-dialy
+    runtime: ruby
+    region: singapore   # 日本に最も近いリージョン (= Free Tier で選択可能)
+    plan: free
+    buildCommand: ./bin/render-build.sh
+    startCommand: bundle exec rails server -p $PORT -e production
+    healthCheckPath: /up
+    envVars:
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - key: RAILS_SERVE_STATIC_FILES
+        value: "true"
+      - key: APP_HOST
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: weight-dialy-db
+          property: connectionString
+      # Free Tier 512MB RAM では worker 1 が安全 (worker 2 + threads 3 = 6 スレッドで OOM リスク)。
+      # Connection pool 合計 (worker 1 × 4 database × 3 threads = 12) も Free Postgres の 97 接続上限内に収まる。
+      - key: WEB_CONCURRENCY
+        value: "1"
+      # Solid Queue を Puma プロセス内に同居させる (= 別 worker service を契約しない、Free Tier 制約)。
+      # config/puma.rb の `plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]` を有効化する。
+      - key: SOLID_QUEUE_IN_PUMA
+        value: "true"
+
+databases:
+  - name: weight-dialy-db
+    plan: free
+    databaseName: app_production
+    user: app
+    region: singapore   # Web Service と同リージョンに揃えてレイテンシ最小化
