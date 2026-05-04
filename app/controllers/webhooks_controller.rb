@@ -17,24 +17,24 @@ class WebhooksController < ActionController::API
     records_data = parsed["records"]
 
     unless records_data.is_a?(Array)
-      record_delivery!(status: "invalid", error_message: "missing 'records' array")
+      record_delivery!(status: "invalid", accepted_count: 0, error_message: "missing 'records' array")
       render json: { error: "Invalid payload" }, status: :unprocessable_content
       return
     end
 
     accepted = upsert_records(records_data)
-    record_delivery!(status: "success")
+    record_delivery!(status: "success", accepted_count: accepted)
     render json: { accepted: accepted }, status: :ok
   rescue JSON::ParserError => e
-    record_delivery!(status: "invalid", error_message: "JSON parse error: #{e.message.truncate(120)}")
+    record_delivery!(status: "invalid", accepted_count: 0, error_message: "JSON parse error: #{e.message.truncate(120)}")
     render json: { error: "Invalid payload" }, status: :unprocessable_content
   rescue InvalidPayload => e
-    record_delivery!(status: "invalid", error_message: e.message.truncate(120))
+    record_delivery!(status: "invalid", accepted_count: 0, error_message: e.message.truncate(120))
     render json: { error: "Invalid payload" }, status: :unprocessable_content
   rescue ActiveRecord::RecordInvalid => e
     # 個々のレコードのバリデーション違反 (負数 / 不正な日付等) を 500 ではなく 422 + 監査ログで返す。
     # rails-implementer の意図 (全体失敗方式) を実装まで貫徹するため。
-    record_delivery!(status: "invalid", error_message: "RecordInvalid: #{e.message.truncate(120)}")
+    record_delivery!(status: "invalid", accepted_count: 0, error_message: "RecordInvalid: #{e.message.truncate(120)}")
     render json: { error: "Invalid payload" }, status: :unprocessable_content
   end
 
@@ -102,6 +102,27 @@ class WebhooksController < ActionController::API
     raise InvalidPayload, "recorded_on must be yyyy-MM-dd format: got #{truncated}"
   end
 
+  # 数値フィールド (steps / distance_meters / flights_climbed) を厳格パースする (Issue #52)。
+  # nil は許容 (= partial-update セマンティクス維持) するが、Hash や String など Integer/Float でない型は reject。
+  # 防ぎたい事故: Apple HealthKit Sample object `{ value: 12345, unit: "count" }` が来た時に、
+  # AR の type cast で silent に 0 として保存される (= 「動いてるけど中身がゼロ」の見えないバグ温床)。
+  #
+  # Float は「整数値の Float」(例: 8000.0) のみ許容する。9999.9 のような小数は silent に切り捨てられて
+  # 1 歩ぶん失われる事故を防ぐため reject する (= Apple Shortcuts が JSON 数値を 8000.0 で送る可能性を残しつつ、
+  # 真の小数値は reject、code-reviewer 指摘 ⚠️)。
+  def parse_numeric(raw, field_name)
+    return nil if raw.nil?
+    case raw
+    when Integer
+      raw
+    when Float
+      raise InvalidPayload, "#{field_name} must be a whole number, got Float #{raw}" unless raw == raw.to_i
+      raw.to_i
+    else
+      raise InvalidPayload, "#{field_name} must be a number, got #{raw.class}: #{raw.to_s.truncate(40).inspect}"
+    end
+  end
+
   # Upsert each day's record, updating only the keys present in the payload.
   # Keys absent from the payload are left unchanged (partial-update semantics).
   # All-or-nothing: wrap in a transaction so that if any record fails validation
@@ -120,9 +141,9 @@ class WebhooksController < ActionController::API
         # NOTE: we cannot distinguish "key absent" from "explicit 0" because both
         # arrive as falsy in JSON; partial-update semantics treat absent ≠ 0.
         updates = {
-          steps:           entry["steps"],
-          distance_meters: entry["distance_meters"],
-          flights_climbed: entry["flights_climbed"]
+          steps:           parse_numeric(entry["steps"], "steps"),
+          distance_meters: parse_numeric(entry["distance_meters"], "distance_meters"),
+          flights_climbed: parse_numeric(entry["flights_climbed"], "flights_climbed")
         }.compact
 
         record.assign_attributes(updates)
@@ -136,7 +157,8 @@ class WebhooksController < ActionController::API
 
   # Record audit log entry. Uses keyword argument `user:` so callers can
   # override with nil for unauthorized cases where @webhook_user is unreliable.
-  def record_delivery!(status:, error_message: nil, user: @webhook_user)
+  # accepted_count: Issue #52 で追加。何件保存されたかを記録、success 時の中身が空ペイロードかを後追い分析可能にする。
+  def record_delivery!(status:, accepted_count: nil, error_message: nil, user: @webhook_user)
     # Attempt to parse stored body as JSON for richer inspection in the audit log.
     # Falls back to { raw: <string> } when the body is not valid JSON.
     payload = begin
@@ -149,6 +171,7 @@ class WebhooksController < ActionController::API
       user: user,
       payload: payload,
       status: status,
+      accepted_count: accepted_count,
       error_message: error_message,
       received_at: Time.current
     )

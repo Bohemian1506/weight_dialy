@@ -465,4 +465,100 @@ RSpec.describe "POST /webhooks/health_data", type: :request do
       expect(StepRecord.count).to eq(0)
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # Case 14: 数値フィールドの型違反 → 422 (Issue #52)
+  # ---------------------------------------------------------------------------
+  # 防ぎたい事故: Apple HealthKit Sample object `{ value: 12345, unit: "count" }` が来た時に
+  # AR の type cast で silent に 0 として保存される。「動いてるけど中身がゼロ」の見えないバグ温床。
+  describe "Case 14: numeric field type violations return 422 (#52)" do
+    shared_examples "rejects malformed numeric field" do |field, bad_value|
+      describe "with #{field} = #{bad_value.inspect}" do
+        let(:payload) { { records: [ { recorded_on: "2026-05-01", field => bad_value } ] } }
+
+        before { post_health_data(payload) }
+
+        it "returns HTTP 422" do
+          expect(response).to have_http_status(:unprocessable_content)
+        end
+
+        it "does not create any StepRecord" do
+          expect(StepRecord.count).to eq(0)
+        end
+
+        it "records WebhookDelivery with status 'invalid'" do
+          expect(WebhookDelivery.last.status).to eq("invalid")
+        end
+
+        it "mentions the field name in error_message" do
+          expect(WebhookDelivery.last.error_message).to include(field.to_s)
+        end
+      end
+    end
+
+    # Apple HealthKit Sample object 構造 (= 主要な事故パターン)
+    include_examples "rejects malformed numeric field", :steps, { value: 12345, unit: "count" }
+    # 文字列 (= 一般的な型ミス)
+    include_examples "rejects malformed numeric field", :steps, "12345"
+    # 配列 (= 開発者の typo / 誤った payload 構築)
+    include_examples "rejects malformed numeric field", :distance_meters, [ 5000 ]
+    # boolean (= silent に 0 / 1 化される事故)
+    include_examples "rejects malformed numeric field", :flights_climbed, true
+    # 真の小数値 (= silent 切り捨てで 1 歩ロス、code-reviewer ⚠️ 指摘)
+    include_examples "rejects malformed numeric field", :steps, 9999.5
+
+    # 整数値の Float (例: Apple Shortcuts が steps を 8000.0 で送るケース) は許容
+    context "with steps = 8000.0 (= 整数値の Float)" do
+      let(:payload) { { records: [ { recorded_on: "2026-05-01", steps: 8000.0 } ] } }
+
+      before { post_health_data(payload) }
+
+      it "200 OK を返す (= 整数値 Float は許容)" do
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "StepRecord.steps = 8000 として保存" do
+        expect(StepRecord.last.steps).to eq(8000)
+      end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Case 15: accepted_count を WebhookDelivery に記録 (Issue #52)
+  # ---------------------------------------------------------------------------
+  describe "Case 15: WebhookDelivery records accepted_count (#52)" do
+    context "success 時 (= 3 件保存)" do
+      let(:payload) do
+        {
+          records: [
+            { recorded_on: "2026-05-01", steps: 6000, distance_meters: 4000, flights_climbed: 5 },
+            { recorded_on: "2026-05-02", steps: 7000, distance_meters: 4500, flights_climbed: 8 },
+            { recorded_on: "2026-05-03", steps: 9000, distance_meters: 6000, flights_climbed: 15 }
+          ]
+        }
+      end
+
+      before { post_health_data(payload) }
+
+      it "WebhookDelivery.accepted_count に 3 が記録される" do
+        expect(WebhookDelivery.last.accepted_count).to eq(3)
+      end
+    end
+
+    context "invalid 時 (= 全件 rollback)" do
+      before { post_health_data({ records: [ { recorded_on: "bad-date", steps: 100 } ] }) }
+
+      it "WebhookDelivery.accepted_count に 0 が記録される (= silent 0 success との区別がつく)" do
+        expect(WebhookDelivery.last.accepted_count).to eq(0)
+      end
+    end
+
+    context "missing 'records' array" do
+      before { post_health_data({ foo: "bar" }) }
+
+      it "WebhookDelivery.accepted_count に 0 が記録される" do
+        expect(WebhookDelivery.last.accepted_count).to eq(0)
+      end
+    end
+  end
 end
