@@ -78,6 +78,12 @@ RSpec.describe "Settings", type: :request do
         expect(response.body).to include("ショートカットをインストール")
       end
 
+      it "Step 3 に HealthKit 権限許可の案内文言を含む (= 配布版の必須案内、借りた iPhone 検証で発覚)" do
+        # <strong> 等の HTML 強調タグに依存しないよう、キーワード「ヘルスケアへのアクセス」と「許可」を別々に検査
+        expect(response.body).to include("ヘルスケアへのアクセス")
+        expect(response.body).to include("を許可")
+      end
+
       it "iCloud リンクが target=\"_blank\" + rel=\"noopener noreferrer\" 付きで描画される" do
         # 属性順は Rails / link_to に依存し変動しうるため、a タグ抽出後に個別検査する
         link_tag = response.body[%r{<a\b[^>]*href="https://www\.icloud\.com/shortcuts/[^"]+"[^>]*>}]
