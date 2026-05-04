@@ -197,6 +197,13 @@
               </li>
             <% end %>
           </ul>
+          <%# Issue #75: AI 経路で生成された時のみ「Powered by Claude」を控えめに表示 (= フォールバック時は隠す)。
+              ユーザーへの透明性 + 発表会での教材性アピール用。 %>
+          <% if advice.ai_used %>
+            <div class="sketch-small" style="margin-top: 6px; color: var(--muted); font-size: 12px;">
+              Powered by Claude (Anthropic)
+            </div>
+          <% end %>
           <div style="margin-top: 10px;">
             <span class="sketch-btn" style="cursor: default; opacity: 0.6;"
                   title="この機能は近日公開予定です">

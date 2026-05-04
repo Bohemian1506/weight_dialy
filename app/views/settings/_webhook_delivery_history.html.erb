@@ -7,6 +7,11 @@
       まだ Shortcut からの送信はありません。Step 3 のボタンからインストールしてください。
     </p>
   <% else %>
+    <%# Issue #58: セクション冒頭に最終送信時刻を 1 行で表示 (= 直近状態が即座に把握できる)。
+        @webhook_deliveries は received_at desc 順で取得済みなので first が最新。 %>
+    <p class="sketch-small" style="margin: 0 0 10px; color: var(--ink-2);">
+      最終送信: <strong><%= time_ago_in_words(@webhook_deliveries.first.received_at) %>前</strong>
+    </p>
     <ul class="sketch-webhook-history">
       <% @webhook_deliveries.each do |delivery| %>
         <li class="sketch-webhook-history-item">
