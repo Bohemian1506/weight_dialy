@@ -90,16 +90,25 @@
 </div>
 
 <%# ---- 貯カロリー (Issue #41: アプリ哲学のステップ① 核機能。月リセット + 累計の二段構造)
-     数値プレッシャー回避: 矢印・色分け・前月比計算なし、並列表示のみ (= memory three_step_philosophy 参照)。 %>
+     数値プレッシャー回避: 矢印・色分け・前月比計算なし、並列表示のみ (= memory three_step_philosophy 参照)。
+     number_with_delimiter は delimiter "," を明示 (= ja ロケール由来の自動切替で誤って "." に変わる事故を防ぐ、Issue #73)。 %>
 <div class="sketch-box sketch-savings" style="margin-bottom: 14px;">
   <div class="sketch-label">今月の貯カロリー</div>
   <div class="sketch-savings-main">
-    <%= number_with_delimiter(calorie_savings[:this_month]) %>
+    <%= number_with_delimiter(calorie_savings[:this_month], delimiter: ",") %>
     <span class="sketch-small">kcal</span>
   </div>
+  <% if calorie_savings[:this_month].zero? && calorie_savings[:total].positive? %>
+    <%# Issue #70: 月初に「今月: 0 kcal」が出るガッカリ感を、累計を頼みに能動的に解消する。
+        強要表現は使わず「これまでの合計が支えてくれる」というニュートラルな励ましに留める。 %>
+    <p class="sketch-small" style="margin: 4px 0 0; color: var(--ink-2);">
+      月の始まり。今日の一歩が貯まりはじめる。
+      これまでの合計 <strong><%= number_with_delimiter(calorie_savings[:total], delimiter: ",") %> kcal</strong> が支えてくれます。
+    </p>
+  <% end %>
   <div class="sketch-small" style="margin-top: 6px;">
-    前月: <%= number_with_delimiter(calorie_savings[:last_month]) %> kcal ／
-    これまでの合計: <%= number_with_delimiter(calorie_savings[:total]) %> kcal
+    前月: <%= number_with_delimiter(calorie_savings[:last_month], delimiter: ",") %> kcal ／
+    これまでの合計: <%= number_with_delimiter(calorie_savings[:total], delimiter: ",") %> kcal
   </div>
 </div>
 
@@ -283,7 +292,7 @@
 
   <div class="sketch-box accent">
     <div class="sketch-label">きょうの合計歩数</div>
-    <div class="sketch-hh"><%= number_with_delimiter(today_steps) %></div>
+    <div class="sketch-hh"><%= number_with_delimiter(today_steps, delimiter: ",") %></div>
     <div class="sketch-small">スマホ連携で自動記録</div>
   </div>
 </div>

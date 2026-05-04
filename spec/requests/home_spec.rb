@@ -170,6 +170,39 @@ RSpec.describe "Home", type: :request do
       it "累計表示「これまでの合計:」の文言を含む (= カジュアル層配慮、design-reviewer 指摘)" do
         expect(response.body).to include("これまでの合計:")
       end
+
+      # Issue #70: 月初ゼロ励まし。今月のレコードがある = this_month が 0 ではないので励ましは出ない。
+      it "今月の貯カロリーがある (this_month > 0) ので月初励ましは表示されない" do
+        expect(response.body).not_to include("月の始まり。今日の一歩が貯まりはじめる")
+      end
+    end
+
+    # ─────────────────────────────────────────────────
+    # 状態 :iphone_with_data かつ「今月のレコードがゼロ + 累計あり」 (= 月初励まし発火条件、Issue #70)
+    # ─────────────────────────────────────────────────
+    context "状態 :iphone_with_data + 今月 0 + 累計あり (= 月初励まし発火条件、Issue #70)" do
+      # travel_to で日付を固定して月境界 issue を予防 (= code-reviewer 指摘)。
+      # CI が月末/月初に走った時の偶発バグを防ぎ、再現性を担保する。
+      around { |ex| travel_to(Date.new(2026, 5, 15)) { ex.run } }
+
+      let(:user) { create(:user) }
+      # 先月の StepRecord のみ作成 → this_month = 0、total > 0
+      let!(:last_month_record) do
+        create(:step_record, user: user, recorded_on: Date.new(2026, 4, 15), steps: 5000)
+      end
+
+      before do
+        login_as(user)
+        get root_path, headers: { "User-Agent" => iphone_ua }
+      end
+
+      it "月初励ましメッセージを表示する" do
+        expect(response.body).to include("月の始まり。今日の一歩が貯まりはじめる")
+      end
+
+      it "累計値 200 kcal (= 5000 * 0.04) が励まし内に表示される" do
+        expect(response.body).to include("200")
+      end
     end
 
     # ─────────────────────────────────────────────────
