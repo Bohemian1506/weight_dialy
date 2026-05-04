@@ -86,6 +86,129 @@ RSpec.describe "Settings", type: :request do
         expect(link_tag).to include('rel="noopener noreferrer"')
       end
     end
+
+    # -------------------------------------------------------------------------
+    # 受信履歴セクション (Issue #53)
+    # -------------------------------------------------------------------------
+    context "ログイン時 (受信履歴セクション)" do
+      let(:user) { create(:user) }
+
+      before { login(user) }
+
+      context "WebhookDelivery が 0 件のとき" do
+        before { get settings_path }
+
+        it "「送信ログ」見出しを表示する" do
+          expect(response.body).to include("送信ログ")
+        end
+
+        it "プレースホルダー「まだ Shortcut からの送信はありません」を表示する" do
+          expect(response.body).to include("まだ Shortcut からの送信はありません")
+        end
+      end
+
+      context "success の WebhookDelivery が 1 件あるとき" do
+        let!(:delivery) do
+          create(:webhook_delivery, user: user, status: "success",
+                                    payload: { "records" => [ { "recorded_on" => "2026-05-03", "steps" => 8000 } ] },
+                                    received_at: 5.minutes.ago)
+        end
+
+        before { get settings_path }
+
+        it "ステータスラベル「成功」を表示する" do
+          expect(response.body).to include("成功")
+        end
+
+        it "件数 (1 件) を表示する" do
+          expect(response.body).to include("1 件")
+        end
+
+        it "sketch-status-success クラスを描画する" do
+          expect(response.body).to include("sketch-status-success")
+        end
+
+        it "プレースホルダーを表示しない" do
+          expect(response.body).not_to include("まだ Shortcut からの送信はありません")
+        end
+      end
+
+      context "invalid の WebhookDelivery が 1 件あるとき" do
+        let!(:delivery) do
+          create(:webhook_delivery, user: user, status: "invalid",
+                                    payload: { "records" => [ { "recorded_on" => "bad" } ] },
+                                    error_message: "recorded_on must be yyyy-MM-dd format: got \"bad\"",
+                                    received_at: 1.hour.ago)
+        end
+
+        before { get settings_path }
+
+        it "ステータスラベル「エラー」を表示する" do
+          expect(response.body).to include("エラー")
+        end
+
+        it "sketch-status-invalid クラスを描画する" do
+          expect(response.body).to include("sketch-status-invalid")
+        end
+
+        it "件数表示は省略する (= invalid 時の '1 件' は誤読を生むため非表示)" do
+          expect(response.body).not_to include("sketch-webhook-history-count")
+        end
+
+        it "error_message を全文表示する (truncate なし、モバイル hover 不可問題対応)" do
+          expect(response.body).to include("recorded_on must be yyyy-MM-dd format: got")
+        end
+      end
+
+      context "unauthorized の WebhookDelivery (user_id = nil) があるとき" do
+        let!(:unauthorized_delivery) do
+          create(:webhook_delivery, user: nil, status: "unauthorized",
+                                    payload: { "records" => [] },
+                                    received_at: 10.minutes.ago)
+        end
+
+        before { get settings_path }
+
+        it "unauthorized 行は表示しない (MVP デフォルト、#55 で設定化予定)" do
+          expect(response.body).not_to include("認証失敗")
+        end
+
+        it "0 件扱いでプレースホルダーを表示する" do
+          expect(response.body).to include("まだ Shortcut からの送信はありません")
+        end
+      end
+
+      context "WebhookDelivery が 6 件以上あるとき" do
+        before do
+          7.times do |i|
+            create(:webhook_delivery, user: user, status: "success",
+                                      payload: { "records" => [ { "recorded_on" => "2026-05-#{i + 1}" } ] },
+                                      received_at: i.hours.ago)
+          end
+          get settings_path
+        end
+
+        it "直近 5 件のみ描画する (= sketch-status-success の出現回数が 5)" do
+          expect(response.body.scan(/sketch-status-success/).size).to eq(5)
+        end
+      end
+
+      context "payload の records が配列でないとき (= 不正 payload)" do
+        let!(:delivery) do
+          create(:webhook_delivery, user: user, status: "invalid",
+                                    payload: { "raw" => "not json" },
+                                    error_message: "JSON parse error",
+                                    received_at: 5.minutes.ago)
+        end
+
+        before { get settings_path }
+
+        it "件数表示用の sketch-webhook-history-count クラスは描画されない" do
+          # タイトル「受信履歴 (直近 5 件)」とぶつからないよう、件数バッジの class 出現数で判定
+          expect(response.body).not_to include("sketch-webhook-history-count")
+        end
+      end
+    end
   end
 
   # ---------------------------------------------------------------------------
