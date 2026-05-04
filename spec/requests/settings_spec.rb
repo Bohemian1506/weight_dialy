@@ -71,7 +71,7 @@ RSpec.describe "Settings", type: :request do
       end
 
       it "Step 3 に iCloud Shortcut の配布リンクを含む" do
-        expect(response.body).to include("https://www.icloud.com/shortcuts/d2fb3cca3a3e47549577231a011dffee")
+        expect(response.body).to include("https://www.icloud.com/shortcuts/7e0199f480824ae1959a0833a443f564")
       end
 
       it "Step 3 のボタン文言が「ショートカットをインストール」である" do
