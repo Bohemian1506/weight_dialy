@@ -111,6 +111,15 @@ RSpec.describe "Settings", type: :request do
         it "プレースホルダー「まだ Shortcut からの送信はありません」を表示する" do
           expect(response.body).to include("まだ Shortcut からの送信はありません")
         end
+
+        # Issue #48 指摘 0: 受信ログ無しなら従来通り Step 3 をフルサイズ表示
+        it "Step 3 のフル案内 (= 「あとはショートカットを入れるだけ」) を表示する" do
+          expect(response.body).to include("あとはショートカットを入れるだけ")
+        end
+
+        it "Step 3 非表示時の再追加リンク (= 「別の端末に追加したい」) は表示しない" do
+          expect(response.body).not_to include("別の端末に追加したい")
+        end
       end
 
       context "success の WebhookDelivery が 1 件あるとき" do
@@ -136,6 +145,21 @@ RSpec.describe "Settings", type: :request do
 
         it "プレースホルダーを表示しない" do
           expect(response.body).not_to include("まだ Shortcut からの送信はありません")
+        end
+
+        # Issue #58: 受信ログがある時はセクション冒頭に「最終送信」表示
+        it "「最終送信:」の文言を表示する" do
+          expect(response.body).to include("最終送信:")
+        end
+
+        # Issue #48 指摘 0: 受信ログがある = Step 3 のフル案内を非表示にする
+        it "Step 3 のフル案内 (= 「あとはショートカットを入れるだけ」) を表示しない" do
+          expect(response.body).not_to include("あとはショートカットを入れるだけ")
+        end
+
+        # Issue #48 指摘 0: 代わりに再追加導線リンクを控えめに表示
+        it "「別の端末に追加したい場合はこちら」の再追加リンクを表示する" do
+          expect(response.body).to include("別の端末に追加したい")
         end
       end
 

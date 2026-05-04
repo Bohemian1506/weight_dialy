@@ -8,7 +8,9 @@
 # - 数値プレッシャー回避: AI 出力にも「強要表現禁止」をプロンプトで指示
 # - 詳細根拠: memory project_weight_dialy_three_step_philosophy.md
 class CalorieAdviceService
-  Result = Struct.new(:headline, :items, :button_label, keyword_init: true)
+  # ai_used: AI 経路で生成されたかのフラグ。dashboard で「Powered by Claude」バッジ表示の出し分けに使う (Issue #75)。
+  # AI 成功時 true / Static フォールバック時 false。ユーザーには UI 出力にしか影響せず PII は含めない。
+  Result = Struct.new(:headline, :items, :button_label, :ai_used, keyword_init: true)
   Item   = Struct.new(:name, :kcal, :label, keyword_init: true)
 
   # ヘッドラインは固定 (= AI 生成にせず一貫したブランドトーンを維持、レイテンシ短縮)。
@@ -23,16 +25,17 @@ class CalorieAdviceService
     if ai_available?
       items = Ai.call(estimated_kcal)
       Rails.logger.info("[CalorieAdviceService] AI suggestion ok (kcal=#{estimated_kcal}, items=#{items.size})")
+      Result.new(headline: HEADLINE, items: items, button_label: BUTTON_LABEL, ai_used: true)
     else
       items = Static.call(estimated_kcal)
+      Result.new(headline: HEADLINE, items: items, button_label: BUTTON_LABEL, ai_used: false)
     end
-    Result.new(headline: HEADLINE, items: items, button_label: BUTTON_LABEL)
   rescue StandardError => e
     # API failure / timeout / rate limit / JSON parse error すべて広く受けてフォールバック。
     # 細粒度の制御 (= 例外別の retry 等) は polish フェーズで Issue 化して別途。
     Rails.logger.warn("[CalorieAdviceService] AI failed (#{e.class}: #{e.message.truncate(120)}), falling back to static")
     static_items = Static.call(estimated_kcal)
-    Result.new(headline: HEADLINE, items: static_items, button_label: BUTTON_LABEL)
+    Result.new(headline: HEADLINE, items: static_items, button_label: BUTTON_LABEL, ai_used: false)
   end
 
   def self.ai_available?

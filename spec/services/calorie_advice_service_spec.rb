@@ -145,6 +145,10 @@ RSpec.describe CalorieAdviceService do
         allow(Rails.logger).to receive(:info)
       end
 
+      it "Result.ai_used が true (= Powered by Claude バッジ表示用、Issue #75)" do
+        expect(CalorieAdviceService.call(kcal).ai_used).to be true
+      end
+
       it "AI が返した items をそのまま Result.items に詰める" do
         expect(CalorieAdviceService.call(kcal).items.map(&:name)).to eq([ "AI 提案 A", "AI 提案 B", "AI 提案 C" ])
       end
@@ -168,6 +172,10 @@ RSpec.describe CalorieAdviceService do
         CalorieAdviceService.call(kcal)
         expect(Rails.logger).to have_received(:warn).with(/AI failed.*falling back to static/)
       end
+
+      it "Result.ai_used が false (= Powered by Claude バッジ非表示、Issue #75)" do
+        expect(CalorieAdviceService.call(kcal).ai_used).to be false
+      end
     end
 
     context "credentials に api_key が無い時 (= test/development デフォルト)" do
@@ -180,6 +188,10 @@ RSpec.describe CalorieAdviceService do
         expect(CalorieAdviceService::Ai).not_to receive(:call)
         result = CalorieAdviceService.call(kcal)
         expect(result.items.size).to eq(3)
+      end
+
+      it "Result.ai_used が false" do
+        expect(CalorieAdviceService.call(kcal).ai_used).to be false
       end
     end
   end

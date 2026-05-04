@@ -32,7 +32,8 @@
     <p class="sketch-label" style="margin-bottom: 8px;">iPhone のショートカットアプリで使う URL</p>
 
     <div data-controller="copy" data-copy-text-value="<%= @webhook_url %>">
-      <code style="display: block; font-size: 15px; word-break: break-all; background: var(--paper-2); border: 1px solid var(--ink); border-radius: 4px; padding: 10px 12px; margin-bottom: 12px; font-family: monospace; line-height: 1.4;">
+      <%# 本番 URL は 47 文字あり 375px モバイル幅で 3-4 行に折り返すため font-size は 13px に詰める (Issue #48 指摘 1) %>
+      <code style="display: block; font-size: 13px; word-break: break-all; background: var(--paper-2); border: 1px solid var(--ink); border-radius: 4px; padding: 10px 12px; margin-bottom: 12px; font-family: monospace; line-height: 1.4;">
         <%= @webhook_url %>
       </code>
       <button type="button"
@@ -44,22 +45,45 @@
     </div>
   </div>
 
-  <%# Step 3: iCloud 公開済み Shortcut の配布リンク %>
-  <p class="sketch-label" style="margin-bottom: 6px;">Step 3</p>
-  <div class="sketch-box" style="margin-bottom: 32px;">
-    <p class="sketch-h" style="margin-bottom: 8px;">🎉 あとはショートカットを入れるだけ</p>
-    <p class="sketch-body-text" style="margin-bottom: 16px;">
-      下のボタンから iPhone に Shortcut を追加 → 初回実行時に「<strong>ヘルスケアへのアクセス</strong>」を許可 → Step 1 でコピーした値を貼り付ければ完了です。
-    </p>
-    <%= link_to "ショートカットをインストール",
-          "https://www.icloud.com/shortcuts/7e0199f480824ae1959a0833a443f564",
-          class: "sketch-btn sketch-btn-primary",
-          target: "_blank",
-          rel: "noopener noreferrer" %>
-    <p class="sketch-small" style="margin: 8px 0 0;">タップで iCloud が開きます</p>
-  </div>
+  <%# Step 3: iCloud 公開済み Shortcut の配布リンク。
+      Issue #48 指摘 0: 受信ログがある = 既に Shortcut 導入済みなので、フルサイズ案内は隠す。
+      代わりに送信ログセクションの後に「別の端末で再追加したい場合はこちら」の小リンクを出して再追加導線を確保。
+
+      ⚠️ 仕様メモ: @webhook_deliveries は SettingsController で WEBHOOK_HISTORY_LIMIT (= 5) 件のみ取得しているため、
+      この `empty?` 判定は「全期間の受信履歴有無」ではなく「直近 5 件の窓に何かあるか」の判定。
+      全件 1000+ あっても直近 5 件が unauthorized 状態 (= 表示対象外) なら Step 3 が再表示される設計。
+      意図: 「直近に動作している実績があるか」を見たい (= 古い履歴より最近の動作実績を信頼)。
+      `current_user.webhook_deliveries.exists?` に変えれば全件判定になるが、追加クエリ発生 + 「最近壊れてる人にも案内出ない」問題があるため不採用。 %>
+  <% if @webhook_deliveries.empty? %>
+    <p class="sketch-label" style="margin-bottom: 6px;">Step 3</p>
+    <div class="sketch-box" style="margin-bottom: 32px;">
+      <p class="sketch-h" style="margin-bottom: 8px;">🎉 あとはショートカットを入れるだけ</p>
+      <p class="sketch-body-text" style="margin-bottom: 16px;">
+        下のボタンから iPhone に Shortcut を追加 → 初回実行時に「<strong>ヘルスケアへのアクセス</strong>」を許可 → Step 1 でコピーした値を貼り付ければ完了です。
+      </p>
+      <%= link_to "ショートカットをインストール",
+            "https://www.icloud.com/shortcuts/7e0199f480824ae1959a0833a443f564",
+            class: "sketch-btn sketch-btn-primary",
+            target: "_blank",
+            rel: "noopener noreferrer" %>
+      <p class="sketch-small" style="margin: 8px 0 0;">タップで iCloud が開きます</p>
+    </div>
+  <% end %>
 
   <%= render "webhook_delivery_history" %>
+
+  <% if @webhook_deliveries.any? %>
+    <%# 受信ログがある時の再追加導線 (= Issue #48 指摘 0)。
+        Step 3 を非表示にした代わりに、別端末でも追加したい人向けの控えめなリンク。 %>
+    <p class="sketch-small" style="text-align: center; margin: 8px 0 24px; color: var(--muted);">
+      ショートカットを別の端末に追加したい場合は
+      <%= link_to "こちら",
+            "https://www.icloud.com/shortcuts/7e0199f480824ae1959a0833a443f564",
+            target: "_blank",
+            rel: "noopener noreferrer",
+            style: "color: var(--ink); text-decoration: underline;" %>
+    </p>
+  <% end %>
 
   <%# 危険ゾーン: トークン再生成 %>
   <div class="sketch-box" style="margin-bottom: 24px; background: #ffe5e5;">
