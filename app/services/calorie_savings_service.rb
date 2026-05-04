@@ -17,35 +17,37 @@
 class CalorieSavingsService
   CALORIES_PER_STEP = 0.04
 
-  # @param records [Array<#recorded_on, #steps>] StepRecord または DemoRecord の配列 (全期間想定)
-  # @return [Hash{Symbol=>Integer}] { this_month:, last_month:, total: } 各 kcal を整数で返す
-  def self.call(records)
-    return zero_result if records.blank?
+  class << self
+    # @param records [Array<#recorded_on, #steps>] StepRecord または DemoRecord の配列 (全期間想定)
+    # @return [Hash{Symbol=>Integer}] { this_month:, last_month:, total: } 各 kcal を整数で返す
+    def call(records)
+      return zero_result if records.blank?
 
-    today = Date.current
-    this_month_range = today.beginning_of_month..today.end_of_month
-    last_month_date  = today - 1.month
-    last_month_range = last_month_date.beginning_of_month..last_month_date.end_of_month
+      today = Date.current
+      this_month_range = today.beginning_of_month..today.end_of_month
+      last_month_date  = today - 1.month
+      last_month_range = last_month_date.beginning_of_month..last_month_date.end_of_month
 
-    {
-      this_month: kcal_in_range(records, this_month_range),
-      last_month: kcal_in_range(records, last_month_range),
-      total:      kcal_total(records)
-    }
+      {
+        this_month: kcal_in_range(records, this_month_range),
+        last_month: kcal_in_range(records, last_month_range),
+        total:      kcal_total(records)
+      }
+    end
+
+    private
+
+    def zero_result
+      { this_month: 0, last_month: 0, total: 0 }
+    end
+
+    def kcal_in_range(records, range)
+      steps_sum = records.select { |r| range.cover?(r.recorded_on) }.sum(&:steps)
+      (steps_sum * CALORIES_PER_STEP).round
+    end
+
+    def kcal_total(records)
+      (records.sum(&:steps) * CALORIES_PER_STEP).round
+    end
   end
-
-  def self.zero_result
-    { this_month: 0, last_month: 0, total: 0 }
-  end
-
-  def self.kcal_in_range(records, range)
-    steps_sum = records.select { |r| range.cover?(r.recorded_on) }.sum(&:steps)
-    (steps_sum * CALORIES_PER_STEP).round
-  end
-
-  def self.kcal_total(records)
-    (records.sum(&:steps) * CALORIES_PER_STEP).round
-  end
-
-  private_class_method :zero_result, :kcal_in_range, :kcal_total
 end
