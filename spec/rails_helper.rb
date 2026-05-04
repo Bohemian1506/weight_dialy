@@ -8,6 +8,12 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 # that will avoid rails generators crashing because migrations haven't been run yet
 # return unless Rails.env.test?
 require 'rspec/rails'
+
+# WebMock を RSpec に統合する require はトップレベルに置く必要がある (= configure ブロック内に置くと
+# WebMock の hooks 登録タイミングがずれる)。net 接続を全面ブロックする disable_net_connect! は
+# 各 spec の before で局所的に呼ぶ運用 (= 例: spec/services/calorie_advice_service/ai_spec.rb)。
+require "webmock/rspec"
+
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
