@@ -52,6 +52,10 @@ gem "omniauth-rails_csrf_protection"
 # Issue #42: 固定リスト → AI 動的生成への切替、フォールバック付き
 gem "anthropic"
 
+# 日本語ロケール (= time_ago_in_words / number_with_delimiter / 各種フォーマット)
+# 入れないと "about 5 minutes 前" のような英日混在表示になる
+gem "rails-i18n"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

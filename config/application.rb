@@ -36,6 +36,11 @@ module App
     # 表示時刻を JST に統一する。DB 保存は UTC のまま (= active_record.default_timezone デフォルト :utc を維持)。
     # DB を UTC で持つことで、将来海外ユーザー対応や per-user time_zone を導入する際の移行コストがゼロ。
     config.time_zone = "Tokyo"
+
+    # I18n の標準ロケールを日本語に固定 (= rails-i18n gem で日本語化された各種フォーマットが効く)。
+    # 主な効果: time_ago_in_words が「約 5 分」表記に / number_with_delimiter のロケール対応 / I18n.t の :ja 翻訳。
+    # 将来海外展開時は per-user locale 切替を検討、まずは MVP として ja 固定。
+    config.i18n.default_locale = :ja
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Don't generate system test files.
