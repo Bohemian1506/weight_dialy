@@ -23,9 +23,10 @@
 <%# Dashboard 本体 (全状態共通) %>
 <div class="sketch-dashboard">
   <%= render "dashboard",
-        display_name: @display_name,
-        records:      @records,
-        today_record: @today_record,
-        streak:       @streak,
-        advice:       @advice %>
+        display_name:    @display_name,
+        records:         @records,
+        today_record:    @today_record,
+        streak:          @streak,
+        advice:          @advice,
+        calorie_savings: @calorie_savings %>
 </div>

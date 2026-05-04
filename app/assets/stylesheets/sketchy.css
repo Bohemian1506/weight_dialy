@@ -190,6 +190,16 @@ body {
   border-bottom: 2px solid var(--ink); padding-bottom: 14px;
 }
 
+/* ---- 貯カロリー (Issue #41 = アプリ哲学のステップ① 核機能) ----
+   メイン KPI として大きく表示。矢印・色分けは「数値プレッシャー回避」の原則で意図的に持たない。
+   flex + flex-wrap で 6 桁以上 (= 100,000 kcal+) になっても数値と単位「kcal」が綺麗に折り返す。 */
+.sketch-savings-main {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px;
+  font-family: 'Caveat', cursive; font-weight: 700;
+  font-size: 48px; line-height: 1.1; color: var(--ink);
+  margin-top: 4px;
+}
+
 /* ---- メイングリッド (チャート 1.5fr + サイドパネル 1fr) ---- */
 .sketch-main-grid {
   display: grid;
