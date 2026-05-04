@@ -90,20 +90,18 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
+  # Render Free Tier の 1 Postgres インスタンス制約に合わせ、Solid Trifecta (cache/queue/cable) を
+  # primary DB に同居させる。Solid 系テーブルは prefix (solid_*) で名前空間が分かれており衝突しない。
+  # 将来有料プラン化したら、各 url を個別 ENV (CACHE_DATABASE_URL 等) に切り替えるだけで分離可能 (= migrations_paths は維持)。
   primary: &primary_production
     <<: *default
-    database: app_production
-    username: app
-    password: <%= ENV["APP_DATABASE_PASSWORD"] %>
+    url: <%= ENV["DATABASE_URL"] %>
   cache:
     <<: *primary_production
-    database: app_production_cache
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: app_production_queue
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    database: app_production_cable
     migrations_paths: db/cable_migrate
