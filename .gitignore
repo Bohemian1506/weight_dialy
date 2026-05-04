@@ -33,6 +33,9 @@
 
 # Ignore key files for decrypting credentials and more.
 /config/*.key
+# environment-specific credentials (Rails 6+) の master key も除外。
+# `bin/rails credentials:edit -e production` で生成される production.key 等を git に乗せないため。
+/config/credentials/*.key
 
 
 /app/assets/builds/*

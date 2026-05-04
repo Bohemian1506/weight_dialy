@@ -428,21 +428,21 @@ Infrastructure as Code として `render.yaml` でこの構成を定義 (= Rende
 
 ### 11-4. 初回デプロイ手順
 
-1. **ローカルで credentials を編集** (Google OAuth client_id / secret を入れる)
+1. **ローカルで production-specific credentials を編集** (Google OAuth client_id / secret を入れる)
    ```bash
    # VS Code 派 (推奨):
    EDITOR="code --wait" bin/rails credentials:edit -e production
    # vim 派:
    EDITOR=vim bin/rails credentials:edit -e production
-
-   git add config/credentials/production.yml.enc && git commit -m "..."
-   git push origin main
    ```
-2. **`config/master.key` の中身を控える** (= デプロイ後の Render 環境変数で必要)
+   - 生成される `config/credentials/production.yml.enc` (= 暗号化済み) は **commit する**
+   - 生成される `config/credentials/production.key` (= 復号 key) は **`.gitignore` で除外、絶対 commit しない**
+   - 編集 → 保存 → 別ブランチで commit & push & PR (= main 直 push はガードでブロックされる)
+2. **`config/credentials/production.key` の中身を控える** (= デプロイ後の Render 環境変数で必要)
 3. **Google OAuth Console** で本番 redirect URI (`https://<your-render-domain>/auth/google_oauth2/callback`) を許可リストに追加
 4. **Render Dashboard** で `New Blueprint` → 本リポジトリを指定 → `render.yaml` が自動検出される
 5. **環境変数を設定** (Render Dashboard → 該当 Service → Environment):
-   - `RAILS_MASTER_KEY` = ローカルの `config/master.key` の中身
+   - `RAILS_MASTER_KEY` = ローカルの `config/credentials/production.key` の中身
    - `APP_HOST` = Render が割り当てたドメイン (例: `weight-dialy.onrender.com`)
 6. **デプロイ完了後**: ブラウザで `https://<your-render-domain>/` にアクセス → 200 OK 確認
 7. **Google ログイン** → ダッシュボード遷移確認
