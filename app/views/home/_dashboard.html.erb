@@ -1,7 +1,8 @@
 <%#
   Dashboard partial — Wireframe v3 の sketchy 再現版。
-  ローカル変数: display_name, records, today_record, streak, advice
+  ローカル変数: display_name, records, today_record, streak, advice, calorie_savings
   duck typing: records の各要素は recorded_on / steps / distance_meters / flights_climbed / estimated_kcal を持つ。
+  calorie_savings: { this_month:, last_month:, total: } 各 kcal を整数で保持 (CalorieSavingsService 由来)。
 %>
 
 <%# ---- SVG チャート計算 ---- %>
@@ -85,6 +86,20 @@
   <div style="text-align: right;">
     <div class="sketch-small">きょうの消費</div>
     <div class="sketch-hh">+<%= today_kcal %> <span class="sketch-hl-yellow">kcal</span></div>
+  </div>
+</div>
+
+<%# ---- 貯カロリー (Issue #41: アプリ哲学のステップ① 核機能。月リセット + 累計の二段構造)
+     数値プレッシャー回避: 矢印・色分け・前月比計算なし、並列表示のみ (= memory three_step_philosophy 参照)。 %>
+<div class="sketch-box sketch-savings" style="margin-bottom: 14px;">
+  <div class="sketch-label">今月の貯カロリー</div>
+  <div class="sketch-savings-main">
+    <%= number_with_delimiter(calorie_savings[:this_month]) %>
+    <span class="sketch-small">kcal</span>
+  </div>
+  <div class="sketch-small" style="margin-top: 6px;">
+    前月: <%= number_with_delimiter(calorie_savings[:last_month]) %> kcal ／
+    これまでの合計: <%= number_with_delimiter(calorie_savings[:total]) %> kcal
   </div>
 </div>
 

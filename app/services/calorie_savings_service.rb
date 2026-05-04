@@ -1,0 +1,51 @@
+# 歩数記録配列から「貯カロリー」(= 歩数を kcal 換算した累積) を算出する。
+#
+# 設計思想:
+#   - アプリの 3 ステップ思想 (① 罪悪感を減らす → ② 習慣化 → ③ ガチ運動) のステップ ① の核機能。
+#   - 「貯カロリー」直球造語で「kcal = 罪」を「kcal = 貯めるもの」に能動的反転。
+#   - 月リセット + 累計の二段構造で、ステップ ① (累計達成感) と ステップ ② (月単位習慣化) 両対応。
+#
+# 数値プレッシャー回避:
+#   - 戻り値は this_month / last_month / total の 3 値だけ (= 並列表示用)。
+#   - 前月比 / 矢印 / 色分けはこの service では計算しない (= UI 側でも提示しない方針)。
+#   - 詳細根拠: memory project_weight_dialy_three_step_philosophy.md
+#
+# 換算式:
+#   - 1 歩 = 0.04 kcal (= 体重 70kg 前提のおおよその平均値)
+#   - 体重設定を要求しないことで、ステップ ① の人を「面倒くさい → 離脱」から守る。
+#   - 精密化は v1.3+ (Issue #43 ガチ運動モード) で別 service として分岐予定。
+class CalorieSavingsService
+  CALORIES_PER_STEP = 0.04
+
+  # @param records [Array<#recorded_on, #steps>] StepRecord または DemoRecord の配列 (全期間想定)
+  # @return [Hash{Symbol=>Integer}] { this_month:, last_month:, total: } 各 kcal を整数で返す
+  def self.call(records)
+    return zero_result if records.blank?
+
+    today = Date.current
+    this_month_range = today.beginning_of_month..today.end_of_month
+    last_month_date  = today - 1.month
+    last_month_range = last_month_date.beginning_of_month..last_month_date.end_of_month
+
+    {
+      this_month: kcal_in_range(records, this_month_range),
+      last_month: kcal_in_range(records, last_month_range),
+      total:      kcal_total(records)
+    }
+  end
+
+  def self.zero_result
+    { this_month: 0, last_month: 0, total: 0 }
+  end
+
+  def self.kcal_in_range(records, range)
+    steps_sum = records.select { |r| range.cover?(r.recorded_on) }.sum(&:steps)
+    (steps_sum * CALORIES_PER_STEP).round
+  end
+
+  def self.kcal_total(records)
+    (records.sum(&:steps) * CALORIES_PER_STEP).round
+  end
+
+  private_class_method :zero_result, :kcal_in_range, :kcal_total
+end

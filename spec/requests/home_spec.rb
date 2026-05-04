@@ -153,6 +153,23 @@ RSpec.describe "Home", type: :request do
       it "ログアウトボタンを表示する" do
         expect(response.body).to include("ログアウト")
       end
+
+      # 貯カロリー (Issue #41): 9000 歩 * 0.04 = 360 kcal
+      it "「今月の貯カロリー」見出しを表示する" do
+        expect(response.body).to include("今月の貯カロリー")
+      end
+
+      it "貯カロリーのメイン数値 (sketch-savings-main) を描画する" do
+        expect(response.body).to include("sketch-savings-main")
+      end
+
+      it "今月の貯カロリー値 360 kcal を含む (= 9000 歩 * 0.04 を四捨五入で number_with_delimiter)" do
+        expect(response.body).to include("360")
+      end
+
+      it "累計表示「これまでの合計:」の文言を含む (= カジュアル層配慮、design-reviewer 指摘)" do
+        expect(response.body).to include("これまでの合計:")
+      end
     end
 
     # ─────────────────────────────────────────────────
