@@ -325,5 +325,16 @@ RSpec.describe "Home", type: :request do
         expect(response).to have_http_status(:redirect)
       end
     end
+
+    # Mobile Chrome bypass (= OAuth Custom Tabs 経由で / に戻った時の UA、子 6 動作確認 PR #147 由来)
+    context "Mobile Chrome UA (= Custom Tabs / Android Chrome 経由)" do
+      mobile_chrome_ua = "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 " \
+                         "(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+      before { get root_path, headers: { "User-Agent" => mobile_chrome_ua } }
+
+      it "406 ではなく 200 OK を返す (= 三重防衛、Custom Tabs から戻った後の / 遷移を通す)" do
+        expect(response).to have_http_status(:ok)
+      end
+    end
   end
 end
