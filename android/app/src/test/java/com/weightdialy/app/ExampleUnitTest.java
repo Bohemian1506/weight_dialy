@@ -1,4 +1,4 @@
-package com.getcapacitor.myapp;
+package com.weightdialy.app;
 
 import static org.junit.Assert.*;
 

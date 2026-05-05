@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">weight_dialy</string>
-    <string name="title_activity_main">weight_dialy</string>
+    <string name="app_name">weight daily.</string>
+    <string name="title_activity_main">weight daily.</string>
     <string name="package_name">com.weightdialy.app</string>
     <string name="custom_url_scheme">com.weightdialy.app</string>
 </resources>
