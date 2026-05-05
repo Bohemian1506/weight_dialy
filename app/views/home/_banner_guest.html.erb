@@ -8,11 +8,14 @@
       </p>
     </div>
   </div>
-  <div class="sketch-banner-action">
-    <%# OmniAuth ミドルウェアが /auth/:provider を処理するため named route なし %>
+  <div class="sketch-banner-action"
+       data-controller="capacitor-oauth-login">
+    <%# OmniAuth ミドルウェアが /auth/:provider を処理するため named route なし。
+        Capacitor アプリ内では capacitor-oauth-login controller が click を intercept して
+        Browser.open(/auth/capacitor_start) に切り替える (= Phase 3 cookie storage 分離対応)。 %>
     <%= button_to "Google でログイン", "/auth/google_oauth2",
           method: :post,
           class: "sketch-btn sketch-btn-primary",
-          data: { turbo: false } %>
+          data: { turbo: false, action: "click->capacitor-oauth-login#intercept" } %>
   </div>
 </div>

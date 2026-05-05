@@ -1,0 +1,31 @@
+<%# Phase 3 Capacitor OAuth ブリッジ中継ページ。Custom Tabs で開かれ、即座に /auth/google_oauth2 (= OmniAuth POST 必須) に自動 submit する。
+    OmniAuth は CSRF protection で POST 強制かつ authenticity_token 必須のため、form 経由でないと開始できない。
+    ユーザーには ~100ms 程度しか見えない遷移ページ。 %>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Google ログインへ進んでいます…</title>
+  <%= csrf_meta_tags %>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 2rem; text-align: center; color: #333; }
+    @keyframes capacitor-bridge-dots { 0%, 20% { content: "."; } 40% { content: ".."; } 60%, 100% { content: "..."; } }
+    .capacitor-bridge-loading::after { content: "..."; display: inline-block; min-width: 1.2em; text-align: left; animation: capacitor-bridge-dots 1.2s infinite; }
+  </style>
+</head>
+<body>
+  <p>Google ログインへ進んでいます<span class="capacitor-bridge-loading" aria-hidden="true"></span></p>
+  <%= form_with url: "/auth/google_oauth2", method: :post,
+                data: { turbo: false }, html: { id: "capacitor-oauth-bridge" } do %>
+  <% end %>
+  <script>
+    document.getElementById("capacitor-oauth-bridge").submit();
+  </script>
+  <noscript>
+    <%= form_with url: "/auth/google_oauth2", method: :post, data: { turbo: false } do %>
+      <%= submit_tag "Google ログインへ進む" %>
+    <% end %>
+  </noscript>
+</body>
+</html>
