@@ -289,7 +289,9 @@
     <div class="sketch-label">🔥 消費</div>
     <div class="sketch-hh">+<%= today_kcal %> <span class="sketch-small">kcal</span></div>
     <% if food_equivalent %>
-      <div class="sketch-small">≒ <%= food_equivalent[:emoji] %> <%= food_equivalent[:name] %> <%= food_equivalent[:count] %> <%= food_equivalent[:unit] %>ぶん</div>
+      <div class="sketch-small sketch-food-equivalent">≒ <%= food_equivalent[:emoji] %> <%= food_equivalent[:name] %> <%= food_equivalent[:count] %> <%= food_equivalent[:unit] %>ぶん</div>
+    <% else %>
+      <div class="sketch-small">今日のプラスα</div>
     <% end %>
   </div>
 
