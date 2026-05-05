@@ -6,5 +6,8 @@
     "url": "https://weight-dialy.onrender.com",
     "cleartext": false,
     "allowNavigation": ["weight-dialy.onrender.com"]
+  },
+  "android": {
+    "appendUserAgent": "WeightDialyCapacitor"
   }
 }

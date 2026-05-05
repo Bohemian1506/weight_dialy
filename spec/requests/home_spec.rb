@@ -22,9 +22,12 @@ RSpec.describe "Home", type: :request do
   end
 
   shared_examples "banner_android が表示される" do
-    it "「Android 版は現在開発中」を含む" do
-      expect(response.body).to include("Android 版")
-      expect(response.body).to include("現在開発中")
+    it "「Android アプリ版」「Health Connect」「dogfood」を含む" do
+      # 子 6 (#125) で Capacitor アプリ版が dogfood 段階に到達したため、
+      # 「現在開発中」→「Android アプリ版で Health Connect と連携できます」に文言更新済 (PR #140)
+      expect(response.body).to include("Android アプリ版")
+      expect(response.body).to include("Health Connect")
+      expect(response.body).to include("dogfood")
     end
   end
 
@@ -269,6 +272,30 @@ RSpec.describe "Home", type: :request do
 
       it "ヘッダにログアウトボタンを表示する" do
         expect(response.body).to include("ログアウト")
+      end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Capacitor アプリ (= Android WebView) の allow_browser bypass (Issue #40 子 6 由来、PR #140)
+  # ---------------------------------------------------------------------------
+  describe "Capacitor アプリの allow_browser bypass" do
+    capacitor_ua = "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 " \
+                   "(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36 wv WeightDialyCapacitor"
+
+    context "WeightDialyCapacitor suffix を含む UA" do
+      before { get root_path, headers: { "User-Agent" => capacitor_ua } }
+
+      it "406 Not Acceptable ではなく 200 OK を返す (= modern check を bypass)" do
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "通常の Web ブラウザ UA (= suffix なし)" do
+      before { get root_path, headers: { "User-Agent" => "Mozilla/4.0 (compatible; MSIE 6.0)" } }
+
+      it "406 Not Acceptable を返す (= bypass が Capacitor 限定で効く)" do
+        expect(response).to have_http_status(:not_acceptable)
       end
     end
   end
