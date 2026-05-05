@@ -320,8 +320,9 @@ RSpec.describe "Home", type: :request do
             headers: { "User-Agent" => "Mozilla/4.0 (compatible; MSIE 6.0)" }
       end
 
-      it "406 Not Acceptable ではない (= /auth/ 配下は modern check スキップ)" do
+      it "406 Not Acceptable ではなく、認証成功で 302 redirect を返す (= /auth/ 配下は modern check スキップ + OAuth callback 動作)" do
         expect(response).not_to have_http_status(:not_acceptable)
+        expect(response).to have_http_status(:redirect)
       end
     end
   end

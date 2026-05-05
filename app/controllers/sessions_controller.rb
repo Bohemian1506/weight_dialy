@@ -3,7 +3,7 @@ class SessionsController < ApplicationController
     auth = request.env["omniauth.auth"]
     if auth.nil?
       Rails.logger.error("OAuth login failed: omniauth.auth is nil")
-      return redirect_to root_path, alert: "ログインに失敗しました"
+      return redirect_to root_path, alert: "ログインに失敗しました。もう一度お試しください"
     end
 
     user = User.from_omniauth(auth)
@@ -12,7 +12,7 @@ class SessionsController < ApplicationController
     redirect_to root_path, notice: "ログインしました"
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error("OAuth login failed: #{e.message}")
-    redirect_to root_path, alert: "ログインに失敗しました"
+    redirect_to root_path, alert: "ログインに失敗しました。もう一度お試しください"
   end
 
   def destroy
@@ -21,6 +21,7 @@ class SessionsController < ApplicationController
   end
 
   def failure
-    redirect_to root_path, alert: "ログインに失敗しました"
+    # OAuth フロー中断 (= ユーザーがキャンセル / Custom Tabs から戻った等) の専用文言
+    redirect_to root_path, alert: "Google ログインがキャンセルされました。再度お試しください"
   end
 end

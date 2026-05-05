@@ -13,7 +13,7 @@ class ApplicationController < ActionController::Base
                   # OAuth コールバックパスは Chrome Custom Tabs で開かれる (= Google の "In-App Browsers Are Not Allowed" 2021 ポリシー)
                   # Custom Tabs は Capacitor の overrideUserAgent の影響を受けないため UA に WeightDialyCapacitor が含まれず、modern check で弾かれる。
                   # /auth/ 配下は認証フロー専用で UA 判定すべきパスではないため、modern check 自体をスキップする。
-                  return false if request.path.start_with?("/auth/")
+                  next false if request.path.start_with?("/auth/")
                   ua = request.user_agent.to_s
                   !ua.include?("WeightDialyCapacitor") && !ua.include?("; wv)")
                 }

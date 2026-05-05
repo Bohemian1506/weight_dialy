@@ -70,9 +70,10 @@ RSpec.describe "Sessions", type: :request do
       expect(response).to redirect_to(root_path)
     end
 
-    it "sets an alert flash" do
+    it "sets an alert flash with cancellation guidance" do
+      # PR #146 design レビューで OAuth 中断専用文言に変更 (= 通常失敗とは別、Custom Tabs 復帰時の UX 改善)
       get auth_failure_path
-      expect(flash[:alert]).to eq("ログインに失敗しました")
+      expect(flash[:alert]).to eq("Google ログインがキャンセルされました。再度お試しください")
     end
   end
 end
