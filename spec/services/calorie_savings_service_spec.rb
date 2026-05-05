@@ -106,4 +106,102 @@ RSpec.describe CalorieSavingsService do
       end
     end
   end
+
+  describe ".call_for_user" do
+    let(:user) { create(:user) }
+
+    context "レコード 0 件" do
+      it "全 0 のハッシュを返す" do
+        expect(CalorieSavingsService.call_for_user(user)).to eq(this_month: 0, last_month: 0, total: 0)
+      end
+    end
+
+    context "当月のみ 1 件 (1000 歩)" do
+      before { create(:step_record, user: user, recorded_on: this_month_15, steps: 1000) }
+
+      it "this_month = 40 kcal (= 1000 * 0.04)" do
+        expect(CalorieSavingsService.call_for_user(user)[:this_month]).to eq(40)
+      end
+
+      it "last_month = 0 kcal" do
+        expect(CalorieSavingsService.call_for_user(user)[:last_month]).to eq(0)
+      end
+
+      it "total = 40 kcal (= this_month と一致)" do
+        expect(CalorieSavingsService.call_for_user(user)[:total]).to eq(40)
+      end
+    end
+
+    context "前月のみ 1 件 (5000 歩)" do
+      before { create(:step_record, user: user, recorded_on: last_month_15, steps: 5000) }
+
+      it "this_month = 0 kcal" do
+        expect(CalorieSavingsService.call_for_user(user)[:this_month]).to eq(0)
+      end
+
+      it "last_month = 200 kcal (= 5000 * 0.04)" do
+        expect(CalorieSavingsService.call_for_user(user)[:last_month]).to eq(200)
+      end
+
+      it "total = 200 kcal" do
+        expect(CalorieSavingsService.call_for_user(user)[:total]).to eq(200)
+      end
+    end
+
+    context "当月 + 前月 + 2 ヶ月前 の混在" do
+      before do
+        create(:step_record, user: user, recorded_on: two_months_ago_day, steps: 10000) # 400 kcal
+        create(:step_record, user: user, recorded_on: last_month_15,      steps: 5000)  # 200 kcal
+        create(:step_record, user: user, recorded_on: this_month_15,      steps: 2500)  # 100 kcal
+      end
+
+      it "this_month は今月分のみ (100 kcal)" do
+        expect(CalorieSavingsService.call_for_user(user)[:this_month]).to eq(100)
+      end
+
+      it "last_month は前月分のみ (200 kcal)" do
+        expect(CalorieSavingsService.call_for_user(user)[:last_month]).to eq(200)
+      end
+
+      it "total は全期間 (700 kcal)" do
+        expect(CalorieSavingsService.call_for_user(user)[:total]).to eq(700)
+      end
+    end
+
+    context "他ユーザーのレコードは混入しない (= scope が user.step_records)" do
+      let(:other_user) { create(:user) }
+
+      before do
+        create(:step_record, user: user,       recorded_on: this_month_15, steps: 1000)
+        create(:step_record, user: other_user, recorded_on: this_month_15, steps: 99999)
+      end
+
+      it "user のレコードのみが集計される" do
+        expect(CalorieSavingsService.call_for_user(user)[:this_month]).to eq(40)
+      end
+    end
+
+    context "月境界: 今月の月初 (= today.beginning_of_month)" do
+      it "月初 1 日のレコードも this_month に含む" do
+        create(:step_record, user: user, recorded_on: today.beginning_of_month, steps: 1000)
+        expect(CalorieSavingsService.call_for_user(user)[:this_month]).to eq(40)
+      end
+    end
+
+    context "月境界: 前月の月末 (= 1 ヶ月前の月末)" do
+      it "前月末日のレコードを last_month に含む" do
+        last_month_end = (today - 1.month).end_of_month
+        create(:step_record, user: user, recorded_on: last_month_end, steps: 1000)
+        expect(CalorieSavingsService.call_for_user(user)[:last_month]).to eq(40)
+      end
+    end
+
+    context "call(records) と call_for_user(user) の換算結果一致 (= 9000 歩 → 360 kcal)" do
+      before { create(:step_record, user: user, recorded_on: this_month_15, steps: 9000) }
+
+      it "this_month が 360 kcal" do
+        expect(CalorieSavingsService.call_for_user(user)[:this_month]).to eq(360)
+      end
+    end
+  end
 end

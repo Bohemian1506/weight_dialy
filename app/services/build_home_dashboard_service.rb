@@ -8,7 +8,7 @@
 #
 # nil ガード設計:
 #   - user が nil (= 未ログイン) の場合、state: :guest を先に確定する。
-#   - fetch_records / fetch_calorie_records は state で分岐するため、
+#   - fetch_records / calorie_savings 分岐は state で決定するため、
 #     user が nil のまま step_records を呼び出す経路は存在しない。
 class BuildHomeDashboardService
   Result = Data.define(
@@ -21,10 +21,15 @@ class BuildHomeDashboardService
     # @param request [ActionDispatch::Request] UA 判定のためのリクエストオブジェクト
     # @return [Result]
     def call(user:, request:)
-      state           = determine_state(user, request)
-      records         = fetch_records(user, state)
-      calorie_records = fetch_calorie_records(user, state)
-      today_record    = records.find { |r| r.recorded_on == Date.current } || records.last
+      state        = determine_state(user, request)
+      records      = fetch_records(user, state)
+      today_record = records.find { |r| r.recorded_on == Date.current } || records.last
+
+      calorie_savings = if state == :iphone_with_data
+                          CalorieSavingsService.call_for_user(user)
+      else
+                          CalorieSavingsService.call(records)
+      end
 
       Result.new(
         state:           state,
@@ -33,7 +38,7 @@ class BuildHomeDashboardService
         today_record:    today_record,
         streak:          StreakCalculatorService.call(records),
         advice:          CalorieAdviceService.call(today_record&.estimated_kcal.to_i),
-        calorie_savings: CalorieSavingsService.call(calorie_records),
+        calorie_savings: calorie_savings,
         food_equivalent: CalorieEquivalentService.call(today_record&.estimated_kcal.to_i)
       )
     end
@@ -58,16 +63,6 @@ class BuildHomeDashboardService
             .where(recorded_on: 30.days.ago.to_date..Date.current)
             .order(:recorded_on)
             .to_a
-      else
-        DemoDataService.call
-      end
-    end
-
-    # 貯カロリー算出用に全期間レコードを返す (累計 total を正確に計算するため)。
-    # demo state では DemoDataService の 30 日分で代替。
-    def fetch_calorie_records(user, state)
-      if state == :iphone_with_data
-        user.step_records.order(:recorded_on).to_a
       else
         DemoDataService.call
       end
