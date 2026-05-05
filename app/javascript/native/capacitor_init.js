@@ -39,10 +39,14 @@ if (typeof window.Capacitor !== "undefined" && window.Capacitor.isNativePlatform
             try { await Browser.close() } catch (_) { /* close 失敗は致命的でない */ }
           }
           window.location.href = `/auto_login?token=${encodeURIComponent(token)}`
-        } else if (url.includes("/auth/")) {
-          // Phase 2a 互換経路 (= AssetLinks intent-filter 経由のフォールバック、Phase 3 動作確認後に削除予定)
-          const parsed = new URL(url)
-          window.location.href = parsed.pathname + parsed.search
+        } else {
+          // Phase 2a 互換経路 (= /auth/ を含む https URL を WebView に転送) は意図的に削除。
+          // 理由: AssetLinks intent-filter で OAuth callback URL を appUrlOpen 経由で受信した場合、
+          // ここで WebView に転送してしまうと WebView 側 session に OAuth state cookie がない状態で
+          // OmniAuth callback 処理が走り、state 不整合で「ログインキャンセル」になる障害が発生した
+          // (2026-05-06、Phase 3 実機検証で発覚)。AndroidManifest 側の AssetLinks intent-filter も
+          // 同時に削除済 = この else 分岐は今後到達想定なし、何もしないのが正解。
+          console.debug("[Capacitor] appUrlOpen received non-custom-scheme URL, ignored:", url)
         }
       } catch (error) {
         console.error("[Capacitor] appUrlOpen handler error:", error)

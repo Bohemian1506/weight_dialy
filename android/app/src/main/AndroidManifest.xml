@@ -26,7 +26,7 @@
                  Custom Tabs 内で Rails が com.weightdialy.app://oauth_callback?token=XXX に redirect
                  → Android が scheme を認識して Custom Tabs 自動 close、Capacitor アプリ前面復帰
                  → appUrlOpen listener で token 受信 → /auto_login?token=XXX 経由で WebView に session 確立
-                 (= Auth0 公式 quickstart 由来の業界標準パターン、AssetLinks deep link は Custom Tabs 内 callback 不対象のため不可) -->
+                 (= Auth0 公式 quickstart 由来の業界標準パターン) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -34,16 +34,11 @@
                 <data android:scheme="@string/custom_url_scheme" />
             </intent-filter>
 
-            <!-- Deep link (= Phase 2b): https AssetLinks intent-filter は Phase 3 動作確認後に別 PR で削除予定
-                 (= Custom Tabs 内 callback では発動しないと確定済み、学び 20 参照) -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https"
-                      android:host="weight-dialy.onrender.com"
-                      android:pathPrefix="/auth/" />
-            </intent-filter>
+            <!-- ⚠ Phase 2b の AssetLinks (https autoVerify) intent-filter は意図的に削除済み (2026-05-06)。
+                 理由: 実機 (Torque G6) で Day 7 の前提と異なり Custom Tabs 内 OAuth callback も AssetLinks で
+                 横取りされてしまい、Rails の sessions#create 処理 (= Phase 3 ブリッジの中核) が走らず WebView 側で
+                 state 不整合 → 「ログインキャンセル」になる障害が発生したため。Phase 3 は custom scheme 一本で完結する設計。
+                 削除に伴い public/.well-known/assetlinks.json も実質不要 (= ファイルは残るが効果なし)、別 PR で削除予定。 -->
 
         </activity>
 
