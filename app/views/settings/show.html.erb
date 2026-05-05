@@ -85,7 +85,7 @@
     </p>
   <% end %>
 
-  <%# ポリシーリンク %>
+  <%# ポリシーリンク (= Health Connect より上、インフォームドコンセントの順序) %>
   <div class="sketch-box" style="margin-bottom: 24px;">
     <h2 class="sketch-h" style="margin-bottom: 8px;">ポリシー</h2>
     <p class="sketch-body-text">
@@ -93,6 +93,25 @@
       /
       <%= link_to "利用規約", terms_path, style: "color: var(--ink); text-decoration: underline;" %>
     </p>
+  </div>
+
+  <%# Health Connect 連携 (Android のみ、Capacitor 検知で動的表示。Web 版では非表示のまま) %>
+  <div data-controller="native-health"
+       class="sketch-box"
+       style="display: none; margin-bottom: 24px;">
+    <h2 class="sketch-h" style="margin-bottom: 8px;">📱 Android Health Connect 連携</h2>
+    <p class="sketch-small" style="margin-bottom: 12px;">
+      Android アプリ版で Health Connect から歩数 / 距離 / 階段を取得します。
+    </p>
+    <p data-native-health-target="status" class="sketch-body-text" style="margin-bottom: 16px;">
+      確認中...
+    </p>
+    <button data-action="click->native-health#requestPermission"
+            data-native-health-target="requestButton"
+            class="sketch-btn"
+            style="display: none;">
+      権限を許可する
+    </button>
   </div>
 
   <%# 危険ゾーン: トークン再生成 %>

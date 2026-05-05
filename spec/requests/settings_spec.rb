@@ -94,6 +94,29 @@ RSpec.describe "Settings", type: :request do
     end
 
     # -------------------------------------------------------------------------
+    # Health Connect 連携セクション (Issue #40 子 3 / #121)
+    # Capacitor (Android アプリ) でのみ動的表示、Web 版では display: none 維持
+    # -------------------------------------------------------------------------
+    context "ログイン時 (Health Connect セクション)" do
+      let(:user) { create(:user) }
+
+      before do
+        login(user)
+        get settings_path
+      end
+
+      it "Android Health Connect 連携セクションを含む (= Stimulus controller 経由でレンダリング)" do
+        expect(response.body).to include("Android Health Connect 連携")
+        expect(response.body).to include('data-controller="native-health"')
+      end
+
+      it "Web 版では display: none で初期表示する (= Capacitor 検知時のみ表示に切り替わる)" do
+        # native-health controller を持つ要素の inline style に display: none が含まれる
+        expect(response.body).to match(/data-controller="native-health"[^>]*style="[^"]*display: none/)
+      end
+    end
+
+    # -------------------------------------------------------------------------
     # 受信履歴セクション (Issue #53)
     # -------------------------------------------------------------------------
     context "ログイン時 (受信履歴セクション)" do
