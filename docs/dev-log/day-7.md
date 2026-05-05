@@ -1,6 +1,6 @@
 # Day 7 開発ログ (2026-05-05、発表会前日)
 
-GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + Anthropic Claude 接続を経て **本物の AI が production で動く weight_dialy** に到達した翌日、本日は **発表会前に必須の項目を確実に押さえる** + **scope 整理を徹底する** 1 日。Day 6 で寝かせた PR #82 を起点に、退会機能 → プライバシーポリシー → 食品換算動的化を順次実装。各機能で 3 者並列レビューを 2 ラウンドずつ回し、13 件の別 Issue を起票して「やりたいけど今やらない」を可視化した。さらに **Day 3-7 dev-log の後追い整備 + dev-log 運用ルール化** で教材性インフラを完成。終盤は **OPEN Issue 棚卸し + リファクタ 4 件 (#85 #86 #45 + home_controller 集約) + SQL 集計化 (#72) + 法務記述強化 (#88 #89) + sketchy danger 体系の三色一致 polish 連鎖 (#105 #106 #116)** で polish + perf + 法務まで消化。**夜は Issue #40 (Capacitor + Health Connect Android 対応) に着手**、子 Issue 8 件 (#119-#126) に分解 + 起票後、子 1 (Capacitor 8.3.1 scaffold) をマージ。**17 PR マージ + 24 Issue 起票 + 21 Issue close** で、発表会前の最終調整に到達 + Android v1.0 の出発点に立つ。
+GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + Anthropic Claude 接続を経て **本物の AI が production で動く weight_dialy** に到達した翌日、本日は **発表会前に必須の項目を確実に押さえる** + **scope 整理を徹底する** 1 日。Day 6 で寝かせた PR #82 を起点に、退会機能 → プライバシーポリシー → 食品換算動的化を順次実装。各機能で 3 者並列レビューを 2 ラウンドずつ回し、13 件の別 Issue を起票して「やりたいけど今やらない」を可視化した。さらに **Day 3-7 dev-log の後追い整備 + dev-log 運用ルール化** で教材性インフラを完成。終盤は **OPEN Issue 棚卸し + リファクタ 4 件 (#85 #86 #45 + home_controller 集約) + SQL 集計化 (#72) + 法務記述強化 (#88 #89) + sketchy danger 体系の三色一致 polish 連鎖 (#105 #106 #116)** で polish + perf + 法務まで消化。**夜は Issue #40 (Capacitor + Health Connect Android 対応) に着手**、子 Issue 8 件 (#119-#126) に分解 + 起票後、子 1 (Capacitor 8.3.1 scaffold) → 子 2 (`@capgo/capacitor-health` 導入 + Privacy Policy URL 設定) を順次マージ。**18 PR マージ + 25 Issue 起票 + 22 Issue close** で、発表会前の最終調整に到達 + Android v1.0 の出発点に立つ。
 
 セッションの戦略テーマ: **「発表会前日、必須項目を確実に押さえる」+「設計事前 3 者レビューによる手戻り回避」**
 
@@ -41,8 +41,9 @@ GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + An
 | #115 | #105 #106 | polish: トークン再生成タイトルを `sketch-h-danger` 統一 + CLAUDE.md に危険度クラス命名規約追記 |
 | #117 | #116 | polish: `sketch-box-danger-soft` のボーダーを半透明赤 (= `--danger-soft-border` rgba 35%) にして背景・タイトル・ボーダーで赤系三色一致 |
 | #127 | #119 | feat: Capacitor 8.3.1 初期化 + `server.url` を本番 URL (`https://weight-dialy.onrender.com`) にラップ (= Issue #40 子 1、Android v1.0 出発点) |
+| #130 | #120 | feat: `@capgo/capacitor-health` 8.4.9 導入 + Privacy Policy URL を `strings.xml` に設定 (= Issue #40 子 2、Health Connect 連携プラグインの基盤整備) |
 
-### close した Issue (= 21 件)
+### close した Issue (= 22 件)
 
 - **#39 発表会デモシナリオ準備** — 本人プレゼンないので close (= スクープ外と判断)
 - **#35 ngrok 動作確認** — Day 5 で完了済みだったが OPEN 残存だったので close
@@ -54,8 +55,9 @@ GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + An
 - **#105 #106** — sketchy `--danger` フォローアップ (= タイトル赤化 + 規約追記)、PR #115 で close
 - **#116** — sketchy danger-soft ボーダー半透明赤化 (= 三色一致 polish 連鎖の最終ピース)、PR #117 で close
 - **#119** — Capacitor 初期化 + server.url wrap (= Issue #40 子 1、Android v1.0 出発点)、PR #127 で close
+- **#120** — `@capgo/capacitor-health` 導入 + Privacy Policy URL 設定 (= Issue #40 子 2、Health Connect 連携基盤)、PR #130 で close
 
-### 起票した Issue (= 15 件 + Issue #40 子 Issue 8 件 + 派生 polish 1 件 + Issue #8 追記)
+### 起票した Issue (= 15 件 + Issue #40 子 Issue 8 件 + 派生 polish 2 件 + Issue #8 追記)
 
 - #83 webhook error_message 日本語化
 - #85 webhook_deliveries / step_records FK `on_delete: :cascade`
@@ -87,6 +89,7 @@ GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + An
 #### 派生 polish (= PR #127 design レビューより)
 
 - #128 Capacitor splash 背景色を sketchy theme `--paper` (`#fbf8f1`) 単色に置き換え (= 発表会前 polish 候補、子 1 のスコープ膨張防ぐため別 Issue 化)
+- #131 `/privacy` に Android Health Connect 経由の取得情報を明記 (= Google 規約対応、PR #130 design レビュー由来、発表会前必須)
 
 - (Issue #8 への追記: 「初回ログイン時の同意モーダル」)
 
@@ -261,6 +264,31 @@ PR #127 は 56 files / 2150 insertions だが、レビュー対象の本質は `
 
 これらは scaffold PR 内で潰すべき (= 後続 Issue でフォローしようとすると忘れる)。
 
+### 学び 12: ライブラリ採用時は同梱 AndroidManifest / Info.plist を README より先に grep する
+
+Issue #40 子 2 (PR #130) で `@capgo/capacitor-health` 導入時、子 Issue 本文の予定 (= AndroidManifest に Health Connect permission 3 種類追加) と実態が乖離。
+
+**4 行構造で経緯を残す** (= strategic-reviewer 提案):
+
+1. **予定 (= 子 Issue #120 本文)**: AndroidManifest に `READ_STEPS` / `READ_DISTANCE` / `READ_FLOORS_CLIMBED` の 3 permission を追加
+2. **着手で判明**: プラグイン同梱 `node_modules/@capgo/capacitor-health/android/src/main/AndroidManifest.xml` に既に **42 permission 宣言済み** (= READ/WRITE × 21 データ型)。Capacitor のマニフェストマージ機構で自動結合 → アプリ側で重複宣言不要 (= プラグイン README 「Your app does not need to duplicate them」)
+3. **実態**: 必要だったのは **Privacy Policy URL 設定** (= Health Connect 必須要件、`strings.xml` に `health_connect_privacy_policy_url` を追加)
+4. **なぜ事前に分からなかったか**: 子 2 着手前に `npm view @capgo/capacitor-health peerDependencies` で Capacitor 8 互換性は確認していたが、**同梱 AndroidManifest 内容までは確認しなかった**。README は「Privacy Policy 必須」と書いてあったが、permission 重複の話は source を読まないと判別できなかった
+
+**教訓**: ライブラリ採用時の事前調査ステップに、以下を追加する:
+
+```bash
+# プラグインが Android で何を宣言しているか確認
+grep -E "permission|activity" node_modules/<plugin>/android/src/main/AndroidManifest.xml
+
+# permission の重複宣言が不要な場合が多い (= マニフェストマージ機構)
+# 必須要件 (= Privacy Policy URL / queries / Activity 等) はソース or README で確認
+```
+
+**再現性**: この教訓は Strava / Stripe / OAuth 系プラグインでも再発しうる (= 「README ベースで作業 → ライブラリ同梱物に既にあった」事象)。次回ライブラリ採用時に同じ罠を回避できる粒度。
+
+**良かった点**: 子 2 のスコープが「permission 3 種追加」から「Privacy Policy URL 設定」に変化したが、変化を「事前調査不足」ではなく「ライブラリ仕様の不確定性 = 着手で初めて判明する性質」として正直に記録できた (= strategic-reviewer の指摘通り、運の要素も含む)。
+
 ---
 
 ## 🤝 ユーザー (= 本人) の判断ハイライト
@@ -277,9 +305,9 @@ PR #127 は 56 files / 2150 insertions だが、レビュー対象の本質は `
 
 ## 📊 統計
 
-- マージした PR: **17 本** (= #82, #87, #92, #97, #98, #100, #101, #102, #104, #107, #108, #110, #111, #113, #115, #117, #127)
-- 起票した Issue: **24 件** (= 15 件 + Issue #40 子 Issue 8 件 #119-#126 + 派生 polish 1 件 #128) + Issue #8 への追記 1 件
-- close した Issue: **21 件** (= #39, #35, #58, #73, #75, #52, #84, #38, #71, #96, #95, #85, #86, #45, #72, #88, #89, #105, #106, #116, #119)
+- マージした PR: **18 本** (= #82, #87, #92, #97, #98, #100, #101, #102, #104, #107, #108, #110, #111, #113, #115, #117, #127, #130)
+- 起票した Issue: **25 件** (= 15 件 + Issue #40 子 Issue 8 件 #119-#126 + 派生 polish 2 件 #128 #131) + Issue #8 への追記 1 件
+- close した Issue: **22 件** (= #39, #35, #58, #73, #75, #52, #84, #38, #71, #96, #95, #85, #86, #45, #72, #88, #89, #105, #106, #116, #119, #120)
 - 全体 spec: 348 → **431 examples** (= +83)
 - 起票だけして実装はしないが残った polish Issue: **9 件** (= #83, #85-#86, #88-#91, #93-#94, #99)
 - memory 永続化: **4 ファイル新規** (= project_day5_summary, feedback_irreversible_action_pr_pattern, feedback_random_with_seed_testability, feedback_dev_log_after_merge) + **MEMORY.md update**
