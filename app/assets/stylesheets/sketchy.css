@@ -21,7 +21,7 @@
   /* danger (危険ゾーン / 破壊的操作) */
   --danger: #cc0000;
   --danger-bg: #ffe5e5;
-  --danger-soft-border: rgba(204, 0, 0, 0.35); /* sketch-box-danger-soft 用、削除より弱い警告強度 */
+  --danger-soft-border: rgba(204,0,0,0.35); /* sketch-box-danger-soft 用、削除より弱い警告強度 */
 }
 
 /* body 全体を紙質背景に。layout から bg-base-200 は外す前提。 */
