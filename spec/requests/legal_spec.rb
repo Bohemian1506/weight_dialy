@@ -36,6 +36,10 @@ RSpec.describe "Legal", type: :request do
       it "「Google」を含む" do
         expect(response.body).to include("Google")
       end
+
+      it "「運営者」セクションを含む" do
+        expect(response.body).to include("運営者")
+      end
     end
 
     context "ログイン済み時" do
@@ -77,6 +81,10 @@ RSpec.describe "Legal", type: :request do
 
       it "免責事項の文言を含む" do
         expect(response.body).to include("医療的助言、診断、治療を提供するものではありません")
+      end
+
+      it "消費者契約法 8 条対応の留保文言を含む" do
+        expect(response.body).to include("故意又は重過失による場合を除きます")
       end
 
       it "お問い合わせメールアドレスを含む" do
