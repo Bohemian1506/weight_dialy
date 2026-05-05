@@ -99,4 +99,74 @@
           data: { turbo_confirm: "本当に再生成しますか？ 現在の Shortcut が動かなくなります。" } %>
   </div>
 
+  <%# 危険ゾーン: アカウント削除 %>
+  <div data-controller="confirm-deletion"
+       data-confirm-deletion-expected-name-value="<%= current_user.name %>"
+       data-action="keydown@window->confirm-deletion#keydown">
+
+    <div class="sketch-box" style="margin-bottom: 24px; background: #ffe5e5; border-color: #cc0000;">
+      <p class="sketch-h" style="margin-bottom: 8px; color: #cc0000;">⚠️ アカウントの削除</p>
+      <p class="sketch-body-text" style="margin-bottom: 16px;">
+        アカウントを削除すると、歩数記録・連携設定を含む<strong>すべてのデータが即時に削除</strong>されます。
+        この操作は取り消せません。
+      </p>
+      <button type="button"
+              class="sketch-btn"
+              style="border-color: #cc0000; color: #cc0000;"
+              data-action="click->confirm-deletion#openModal">
+        アカウントを削除する
+      </button>
+    </div>
+
+    <%# 退会確認モーダル (初期非表示。JS で display: flex に切替) %>
+    <div data-confirm-deletion-target="modal"
+         aria-hidden="true"
+         aria-modal="true"
+         role="dialog"
+         aria-labelledby="deletion-modal-title"
+         style="display: none; position: fixed; inset: 0; z-index: 9999; align-items: center; justify-content: center; background: rgba(0,0,0,0.5);"
+         data-action="click->confirm-deletion#backdropClose">
+      <div class="sketch-box"
+           style="width: min(90vw, 24rem); background: var(--paper); position: relative;">
+        <p id="deletion-modal-title" class="sketch-h" style="margin-bottom: 12px; color: #cc0000;">
+          ⚠️ 本当に退会しますか？
+        </p>
+        <p class="sketch-body-text" style="margin-bottom: 16px;">
+          確認のため、あなたの名前 <strong><%= current_user.name %></strong> を下に入力してください。
+        </p>
+
+        <%= form_with url: account_deletion_path, method: :delete do |f| %>
+          <div style="margin-bottom: 16px;">
+            <label for="deletion-name-input" class="sketch-label" style="display: block; margin-bottom: 6px;">
+              名前を入力
+            </label>
+            <input id="deletion-name-input"
+                   type="text"
+                   autocomplete="off"
+                   placeholder="<%= current_user.name %>"
+                   data-confirm-deletion-target="input"
+                   data-action="input->confirm-deletion#checkInput"
+                   style="width: 100%; border: 2px solid var(--ink); border-radius: 6px; padding: 8px 10px; font-family: 'Kalam', cursive; font-size: 15px; background: var(--paper); box-sizing: border-box;">
+          </div>
+
+          <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button type="button"
+                    class="sketch-btn"
+                    data-action="click->confirm-deletion#closeModal">
+              キャンセル
+            </button>
+            <button type="submit"
+                    class="sketch-btn"
+                    style="border-color: #cc0000; color: #cc0000;"
+                    disabled
+                    data-confirm-deletion-target="submitButton">
+              退会する
+            </button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+  </div>
+
 </div>
