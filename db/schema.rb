@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_01_232659) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_04_063009) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_01_232659) do
   end
 
   create_table "webhook_deliveries", force: :cascade do |t|
+    t.integer "accepted_count"
     t.string "error_message"
     t.jsonb "payload", default: {}, null: false
     t.datetime "received_at", null: false
