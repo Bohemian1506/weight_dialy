@@ -3,8 +3,11 @@ class ApplicationController < ActionController::Base
   # Capacitor アプリの WebView は UA に "wv" が付く Android System WebView ベースで modern 判定から弾かれる。
   # bypass 二重防衛 (= 学び 17 / Capacitor appendUserAgent バグ #4886 #6037 既知の沼を踏んだため):
   # - Capacitor 側: capacitor.config.json android.overrideUserAgent で UA に "WeightDialyCapacitor" を付与 (= 主軸)
-  # - Rails 側 1: UA に "WeightDialyCapacitor" を含む → bypass (= Capacitor 経由を識別)
-  # - Rails 側 2: UA に "; wv)" を含む → bypass (= Android WebView 全般、保険、SNS 内蔵ブラウザは Chrome 120+ 系で modern check 通過予定なので影響軽微)
+  # - Rails 側 1: UA に "WeightDialyCapacitor" を含む → bypass (= Capacitor 経由を識別、主軸が動いてる前提)
+  # - Rails 側 2: UA に "; wv)" を含む → bypass (= overrideUserAgent 設定が消えた場合のフォールバック保険)
+  #   note: overrideUserAgent 使用中は UA が完全置換されるため "; wv)" は含まれず、保険 2 は実質発動しない。
+  #         主軸が壊れて Android System WebView デフォルト UA に戻った場合のみ発動する設計。
+  #         副作用: SNS 内蔵ブラウザ (LINE / Twitter 等) も "; wv)" 含むため通る、OAuth 詰まり問題は Issue #143 で対応予定 (v1.1)
   allow_browser versions: :modern,
                 if: -> {
                   ua = request.user_agent.to_s

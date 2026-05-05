@@ -22,12 +22,11 @@ RSpec.describe "Home", type: :request do
   end
 
   shared_examples "banner_android が表示される" do
-    it "「Android アプリ版」「Health Connect」「dogfood」を含む" do
-      # 子 6 (#125) で Capacitor アプリ版が dogfood 段階に到達したため、
-      # 「現在開発中」→「Android アプリ版で Health Connect と連携できます」に文言更新済 (PR #140)
+    it "「Android アプリ版」「Health Connect」を含む" do
+      # 子 6 (#125) で Capacitor アプリ版が完成したため文言更新済 (PR #140)
+      # PR #142 design レビューで「dogfood 中」エンジニア語をカジュアル層向けに削除 (= 1 行 polish)
       expect(response.body).to include("Android アプリ版")
       expect(response.body).to include("Health Connect")
-      expect(response.body).to include("dogfood")
     end
   end
 
