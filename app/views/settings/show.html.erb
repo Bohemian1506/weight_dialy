@@ -96,7 +96,7 @@
   </div>
 
   <%# 危険ゾーン: トークン再生成 %>
-  <div class="sketch-box" style="margin-bottom: 24px; background: #ffe5e5;">
+  <div class="sketch-box sketch-box-danger-soft" style="margin-bottom: 24px;">
     <p class="sketch-h" style="margin-bottom: 8px;">トークンの再生成</p>
     <p class="sketch-body-text" style="margin-bottom: 16px;">
       ⚠️ <strong>トークンを再生成すると、現在 Apple Shortcuts に設定済みのトークンは無効になります。</strong>
@@ -113,15 +113,14 @@
   <div data-controller="confirm-deletion"
        data-confirm-deletion-expected-name-value="<%= current_user.name %>">
 
-    <div class="sketch-box" style="margin-bottom: 24px; background: #ffe5e5; border-color: #cc0000;">
-      <p class="sketch-h" style="margin-bottom: 8px; color: #cc0000;">⚠️ アカウントの削除</p>
+    <div class="sketch-box sketch-box-danger" style="margin-bottom: 24px;">
+      <p class="sketch-h sketch-h-danger" style="margin-bottom: 8px;">⚠️ アカウントの削除</p>
       <p class="sketch-body-text" style="margin-bottom: 16px;">
         アカウントを削除すると、歩数記録・連携設定を含む<strong>すべてのデータが即時に削除</strong>されます。
         この操作は取り消せません。
       </p>
       <button type="button"
-              class="sketch-btn"
-              style="border-color: #cc0000; color: #cc0000;"
+              class="sketch-btn sketch-btn-danger"
               data-action="click->confirm-deletion#openModal">
         アカウントを削除する
       </button>
@@ -137,7 +136,7 @@
          data-action="click->confirm-deletion#backdropClose">
       <div class="sketch-box"
            style="width: min(90vw, 24rem); background: var(--paper); position: relative;">
-        <p id="deletion-modal-title" class="sketch-h" style="margin-bottom: 12px; color: #cc0000;">
+        <p id="deletion-modal-title" class="sketch-h sketch-h-danger" style="margin-bottom: 12px;">
           ⚠️ 本当に退会しますか？
         </p>
         <p class="sketch-body-text" style="margin-bottom: 16px;">
@@ -165,8 +164,7 @@
               キャンセル
             </button>
             <button type="submit"
-                    class="sketch-btn"
-                    style="border-color: #cc0000; color: #cc0000;"
+                    class="sketch-btn sketch-btn-danger"
                     disabled
                     data-confirm-deletion-target="submitButton">
               退会する

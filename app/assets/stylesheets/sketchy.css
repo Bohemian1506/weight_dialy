@@ -18,6 +18,9 @@
   --accent-2: #ffd23f;
   --accent-3: #4ea8de;
   --accent-4: #7ac74f;
+  /* danger (危険ゾーン / 破壊的操作) */
+  --danger: #cc0000;
+  --danger-bg: #ffe5e5;
 }
 
 /* body 全体を紙質背景に。layout から bg-base-200 は外す前提。 */
@@ -94,6 +97,16 @@ body {
 .sketch-box.accent { background: var(--accent); color: var(--ink); }
 .sketch-box.accent .sketch-label,
 .sketch-box.accent .sketch-small { color: var(--ink-2); }
+/* danger: 破壊的操作 (退会 / トークン再生成) の警告エリア。
+   sketch-box-danger  → 背景 + ボーダー両方を danger 色に (アカウント削除ボックス等)。
+   sketch-box-danger-soft → 背景のみ (ボーダーは既定の --ink 黒のまま = トークン再生成ボックス)。
+   --danger (#cc0000) は黒文字 (5.91:1) で WCAG AA 合格。 */
+.sketch-box-danger      { background: var(--danger-bg); border-color: var(--danger); }
+.sketch-box-danger-soft { background: var(--danger-bg); }
+/* danger テキスト (見出し・ラベル) */
+.sketch-h-danger { color: var(--danger); }
+/* danger ボタン: .sketch-btn と組み合わせて使う。ボーダー + 文字を danger 色に。 */
+.sketch-btn-danger { border-color: var(--danger); color: var(--danger); }
 
 /* ---------- webhook delivery history (Settings 画面) ---------- */
 /* 受信履歴の各行を縦並びリストで表示。time / status / count / error_message を flex で配置。
