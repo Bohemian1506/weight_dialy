@@ -1,6 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 
-const HEALTH_READ_TYPES = ["steps", "distance", "floorsClimbed"]
+// @capgo/capacitor-health (v8.4.9) の HealthDataType 定義に合わせる。
+// Health Connect 内部レコードは FloorsClimbedRecord だが、plugin の JS 公開 API は米国流の "flightsClimbed" (= 階段の段数)。
+// 旧コードでは "floorsClimbed" と書かれており permission チェックで "Unsupported data type" エラーになっていた (2026-05-06 実機検証で発覚)。
+const HEALTH_READ_TYPES = ["steps", "distance", "flightsClimbed"]
 
 export default class extends Controller {
   static targets = ["status", "requestButton", "syncButton"]
@@ -116,11 +119,10 @@ export default class extends Controller {
 
     try {
       // 個別フォールバック方式: 1 dataType 失敗しても他が取れれば全体は成立
-      // README 注記より steps / distance は queryAggregated 対応、floorsClimbed は明記なし
       const [steps, distance, floors] = await Promise.all([
         this.queryAggregatedSafe(Health, "steps", startDate, endDate),
         this.queryAggregatedSafe(Health, "distance", startDate, endDate),
-        this.queryAggregatedSafe(Health, "floorsClimbed", startDate, endDate)
+        this.queryAggregatedSafe(Health, "flightsClimbed", startDate, endDate)
       ])
       return {
         step_count: this.sumSamples(steps),
@@ -181,8 +183,9 @@ export default class extends Controller {
     const steps = (data.step_count || 0).toLocaleString()
     const km = ((data.distance_meters || 0) / 1000).toFixed(1) // ホーム画面と同じ 1 桁表示
     const floors = data.floors_climbed
-    // queryAggregated の floorsClimbed 集計対応は README 明記なし、0 なら未対応を示唆 (= バグではないと伝える)
-    const floorsPart = floors > 0 ? ` / ${floors} 階` : " / 階段(未対応)"
+    // 階段データ (= flightsClimbed) は Health Connect に記録があれば取得できる。
+    // 0 の場合は「今日まだ階段昇降がない」or「ソース device が未対応」のいずれかなので「階段なし」と表示する。
+    const floorsPart = floors > 0 ? ` / ${floors} 階` : " / 階段なし"
     return `✅ 今日のデータを取得しました — ${steps} 歩 / ${km} km${floorsPart}`
   }
 
