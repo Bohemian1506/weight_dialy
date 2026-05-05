@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_04_063009) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_05_041407) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -50,6 +50,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_04_063009) do
     t.index ["user_id"], name: "index_webhook_deliveries_on_user_id"
   end
 
-  add_foreign_key "step_records", "users"
-  add_foreign_key "webhook_deliveries", "users"
+  add_foreign_key "step_records", "users", on_delete: :cascade
+  add_foreign_key "webhook_deliveries", "users", on_delete: :cascade
 end
