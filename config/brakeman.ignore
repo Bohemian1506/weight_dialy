@@ -1,0 +1,28 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "1fcbfcaa1a07bfb1209b6fa283ee1a78a4975670e6a9c02c46e6f46849f7b422",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/sessions_controller.rb",
+      "line": 28,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(\"com.weightdialy.app://oauth_callback?token=#{OneTimeLoginToken.issue!(:user => User.from_omniauth(request.env[\"omniauth.auth\"])).token}\", :allow_other_host => true)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "SessionsController",
+        "method": "create"
+      },
+      "user_input": "OneTimeLoginToken.issue!(:user => User.from_omniauth(request.env[\"omniauth.auth\"])).token",
+      "confidence": "Weak",
+      "cwe_id": [
+        601
+      ],
+      "note": "False positive (Phase 3 Capacitor OAuth ブリッジ)。redirect URL 全体は固定文字列 \"com.weightdialy.app://oauth_callback?token=\" + サーバ生成 token (= SecureRandom.urlsafe_base64(32)) で外部入力なし。host 部分は静的、クエリ token は OneTimeLoginToken#issue! が SecureRandom で生成、いずれもユーザー制御不能。allow_other_host: true は custom URL scheme なので必須 (= http(s) 以外のため Rails のデフォルト same-host 制約に引っかかる)。"
+    }
+  ],
+  "brakeman_version": "8.0.4"
+}
