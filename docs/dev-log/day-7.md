@@ -42,7 +42,7 @@ GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + An
 | #117 | #116 | polish: `sketch-box-danger-soft` のボーダーを半透明赤 (= `--danger-soft-border` rgba 35%) にして背景・タイトル・ボーダーで赤系三色一致 |
 | #127 | #119 | feat: Capacitor 8.3.1 初期化 + `server.url` を本番 URL (`https://weight-dialy.onrender.com`) にラップ (= Issue #40 子 1、Android v1.0 出発点) |
 
-### close した Issue (= 18 件)
+### close した Issue (= 21 件)
 
 - **#39 発表会デモシナリオ準備** — 本人プレゼンないので close (= スクープ外と判断)
 - **#35 ngrok 動作確認** — Day 5 で完了済みだったが OPEN 残存だったので close
@@ -242,7 +242,7 @@ PR #127 は 56 files / 2150 insertions だが、レビュー対象の本質は `
 
 **strategic-reviewer の指摘**: 「scaffold PR は『自動生成物 vs 人間判断』を PR 本文で分離して書くと、レビュアーが見るべき箇所 (= server.url と App ID 2 行) が一目で分かる。56 files でも怖くない見せ方の型」。
 
-**教訓**: 大量自動生成 PR では、PR description で「人間判断ポイント」を明示的に取り出して箇条書き化する。レビュアーの認知負荷を下げ、レビュー速度 + 質が両立。
+**教訓**: 大量自動生成 PR では、PR description で「人間判断ポイント」を明示的に取り出して箇条書き化する。レビュアーの認知負荷を下げ、レビュー速度 + 質が両立。実例は **PR #127 description の「変更内容」セクション** (= server.url 設定 + App ID 決定 + allowNavigation の 3 ポイントを箇条書き分離) を参照。
 
 ### 学び 11: cap add android の placeholder ファイルは手動修正必須
 
