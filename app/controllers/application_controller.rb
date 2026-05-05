@@ -1,10 +1,15 @@
 class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   # Capacitor アプリの WebView は UA に "wv" が付く Android System WebView ベースで modern 判定から弾かれる。
-  # capacitor.config.json で android.appendUserAgent="WeightDialyCapacitor" を付与し、ここで bypass する。
-  # (= Web 版には影響なし、Capacitor からの request のみ allow)
+  # bypass 二重防衛 (= 学び 17 / Capacitor appendUserAgent バグ #4886 #6037 既知の沼を踏んだため):
+  # - Capacitor 側: capacitor.config.json android.overrideUserAgent で UA に "WeightDialyCapacitor" を付与 (= 主軸)
+  # - Rails 側 1: UA に "WeightDialyCapacitor" を含む → bypass (= Capacitor 経由を識別)
+  # - Rails 側 2: UA に "; wv)" を含む → bypass (= Android WebView 全般、保険、SNS 内蔵ブラウザは Chrome 120+ 系で modern check 通過予定なので影響軽微)
   allow_browser versions: :modern,
-                if: -> { !request.user_agent.to_s.include?("WeightDialyCapacitor") }
+                if: -> {
+                  ua = request.user_agent.to_s
+                  !ua.include?("WeightDialyCapacitor") && !ua.include?("; wv)")
+                }
 
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
