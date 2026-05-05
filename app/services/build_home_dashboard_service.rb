@@ -25,11 +25,12 @@ class BuildHomeDashboardService
       records      = fetch_records(user, state)
       today_record = records.find { |r| r.recorded_on == Date.current } || records.last
 
-      calorie_savings = if state == :iphone_with_data
-                          CalorieSavingsService.call_for_user(user)
-      else
-                          CalorieSavingsService.call(records)
-      end
+      calorie_savings =
+        if state == :iphone_with_data
+          CalorieSavingsService.call_for_user(user)
+        else
+          CalorieSavingsService.call(records)
+        end
 
       Result.new(
         state:           state,

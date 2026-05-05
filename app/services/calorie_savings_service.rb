@@ -35,14 +35,19 @@ class CalorieSavingsService
       }
     end
 
-    # @param user [User] ログイン済みユーザー (AR ベースの SQL 集計、本番ユーザー用)
+    # @param user [User, nil] ログイン済みユーザー (AR ベースの SQL 集計、本番ユーザー用)
     # @return [Hash{Symbol=>Integer}] { this_month:, last_month:, total: } 各 kcal を整数で返す
     #
     # call(records) との違い:
     #   - 配列を全件メモリに載せず、DB 側で SUM 集計する (= N+1 / メモリ効率)。
     #   - scope が user.step_records に限定されるため、他ユーザーのレコードが混入しない。
     #   - recorded_on は date 型のため time zone の影響を受けない。
+    #
+    # 構造上 nil 来ない (= 呼び出し側 BuildHomeDashboardService で state ガード済み) が、
+    # メソッド単体での安全性のため call(records) の records.blank? ガードと対称に nil ガード。
     def call_for_user(user)
+      return zero_result if user.nil?
+
       today = Date.current
       this_month_range = today.beginning_of_month..today.end_of_month
       last_month_date  = today - 1.month
