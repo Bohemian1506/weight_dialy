@@ -3,14 +3,16 @@ import { Controller } from "@hotwired/stimulus"
 const HEALTH_READ_TYPES = ["steps", "distance", "floorsClimbed"]
 
 export default class extends Controller {
-  static targets = ["container", "status", "requestButton"]
+  static targets = ["status", "requestButton"]
 
   connect() {
     if (!this.isCapacitorNative()) {
       return
     }
-    this.containerTarget.style.display = ""
-    this.checkPermission()
+    this.element.style.display = ""
+    this.checkPermission().catch((error) => {
+      this.showStatus(`❌ 初期化エラー: ${this.errorMessage(error)}`)
+    })
   }
 
   isCapacitorNative() {
@@ -61,7 +63,7 @@ export default class extends Controller {
         this.showStatus("✅ 権限を取得しました")
         this.requestButtonTarget.style.display = "none"
       } else {
-        this.showStatus("⚠️ 権限が拒否されました。Android 設定 → アプリ → Health Connect から許可してください")
+        this.showStatus("⚠️ 権限が拒否されました。設定 → アプリ → Health Connect から許可できます")
       }
     } catch (error) {
       this.showStatus(`❌ リクエストエラー: ${this.errorMessage(error)}`)

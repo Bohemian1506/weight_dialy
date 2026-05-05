@@ -85,9 +85,18 @@
     </p>
   <% end %>
 
+  <%# ポリシーリンク (= Health Connect より上、インフォームドコンセントの順序) %>
+  <div class="sketch-box" style="margin-bottom: 24px;">
+    <h2 class="sketch-h" style="margin-bottom: 8px;">ポリシー</h2>
+    <p class="sketch-body-text">
+      <%= link_to "プライバシーポリシー", privacy_path, style: "color: var(--ink); text-decoration: underline;" %>
+      /
+      <%= link_to "利用規約", terms_path, style: "color: var(--ink); text-decoration: underline;" %>
+    </p>
+  </div>
+
   <%# Health Connect 連携 (Android のみ、Capacitor 検知で動的表示。Web 版では非表示のまま) %>
   <div data-controller="native-health"
-       data-native-health-target="container"
        class="sketch-box"
        style="display: none; margin-bottom: 24px;">
     <h2 class="sketch-h" style="margin-bottom: 8px;">📱 Android Health Connect 連携</h2>
@@ -103,16 +112,6 @@
             style="display: none;">
       権限を許可する
     </button>
-  </div>
-
-  <%# ポリシーリンク %>
-  <div class="sketch-box" style="margin-bottom: 24px;">
-    <h2 class="sketch-h" style="margin-bottom: 8px;">ポリシー</h2>
-    <p class="sketch-body-text">
-      <%= link_to "プライバシーポリシー", privacy_path, style: "color: var(--ink); text-decoration: underline;" %>
-      /
-      <%= link_to "利用規約", terms_path, style: "color: var(--ink); text-decoration: underline;" %>
-    </p>
   </div>
 
   <%# 危険ゾーン: トークン再生成 %>
