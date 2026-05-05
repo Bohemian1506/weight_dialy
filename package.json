@@ -10,6 +10,7 @@
     "daisyui": "^5.5.19"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.0",
     "@capgo/capacitor-health": "^8.4.9"
   }
 }

@@ -22,6 +22,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Deep link (= Phase 2a): OAuth callback を Capacitor アプリで受信
+                 autoVerify="false" のため「アプリで開く?」ダイアログがユーザーに表示される。
+                 autoVerify="true" + AssetLinks 検証は Phase 2b で対応予定 (= seamless 化)。 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                      android:host="weight-dialy.onrender.com"
+                      android:pathPrefix="/auth/" />
+            </intent-filter>
+
         </activity>
 
         <provider
