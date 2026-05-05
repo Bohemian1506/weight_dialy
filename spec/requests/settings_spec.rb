@@ -114,6 +114,16 @@ RSpec.describe "Settings", type: :request do
         # native-health controller を持つ要素の inline style に display: none が含まれる
         expect(response.body).to match(/data-controller="native-health"[^>]*style="[^"]*display: none/)
       end
+
+      # 子 5a (#123): 同期ボタン + Webhook POST フロー
+      it "同期ボタン (= click->native-health#sync action) を含む" do
+        expect(response.body).to include('data-action="click->native-health#sync"')
+      end
+
+      it "webhook_token を Stimulus values 経由で埋め込む (= Capacitor 検知時のみ JS 参照)" do
+        expect(response.body).to include('data-native-health-webhook-token-value="')
+        expect(response.body).to include(user.webhook_token)
+      end
     end
 
     # -------------------------------------------------------------------------

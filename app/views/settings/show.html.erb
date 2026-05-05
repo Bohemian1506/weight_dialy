@@ -97,11 +97,12 @@
 
   <%# Health Connect 連携 (Android のみ、Capacitor 検知で動的表示。Web 版では非表示のまま) %>
   <div data-controller="native-health"
+       data-native-health-webhook-token-value="<%= current_user.webhook_token %>"
        class="sketch-box"
        style="display: none; margin-bottom: 24px;">
     <h2 class="sketch-h" style="margin-bottom: 8px;">📱 Android Health Connect 連携</h2>
     <p class="sketch-small" style="margin-bottom: 12px;">
-      Android アプリ版で Health Connect から歩数 / 距離 / 階段を取得します。
+      Android アプリ版で Health Connect から歩数 / 距離 / 階段を取得 → サーバーへ自動同期します。
     </p>
     <p data-native-health-target="status" class="sketch-body-text" style="margin-bottom: 16px;">
       確認中...
@@ -109,8 +110,14 @@
     <button data-action="click->native-health#requestPermission"
             data-native-health-target="requestButton"
             class="sketch-btn"
-            style="display: none;">
+            style="display: none; margin-right: 8px;">
       権限を許可する
+    </button>
+    <button data-action="click->native-health#sync"
+            data-native-health-target="syncButton"
+            class="sketch-btn"
+            style="display: none;">
+      📡 同期する
     </button>
   </div>
 

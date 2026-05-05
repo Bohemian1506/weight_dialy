@@ -3,7 +3,8 @@ import { Controller } from "@hotwired/stimulus"
 const HEALTH_READ_TYPES = ["steps", "distance", "floorsClimbed"]
 
 export default class extends Controller {
-  static targets = ["status", "requestButton"]
+  static targets = ["status", "requestButton", "syncButton"]
+  static values = { webhookToken: String }
 
   connect() {
     if (!this.isCapacitorNative()) {
@@ -43,10 +44,12 @@ export default class extends Controller {
       const result = await Health.checkAuthorization({ read: HEALTH_READ_TYPES })
       if (result?.granted) {
         this.requestButtonTarget.style.display = "none"
+        this.syncButtonTarget.style.display = ""
         await this.refreshData()
       } else {
         this.showStatus("⏳ Health Connect の権限が必要です")
         this.requestButtonTarget.style.display = ""
+        this.syncButtonTarget.style.display = "none"
       }
     } catch (error) {
       this.showStatus(`❌ 確認エラー: ${this.errorMessage(error)}`)
@@ -61,6 +64,7 @@ export default class extends Controller {
       const result = await Health.requestAuthorization({ read: HEALTH_READ_TYPES })
       if (result?.granted) {
         this.requestButtonTarget.style.display = "none"
+        this.syncButtonTarget.style.display = ""
         await this.refreshData()
       } else {
         this.showStatus("⚠️ 権限が拒否されました。設定 → アプリ → Health Connect から許可できます")
@@ -70,8 +74,20 @@ export default class extends Controller {
     }
   }
 
+  // status 表示は先頭絵文字でトーンを自動分岐 (= success / error / info)。
+  // 発表会デモで成功 / 失敗の瞬間を視認しやすくするため、太字 + 色強調を適用する。
   showStatus(message) {
     this.statusTarget.textContent = message
+    if (message.startsWith("✅")) {
+      this.statusTarget.style.fontWeight = "700"
+      this.statusTarget.style.color = "var(--ink)"
+    } else if (message.startsWith("❌") || message.startsWith("⚠️")) {
+      this.statusTarget.style.fontWeight = "700"
+      this.statusTarget.style.color = "var(--danger)"
+    } else {
+      this.statusTarget.style.fontWeight = ""
+      this.statusTarget.style.color = ""
+    }
   }
 
   errorMessage(error) {
@@ -168,5 +184,74 @@ export default class extends Controller {
     // queryAggregated の floorsClimbed 集計対応は README 明記なし、0 なら未対応を示唆 (= バグではないと伝える)
     const floorsPart = floors > 0 ? ` / ${floors} 階` : " / 階段(未対応)"
     return `✅ 今日のデータを取得しました — ${steps} 歩 / ${km} km${floorsPart}`
+  }
+
+  // -------------------------------------------------------------------------
+  // Webhook POST フロー (子 Issue #123 / 子 5a = MVP)
+  // -------------------------------------------------------------------------
+
+  // sync は「子 4 で取得したデータをそのまま POST」する設計。
+  // 連打しても同日 recorded_on は冪等 (= サーバー側 find_or_initialize_by で同じレコードを上書き) のため副作用なし。
+  // 子 5b (WorkManager 自動化) でこのロジックを Worker 化する場合も「取得 → POST」の 1 トランザクション前提を継承する。
+  async sync() {
+    if (!this.lastFetchedData) {
+      this.showStatus("⚠️ データ未取得です。再読込してください")
+      return
+    }
+    if (!this.webhookTokenValue) {
+      this.showStatus("⚠️ webhook token 未設定 (= ログインし直してください)")
+      return
+    }
+
+    this.showStatus("📡 送信中...")
+    this.syncButtonTarget.disabled = true
+
+    try {
+      const data = this.lastFetchedData
+      // Webhook サーバー側のフィールド名は flights_climbed (= JS 側 floors_climbed から変換)、
+      // distance_meters は整数想定なので Math.round で揃える。
+      const payload = {
+        records: [{
+          recorded_on: data.measured_on,
+          steps: data.step_count,
+          distance_meters: Math.round(data.distance_meters || 0),
+          flights_climbed: data.floors_climbed
+        }]
+      }
+
+      const response = await fetch("/webhooks/health_data", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${this.webhookTokenValue}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        const errorBody = await response.text()
+        // サーバーは {error: "..."} JSON で 4xx を返す設計、JSON parse 成功時は error を抜粋。
+        // パース失敗時は生 body の先頭 80 字でフォールバック。
+        let message = errorBody.slice(0, 80)
+        try { message = JSON.parse(errorBody).error ?? message } catch (_) {}
+        this.showStatus(`❌ 送信失敗 (HTTP ${response.status}): ${message}`)
+        return
+      }
+
+      const result = await response.json()
+      this.showStatus(`✅ 送信完了 — ${result.accepted ?? 0} 件保存。ホームを更新します...`)
+      // Turbo で home 画面を再描画して、保存されたデータを反映
+      setTimeout(() => {
+        if (typeof Turbo !== "undefined") {
+          Turbo.visit("/")
+        } else {
+          window.location.assign("/")
+        }
+      }, 1500)
+    } catch (error) {
+      this.showStatus(`❌ 送信エラー: ${this.errorMessage(error)}`)
+    } finally {
+      this.syncButtonTarget.disabled = false
+    }
   }
 }
