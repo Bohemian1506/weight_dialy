@@ -17,7 +17,9 @@ if (typeof window.Capacitor !== "undefined" && window.Capacitor.isNativePlatform
   const App = window.Capacitor.Plugins.App
   if (App && typeof App.addListener === "function") {
     App.addListener("appUrlOpen", (data) => {
-      console.log("[Capacitor] appUrlOpen:", data?.url)
+      // OAuth callback URL には ?code=... が含まれるため console.log は使わない (= Logcat / DevTools 経由で露出する、code 自体は使い捨てだが本番ログ汚染を避ける)。
+      // デバッグ時のみ DevTools の Verbose レベルで観測可能。
+      console.debug("[Capacitor] appUrlOpen received")
       if (data?.url?.includes("/auth/")) {
         // server.url で本番 Web を WebView 表示している前提、callback URL の path + query だけ抽出して navigate
         try {
