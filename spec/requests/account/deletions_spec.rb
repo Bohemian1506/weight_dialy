@@ -46,7 +46,7 @@ RSpec.describe "Account::Deletions", type: :request do
       end
 
       it "flash[:notice] に退会完了メッセージをセットする" do
-        expect(flash[:notice]).to eq("退会完了しました。ご利用ありがとうございました。")
+        expect(flash[:notice]).to eq("退会完了しました。またいつでも歩いた日には使ってください。")
       end
 
       it "User レコードが削除される" do
@@ -113,6 +113,37 @@ RSpec.describe "Account::Deletions", type: :request do
         delete account_deletion_path
         get settings_path
         expect(response).to redirect_to(root_path)
+      end
+    end
+
+    context "User#destroy! が失敗する場合 (ActiveRecord::RecordNotDestroyed)" do
+      let(:user) { create(:user) }
+
+      before do
+        login(user)
+        allow_any_instance_of(User).to receive(:destroy!).and_raise(
+          ActiveRecord::RecordNotDestroyed.new("destroy failed", user)
+        )
+      end
+
+      it "settings_path へリダイレクトする" do
+        delete account_deletion_path
+        expect(response).to redirect_to(settings_path)
+      end
+
+      it "flash[:alert] をセットする" do
+        delete account_deletion_path
+        expect(flash[:alert]).to eq("退会処理に失敗しました。しばらく経ってから再度お試しください。")
+      end
+
+      it "User レコードは削除されない" do
+        expect { delete account_deletion_path }.not_to change(User, :count)
+      end
+
+      it "セッションは維持される (= ログイン状態のまま settings_path にアクセスできる)" do
+        delete account_deletion_path
+        follow_redirect!
+        expect(response).to have_http_status(:ok)
       end
     end
   end

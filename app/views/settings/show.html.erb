@@ -101,8 +101,7 @@
 
   <%# 危険ゾーン: アカウント削除 %>
   <div data-controller="confirm-deletion"
-       data-confirm-deletion-expected-name-value="<%= current_user.name %>"
-       data-action="keydown@window->confirm-deletion#keydown">
+       data-confirm-deletion-expected-name-value="<%= current_user.name %>">
 
     <div class="sketch-box" style="margin-bottom: 24px; background: #ffe5e5; border-color: #cc0000;">
       <p class="sketch-h" style="margin-bottom: 8px; color: #cc0000;">⚠️ アカウントの削除</p>
@@ -146,7 +145,7 @@
                    placeholder="<%= current_user.name %>"
                    data-confirm-deletion-target="input"
                    data-action="input->confirm-deletion#checkInput"
-                   style="width: 100%; border: 2px solid var(--ink); border-radius: 6px; padding: 8px 10px; font-family: 'Kalam', cursive; font-size: 15px; background: var(--paper); box-sizing: border-box;">
+                   style="width: 100%; border: 2px solid var(--ink); border-radius: 6px; padding: 8px 10px; font-family: 'Kalam', cursive; font-size: 16px; background: var(--paper); box-sizing: border-box;">
           </div>
 
           <div style="display: flex; gap: 12px; justify-content: flex-end;">
