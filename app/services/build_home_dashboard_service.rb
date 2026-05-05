@@ -1,0 +1,76 @@
+# ホームダッシュボード表示に必要な全データを一括で組み立てる。
+#
+# 設計思想:
+#   - HomeController#index の private メソッド群をここに集約し、Controller を薄くする。
+#   - 各サービスへの依存は明示的な呼び出しで表現し、暗黙の順序依存を排除する。
+#   - Data.define (Ruby 3.2+) で immutable な Result 型を定義。
+#     Struct の上位互換で等値性・パターンマッチングに対応し、テスト検証が容易。
+#
+# nil ガード設計:
+#   - user が nil (= 未ログイン) の場合、state: :guest を先に確定する。
+#   - fetch_records / fetch_calorie_records は state で分岐するため、
+#     user が nil のまま step_records を呼び出す経路は存在しない。
+class BuildHomeDashboardService
+  Result = Data.define(
+    :state, :display_name, :records, :today_record,
+    :streak, :advice, :calorie_savings, :food_equivalent
+  )
+
+  class << self
+    # @param user  [User, nil]    current_user (未ログイン時は nil)
+    # @param request [ActionDispatch::Request] UA 判定のためのリクエストオブジェクト
+    # @return [Result]
+    def call(user:, request:)
+      state           = determine_state(user, request)
+      records         = fetch_records(user, state)
+      calorie_records = fetch_calorie_records(user, state)
+      today_record    = records.find { |r| r.recorded_on == Date.current } || records.last
+
+      Result.new(
+        state:           state,
+        display_name:    user&.name || "ユウキ",
+        records:         records,
+        today_record:    today_record,
+        streak:          StreakCalculatorService.call(records),
+        advice:          CalorieAdviceService.call(today_record&.estimated_kcal.to_i),
+        calorie_savings: CalorieSavingsService.call(calorie_records),
+        food_equivalent: CalorieEquivalentService.call(today_record&.estimated_kcal.to_i)
+      )
+    end
+
+    private
+
+    def determine_state(user, request)
+      return :guest unless user
+
+      platform = PlatformDetectorService.from_request(request)
+      return :android if platform == :android
+      return :iphone_with_data if user.step_records.exists?
+
+      :empty
+    end
+
+    # 直近 30 日のレコードを返す (チャート描画用)。
+    # guest / android / empty は DemoDataService のデモデータで代替。
+    def fetch_records(user, state)
+      if state == :iphone_with_data
+        user.step_records
+            .where(recorded_on: 30.days.ago.to_date..Date.current)
+            .order(:recorded_on)
+            .to_a
+      else
+        DemoDataService.call
+      end
+    end
+
+    # 貯カロリー算出用に全期間レコードを返す (累計 total を正確に計算するため)。
+    # demo state では DemoDataService の 30 日分で代替。
+    def fetch_calorie_records(user, state)
+      if state == :iphone_with_data
+        user.step_records.order(:recorded_on).to_a
+      else
+        DemoDataService.call
+      end
+    end
+  end
+end
