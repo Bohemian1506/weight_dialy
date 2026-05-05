@@ -21,6 +21,7 @@
   /* danger (危険ゾーン / 破壊的操作) */
   --danger: #cc0000;
   --danger-bg: #ffe5e5;
+  --danger-soft-border: rgba(204, 0, 0, 0.35); /* sketch-box-danger-soft 用、削除より弱い警告強度 */
 }
 
 /* body 全体を紙質背景に。layout から bg-base-200 は外す前提。 */
@@ -98,11 +99,12 @@ body {
 .sketch-box.accent .sketch-label,
 .sketch-box.accent .sketch-small { color: var(--ink-2); }
 /* danger: 破壊的操作 (退会 / トークン再生成) の警告エリア。
-   sketch-box-danger  → 背景 + ボーダー両方を danger 色に (アカウント削除ボックス等)。
-   sketch-box-danger-soft → 背景のみ (ボーダーは既定の --ink 黒のまま = トークン再生成ボックス)。
+   sketch-box-danger      → 背景 + ボーダー両方を不透明 danger 色に (= 削除ボックス、最強の警告)。
+   sketch-box-danger-soft → 背景 + ボーダーを半透明赤 (35%) に (= トークン再生成ボックス、弱い警告)。
+                             背景・タイトル・ボーダーで赤系 3 色を一致させ、強度差は不透明度で表現。
    --danger (#cc0000) は黒文字 (5.91:1) で WCAG AA 合格。 */
 .sketch-box-danger      { background: var(--danger-bg); border-color: var(--danger); }
-.sketch-box-danger-soft { background: var(--danger-bg); }
+.sketch-box-danger-soft { background: var(--danger-bg); border-color: var(--danger-soft-border); }
 /* danger テキスト (見出し・ラベル) */
 .sketch-h-danger { color: var(--danger); }
 /* danger ボタン: .sketch-btn と組み合わせて使う。ボーダー + 文字を danger 色に。 */
