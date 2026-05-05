@@ -52,6 +52,8 @@ class CalorieEquivalentService
     return nil if today_kcal < MIN_KCAL
 
     rng = Random.new(seed)
+    # 同 seed でも候補順をばらけさせ、上限 max_count 超え食品を弾く再抽選を可能にする。
+    # (旧実装の FOODS.sample では 1 食品決め打ちで上限超えを skip できなかった)
     shuffled = FOODS.shuffle(random: rng)
 
     # 1 <= count <= max_count を満たす最初の食品を採用 (再抽選ロジック)
@@ -60,8 +62,11 @@ class CalorieEquivalentService
       return { emoji: food.emoji, name: food.name, unit: food.unit, count: count } if count >= 1 && count <= max_count
     end
 
-    # フォールバック: 全食品で count > max_count の場合は最大 kcal 食品でキャップ
-    # (例: today_kcal = 5000 では全食品 count > 5 になる)
+    # フォールバック: 全食品で 1 <= count <= max_count を満たさない場合 (= today_kcal が
+    # 非常に高い)、最大 kcal 食品で [count, max_count].min にキャップして返す。
+    # count == 0 (today_kcal < food.kcal) の経路も理論上ここに到達するが、現状の FOODS は
+    # MIN_KCAL = 90 のため today_kcal >= 90 なら必ず 1 食品以上 count >= 1 になり、count == 0
+    # 経路は発生しない。
     largest = FOODS.max_by(&:kcal)
     count = today_kcal / largest.kcal
     return nil if count < 1
