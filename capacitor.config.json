@@ -1,0 +1,10 @@
+{
+  "appId": "com.weightdialy.app",
+  "appName": "weight_dialy",
+  "webDir": "public",
+  "server": {
+    "url": "https://weight-dialy.onrender.com",
+    "cleartext": false,
+    "allowNavigation": ["weight-dialy.onrender.com"]
+  }
+}
