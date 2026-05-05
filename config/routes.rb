@@ -22,6 +22,9 @@ Rails.application.routes.draw do
   get  "/settings",               to: "settings#show",            as: :settings
   post "/settings/webhook_token", to: "settings#regenerate_token", as: :regenerate_webhook_token
 
+  # Account deletion (退会)
+  delete "/account", to: "account/deletions#destroy", as: :account_deletion
+
   # Defines the root path route ("/")
   root "home#index"
 end

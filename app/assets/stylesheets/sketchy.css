@@ -74,6 +74,11 @@ body {
 }
 .sketch-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
 .sketch-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
+.sketch-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
 /* primary は #ff7a45 + 黒文字 (6.73:1) で WCAG AA 合格。白文字 (2.59:1) は不可。 */
 .sketch-btn-primary { background: var(--accent); color: var(--ink); }
 .sketch-btn-primary:hover { background: var(--accent); color: var(--ink); }
@@ -259,3 +264,4 @@ body {
   .sketch-bottom-grid { grid-template-columns: repeat(2, 1fr); }
   .sketch-topbar      { flex-direction: column; align-items: flex-start; gap: 6px; }
 }
+
