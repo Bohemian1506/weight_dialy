@@ -70,16 +70,21 @@ export default class extends Controller {
         this.syncButtonTarget.style.display = ""
         await this.refreshData()
       } else {
-        this.showStatus("⚠️ 権限が拒否されました。設定 → アプリ → Health Connect から許可できます")
+        // 「全部拒否」と「一部だけ拒否」の両方ありうるため、断定形を避けて「不足」表現にする (= design レビュー指摘)。
+        // ナビゲーションパスは Android 機種でラベル差があるので Health Connect アプリ経由の指示にする。
+        this.showStatus("⚠️ Health Connect の権限が不足しています。Health Connect アプリで「歩数 / 距離 / 階段」を許可してください")
       }
     } catch (error) {
       this.showStatus(`❌ リクエストエラー: ${this.errorMessage(error)}`)
     }
   }
 
-  // @capgo/capacitor-health の AuthorizationStatus は { readAuthorized, readDenied, writeAuthorized, writeDenied } を返す。
-  // 旧コードでは存在しない `granted` プロパティを参照しており、Health Connect が全権限許可を返しても常に未許可判定になっていた
+  // @capgo/capacitor-health (v8.4.9) の AuthorizationStatus 型は { readAuthorized: HealthDataType[], readDenied: HealthDataType[] } のみ公開。
+  // 旧コードでは存在しない `result.granted` を参照しており、Health Connect が全権限許可を返しても常に未許可判定になっていた
   // (2026-05-06 実機検証で発覚、HEALTH_READ_TYPES typo fix と同じセッションで連鎖検出)。
+  // 本質的な反省点: Day 7 実装時に「permission UI が出るところ」までで実装完了判定を打っていたため、
+  // permission 通過後の判定 (= ここ) と queryAggregated 戻り値の整合性が温存されていた。
+  // 外部 SDK 連携は「permission UI → 通過判定 → データ取得 → 整形 → サーバ送信」の 1 本繋ぎが完了するまで未完了扱いにすべき。
   // 必要 dataType (= HEALTH_READ_TYPES) が全て readAuthorized に含まれていれば許可済とみなす。
   allReadAuthorized(result) {
     const authorized = result?.readAuthorized
