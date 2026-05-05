@@ -309,5 +309,21 @@ RSpec.describe "Home", type: :request do
         expect(response).to have_http_status(:ok)
       end
     end
+
+    # OAuth Custom Tabs パス bypass (= Google "In-App Browsers Are Not Allowed" 2021 ポリシー対応)
+    context "/auth/ パスへの古い UA でのアクセス (= Chrome Custom Tabs から OAuth callback)" do
+      let(:user) { create(:user) }
+      before do
+        # 古い UA で OAuth callback にアクセス、Custom Tabs 経由を模倣
+        mock_google_oauth2(uid: user.uid, email: user.email, name: user.name)
+        get auth_callback_path(provider: "google_oauth2"),
+            headers: { "User-Agent" => "Mozilla/4.0 (compatible; MSIE 6.0)" }
+      end
+
+      it "406 Not Acceptable ではなく、認証成功で 302 redirect を返す (= /auth/ 配下は modern check スキップ + OAuth callback 動作)" do
+        expect(response).not_to have_http_status(:not_acceptable)
+        expect(response).to have_http_status(:redirect)
+      end
+    end
   end
 end
