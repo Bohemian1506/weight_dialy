@@ -22,12 +22,11 @@ RSpec.describe "Home", type: :request do
   end
 
   shared_examples "banner_android が表示される" do
-    it "「Android アプリ版」「Health Connect」「dogfood」を含む" do
-      # 子 6 (#125) で Capacitor アプリ版が dogfood 段階に到達したため、
-      # 「現在開発中」→「Android アプリ版で Health Connect と連携できます」に文言更新済 (PR #140)
+    it "「Android アプリ版」「Health Connect」を含む" do
+      # 子 6 (#125) で Capacitor アプリ版が完成したため文言更新済 (PR #140)
+      # PR #142 design レビューで「dogfood 中」エンジニア語をカジュアル層向けに削除 (= 1 行 polish)
       expect(response.body).to include("Android アプリ版")
       expect(response.body).to include("Health Connect")
-      expect(response.body).to include("dogfood")
     end
   end
 
@@ -294,8 +293,20 @@ RSpec.describe "Home", type: :request do
     context "通常の Web ブラウザ UA (= suffix なし)" do
       before { get root_path, headers: { "User-Agent" => "Mozilla/4.0 (compatible; MSIE 6.0)" } }
 
-      it "406 Not Acceptable を返す (= bypass が Capacitor 限定で効く)" do
+      it "406 Not Acceptable を返す (= bypass が Capacitor 限定で effective)" do
         expect(response).to have_http_status(:not_acceptable)
+      end
+    end
+
+    # 二重防衛: Capacitor 側 overrideUserAgent が壊れた場合の保険として、
+    # UA に "; wv)" (= Android System WebView の標準マーカー) を含む UA も bypass する
+    context "Android WebView UA (= ; wv) を含む、Capacitor 設定が壊れた場合のフォールバック)" do
+      android_webview_ua = "Mozilla/5.0 (Linux; Android 14; Pixel 7; wv) AppleWebKit/537.36 " \
+                           "(KHTML, like Gecko) Version/4.0 Chrome/120.0.0.0 Mobile Safari/537.36"
+      before { get root_path, headers: { "User-Agent" => android_webview_ua } }
+
+      it "406 ではなく 200 OK を返す (= 二重防衛、SNS 内蔵ブラウザ等も同パターンで通る)" do
+        expect(response).to have_http_status(:ok)
       end
     end
   end
