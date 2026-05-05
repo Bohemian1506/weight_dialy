@@ -42,8 +42,8 @@ export default class extends Controller {
 
       const result = await Health.checkAuthorization({ read: HEALTH_READ_TYPES })
       if (result?.granted) {
-        this.showStatus("✅ Health Connect 連携済み (歩数 / 距離 / 階段)")
         this.requestButtonTarget.style.display = "none"
+        await this.refreshData()
       } else {
         this.showStatus("⏳ Health Connect の権限が必要です")
         this.requestButtonTarget.style.display = ""
@@ -60,8 +60,8 @@ export default class extends Controller {
     try {
       const result = await Health.requestAuthorization({ read: HEALTH_READ_TYPES })
       if (result?.granted) {
-        this.showStatus("✅ 権限を取得しました")
         this.requestButtonTarget.style.display = "none"
+        await this.refreshData()
       } else {
         this.showStatus("⚠️ 権限が拒否されました。設定 → アプリ → Health Connect から許可できます")
       }
@@ -77,5 +77,96 @@ export default class extends Controller {
   errorMessage(error) {
     if (!error) return "原因不明"
     return error.message || error.errorMessage || String(error)
+  }
+
+  // -------------------------------------------------------------------------
+  // データ取得 (子 Issue #122 / 子 4)
+  // -------------------------------------------------------------------------
+
+  async refreshData() {
+    this.showStatus("⏳ データ取得中...")
+    const data = await this.fetchTodayData()
+    if (!data) return
+    this.lastFetchedData = data
+    this.showStatus(this.formatSummary(data))
+  }
+
+  async fetchTodayData() {
+    const Health = this.healthPlugin()
+    if (!Health) return null
+
+    const startDate = this.startOfTodayISO()
+    const endDate = new Date().toISOString()
+
+    try {
+      // 個別フォールバック方式: 1 dataType 失敗しても他が取れれば全体は成立
+      // README 注記より steps / distance は queryAggregated 対応、floorsClimbed は明記なし
+      const [steps, distance, floors] = await Promise.all([
+        this.queryAggregatedSafe(Health, "steps", startDate, endDate),
+        this.queryAggregatedSafe(Health, "distance", startDate, endDate),
+        this.queryAggregatedSafe(Health, "floorsClimbed", startDate, endDate)
+      ])
+      return {
+        step_count: this.sumSamples(steps),
+        distance_meters: this.sumSamples(distance),
+        floors_climbed: this.sumSamples(floors),
+        measured_on: this.todayISODate()
+      }
+    } catch (error) {
+      this.showStatus(`❌ 取得エラー: ${this.errorMessage(error)}`)
+      return null
+    }
+  }
+
+  async queryAggregatedSafe(Health, dataType, startDate, endDate) {
+    try {
+      return await Health.queryAggregated({
+        dataType, startDate, endDate,
+        bucket: "day", aggregation: "sum"
+      })
+    } catch (error) {
+      console.warn(`queryAggregated failed for ${dataType}:`, error)
+      return { samples: [] }
+    }
+  }
+
+  sumSamples(result) {
+    if (!result?.samples?.length) return 0
+    return result.samples.reduce((acc, s) => acc + (s?.value || 0), 0)
+  }
+
+  // ローカル時刻 (= 日本ユーザー想定なので JST) の 0:00 を ISO 8601 形式で返す。
+  // toISOString() は UTC 化するため、setHours(0,0,0,0) と併用すると前日 15:00 UTC になり日付ズレ発生。
+  // タイムゾーンオフセット付きで返すことで Health Connect の集計バケットを意図通りに切る。
+  startOfTodayISO() {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    return this.toLocalISOString(d)
+  }
+
+  // ローカル日付の YYYY-MM-DD。toISOString().slice(0,10) は UTC 基準のため、JST 0-8 時台で前日扱いになる。
+  // measured_on (= サーバー側 recorded_on) として送るため必ずローカル日付。
+  todayISODate() {
+    const d = new Date()
+    const pad = (n) => String(n).padStart(2, "0")
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  }
+
+  toLocalISOString(d) {
+    const pad = (n) => String(n).padStart(2, "0")
+    const offsetMin = -d.getTimezoneOffset()
+    const sign = offsetMin >= 0 ? "+" : "-"
+    const offH = pad(Math.floor(Math.abs(offsetMin) / 60))
+    const offM = pad(Math.abs(offsetMin) % 60)
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}${sign}${offH}:${offM}`
+  }
+
+  formatSummary(data) {
+    const steps = (data.step_count || 0).toLocaleString()
+    const km = ((data.distance_meters || 0) / 1000).toFixed(1) // ホーム画面と同じ 1 桁表示
+    const floors = data.floors_climbed
+    // queryAggregated の floorsClimbed 集計対応は README 明記なし、0 なら未対応を示唆 (= バグではないと伝える)
+    const floorsPart = floors > 0 ? ` / ${floors} 階` : " / 階段(未対応)"
+    return `✅ 今日のデータを取得しました — ${steps} 歩 / ${km} km${floorsPart}`
   }
 }
