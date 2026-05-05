@@ -135,20 +135,38 @@ export default class extends Controller {
     return result.samples.reduce((acc, s) => acc + (s?.value || 0), 0)
   }
 
+  // ローカル時刻 (= 日本ユーザー想定なので JST) の 0:00 を ISO 8601 形式で返す。
+  // toISOString() は UTC 化するため、setHours(0,0,0,0) と併用すると前日 15:00 UTC になり日付ズレ発生。
+  // タイムゾーンオフセット付きで返すことで Health Connect の集計バケットを意図通りに切る。
   startOfTodayISO() {
     const d = new Date()
     d.setHours(0, 0, 0, 0)
-    return d.toISOString()
+    return this.toLocalISOString(d)
   }
 
+  // ローカル日付の YYYY-MM-DD。toISOString().slice(0,10) は UTC 基準のため、JST 0-8 時台で前日扱いになる。
+  // measured_on (= サーバー側 recorded_on) として送るため必ずローカル日付。
   todayISODate() {
-    return new Date().toISOString().slice(0, 10)
+    const d = new Date()
+    const pad = (n) => String(n).padStart(2, "0")
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  }
+
+  toLocalISOString(d) {
+    const pad = (n) => String(n).padStart(2, "0")
+    const offsetMin = -d.getTimezoneOffset()
+    const sign = offsetMin >= 0 ? "+" : "-"
+    const offH = pad(Math.floor(Math.abs(offsetMin) / 60))
+    const offM = pad(Math.abs(offsetMin) % 60)
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}${sign}${offH}:${offM}`
   }
 
   formatSummary(data) {
     const steps = (data.step_count || 0).toLocaleString()
-    const km = ((data.distance_meters || 0) / 1000).toFixed(2)
-    const floors = data.floors_climbed || 0
-    return `✅ 取得成功: ${steps} 歩 / ${km} km / ${floors} 階`
+    const km = ((data.distance_meters || 0) / 1000).toFixed(1) // ホーム画面と同じ 1 桁表示
+    const floors = data.floors_climbed
+    // queryAggregated の floorsClimbed 集計対応は README 明記なし、0 なら未対応を示唆 (= バグではないと伝える)
+    const floorsPart = floors > 0 ? ` / ${floors} 階` : " / 階段(未対応)"
+    return `✅ 今日のデータを取得しました — ${steps} 歩 / ${km} km${floorsPart}`
   }
 }
