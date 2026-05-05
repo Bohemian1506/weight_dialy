@@ -4,4 +4,6 @@
     <string name="title_activity_main">weight daily.</string>
     <string name="package_name">com.weightdialy.app</string>
     <string name="custom_url_scheme">com.weightdialy.app</string>
+    <!-- Health Connect 必須: ユーザーが Health Connect 設定で「Privacy policy」をタップした時の遷移先 -->
+    <string name="health_connect_privacy_policy_url">https://weight-dialy.onrender.com/privacy</string>
 </resources>

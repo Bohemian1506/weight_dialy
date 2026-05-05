@@ -8,5 +8,8 @@
     "@capacitor/cli": "^8.3.1",
     "@capacitor/core": "^8.3.1",
     "daisyui": "^5.5.19"
+  },
+  "dependencies": {
+    "@capgo/capacitor-health": "^8.4.9"
   }
 }
