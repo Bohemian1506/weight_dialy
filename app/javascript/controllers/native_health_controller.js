@@ -45,7 +45,7 @@ export default class extends Controller {
       }
 
       const result = await Health.checkAuthorization({ read: HEALTH_READ_TYPES })
-      if (result?.granted) {
+      if (this.allReadAuthorized(result)) {
         this.requestButtonTarget.style.display = "none"
         this.syncButtonTarget.style.display = ""
         await this.refreshData()
@@ -65,7 +65,7 @@ export default class extends Controller {
 
     try {
       const result = await Health.requestAuthorization({ read: HEALTH_READ_TYPES })
-      if (result?.granted) {
+      if (this.allReadAuthorized(result)) {
         this.requestButtonTarget.style.display = "none"
         this.syncButtonTarget.style.display = ""
         await this.refreshData()
@@ -75,6 +75,16 @@ export default class extends Controller {
     } catch (error) {
       this.showStatus(`❌ リクエストエラー: ${this.errorMessage(error)}`)
     }
+  }
+
+  // @capgo/capacitor-health の AuthorizationStatus は { readAuthorized, readDenied, writeAuthorized, writeDenied } を返す。
+  // 旧コードでは存在しない `granted` プロパティを参照しており、Health Connect が全権限許可を返しても常に未許可判定になっていた
+  // (2026-05-06 実機検証で発覚、HEALTH_READ_TYPES typo fix と同じセッションで連鎖検出)。
+  // 必要 dataType (= HEALTH_READ_TYPES) が全て readAuthorized に含まれていれば許可済とみなす。
+  allReadAuthorized(result) {
+    const authorized = result?.readAuthorized
+    if (!Array.isArray(authorized)) return false
+    return HEALTH_READ_TYPES.every((type) => authorized.includes(type))
   }
 
   // status 表示は先頭絵文字でトーンを自動分岐 (= success / error / info)。
