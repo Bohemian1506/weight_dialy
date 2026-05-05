@@ -1,6 +1,6 @@
 # Day 7 開発ログ (2026-05-05、発表会前日)
 
-GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + Anthropic Claude 接続を経て **本物の AI が production で動く weight_dialy** に到達した翌日、本日は **発表会前に必須の項目を確実に押さえる** + **scope 整理を徹底する** 1 日。Day 6 で寝かせた PR #82 を起点に、退会機能 → プライバシーポリシー → 食品換算動的化を順次実装。各機能で 3 者並列レビューを 2 ラウンドずつ回し、13 件の別 Issue を起票して「やりたいけど今やらない」を可視化した。さらに **Day 3-7 dev-log の後追い整備 + dev-log 運用ルール化** で教材性インフラを完成。終盤は **OPEN Issue 棚卸し + リファクタ 4 件 (#85 #86 #45 + home_controller 集約) + SQL 集計化 (#72) + 法務記述強化 (#88 #89) + sketchy danger 体系の三色一致 polish 連鎖 (#105 #106 #116)** で polish + perf + 法務まで消化。**夜は Issue #40 (Capacitor + Health Connect Android 対応) に着手**、子 Issue 8 件 (#119-#126) に分解 + 起票後、子 1 (Capacitor 8.3.1 scaffold) → 子 2 (`@capgo/capacitor-health` 導入 + Privacy Policy URL 設定) → 子 3 (動的パーミッションフロー Stimulus controller) → 子 4 (歩数 / 距離 / 階段の取得ロジック) → 子 5a (手動同期ボタン + Webhook POST、**MVP 終端**) を順次マージ、**Issue #40 B スコープの中核機能達成** (= 「Android で歩く → アプリで同期 → ホーム画面に反映」のループ成立)。深夜は子 6 (= 実機 E2E、Android Studio + Pixel 7 エミュレータ) に着手、**4 ラウンドの追加 fix** (= PR #140 #142 #146 #147、minSdk / Capacitor appendUserAgent 既知バグ / Rails allow_browser × WebView UA / OAuth Custom Tabs 戻り) を経て **Capacitor アプリ内 OAuth ログイン (Custom Tabs 経由) 完走**。ただし Capacitor アプリと Custom Tabs の **cookie storage 分離は構造的問題**として残り、Capacitor アプリ内ログイン状態保持は v1.0 で deep link / AppLinks 設定 (Phase 2a/2b) が必要と判明。**25 PR マージ + 30 Issue 起票 + 25 Issue close** で、発表会前の最終調整に到達 + Android v1.0 の出発点に立つ。
+GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + Anthropic Claude 接続を経て **本物の AI が production で動く weight_dialy** に到達した翌日、本日は **発表会前に必須の項目を確実に押さえる** + **scope 整理を徹底する** 1 日。Day 6 で寝かせた PR #82 を起点に、退会機能 → プライバシーポリシー → 食品換算動的化を順次実装。各機能で 3 者並列レビューを 2 ラウンドずつ回し、13 件の別 Issue を起票して「やりたいけど今やらない」を可視化した。さらに **Day 3-7 dev-log の後追い整備 + dev-log 運用ルール化** で教材性インフラを完成。終盤は **OPEN Issue 棚卸し + リファクタ 4 件 (#85 #86 #45 + home_controller 集約) + SQL 集計化 (#72) + 法務記述強化 (#88 #89) + sketchy danger 体系の三色一致 polish 連鎖 (#105 #106 #116)** で polish + perf + 法務まで消化。**夜は Issue #40 (Capacitor + Health Connect Android 対応) に着手**、子 Issue 8 件 (#119-#126) に分解 + 起票後、子 1 (Capacitor 8.3.1 scaffold) → 子 2 (`@capgo/capacitor-health` 導入 + Privacy Policy URL 設定) → 子 3 (動的パーミッションフロー Stimulus controller) → 子 4 (歩数 / 距離 / 階段の取得ロジック) → 子 5a (手動同期ボタン + Webhook POST、**MVP 終端**) を順次マージ、**Issue #40 B スコープの中核機能達成** (= 「Android で歩く → アプリで同期 → ホーム画面に反映」のループ成立)。深夜は子 6 (= 実機 E2E、Android Studio + Pixel 7 エミュレータ) に着手、**4 ラウンドの追加 fix** (= PR #140 #142 #146 #147、minSdk / Capacitor appendUserAgent 既知バグ / Rails allow_browser × WebView UA / OAuth Custom Tabs 戻り) を経て **Capacitor アプリ内 OAuth ログイン (Custom Tabs 経由) 完走**。さらに深夜延長で **Phase 2a (PR #149 = appUrlOpen handler) + Phase 2b (PR #151 = AssetLinks verify)** を実装、ただし **AVD + 実機 (Torque G6) 両方で動作確認した結果、Custom Tabs 経由 OAuth callback は AssetLinks 対象外と確定** (= 仮説 5/6 = 構造的問題、deep link は外部リンクタップ専用、Custom Tabs 内では発動しない)。**Phase 3 (= `@capacitor/browser` plugin で OAuth フロー全体を Capacitor 制御) が v1.0 必須**と判明、明朝着手予定。**27 PR マージ + 31 Issue 起票 + 25 Issue close** で、発表会前の最終調整に到達 + Android v1.0 の道半ば (= 子 6 動作確認は明朝 Phase 3 で完走見込み)。
 
 セッションの戦略テーマ: **「発表会前日、必須項目を確実に押さえる」+「設計事前 3 者レビューによる手戻り回避」**
 
@@ -49,6 +49,8 @@ GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + An
 | #142 | – | fix: Capacitor `appendUserAgent` 既知バグを `overrideUserAgent` workaround、`wv` 保険で二重防衛 (= 子 6 動作確認 2 ラウンド目、GitHub Issue #4886 #6037 由来の沼) |
 | #146 | – | fix: `/auth/` パスを allow_browser から bypass (= 子 6 動作確認 3 ラウンド目、Google "In-App Browsers Are Not Allowed" 2021 ポリシー対応 OAuth Custom Tabs 経由のため) |
 | #147 | – | fix: Mobile Chrome UA も whitelist 追加 (= 子 6 動作確認 4 ラウンド目、Custom Tabs から `/` に戻った時の UA 対策、三重防衛) |
+| #149 | – | feat: Phase 2a — Custom Tabs から Capacitor アプリへ deep link で帰還 (= appUrlOpen handler、autoVerify="false") |
+| #151 | – | feat: Phase 2b — AssetLinks verify で deep link を seamless 化 (= public/.well-known/assetlinks.json + autoVerify="true") |
 
 ### close した Issue (= 25 件)
 
@@ -105,11 +107,16 @@ GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + An
 - #143 SNS 内蔵ブラウザ (LINE / Twitter 等) で OAuth ログインが詰まる問題への案内 (= PR #142 design レビュー由来、v1.1)
 - #144 Capacitor アプリ時に Settings の Health Connect セクションを最上部 / 中央に誘導 (= PR #142 design レビュー由来、v1.1)
 - #145 Capacitor アプリ初回起動時の FOUT (フォントちらつき) 対策 (= PR #142 design レビュー由来、v1.1)
+- #150 deep link ダイアログで「ブラウザで開く」を誤選択した場合の回復導線 (= PR #149 design レビュー由来、v1.0 polish)
 
-#### v1.0 最重要 (= 子 6 完全完走の鍵、ロードマップ Phase 2a/2b で対応予定)
+#### v1.0 最重要 (= 子 6 完全完走の鍵、Phase 2a/2b 実装済 → 実機検証待ち)
 
-- **deep link / AppLinks 設定** で Custom Tabs から Capacitor アプリへ帰還 → cookie 共有問題解決 (= 約 2h、待ち最小)
-- **Mobile Chrome bypass (PR #147) 削除** = deep link 実装後不要、`allow_browser` 本来の効果を取り戻す
+- **Phase 2a 実装済 (PR #149)**: appUrlOpen handler、autoVerify="false" → **動作せず確定**
+- **Phase 2b 実装済 (PR #151)**: AssetLinks verify で seamless 化 → **AVD + 実機 (Torque G6) 両方で動作せず確定**
+- **構造的問題確定** (= 学び 20): Custom Tabs 内で開かれる OAuth callback URL は AssetLinks verify の対象外、deep link は外部リンクタップ専用の仕組み
+- **🎯 Phase 3 必須 (= 明朝着手)**: `@capacitor/browser` plugin で OAuth フロー全体を Capacitor 制御、callback URL を Capacitor アプリ側で intercept
+- **Phase 2a/2b の処遇**: 副作用なしのため即 revert 不要、Phase 3 完成後に未使用部分を整理予定
+- **Mobile Chrome bypass (PR #147) 削除** = Phase 3 完成後に不要化、`allow_browser` 本来の効果を取り戻す
 
 - (Issue #8 への追記: 「初回ログイン時の同意モーダル」)
 
@@ -542,6 +549,52 @@ Rails でセッション確立 → redirect_to root_path
 - 「In-App Browsers Are Not Allowed」ポリシーは Apple / Google 共通の流れ、ハイブリッドアプリ設計時に最初から考慮
 - 後輩教材として **「ハイブリッドアプリ × OAuth = deep link 必須」** をルール化、回避不能の前提知識として記録
 
+### 学び 20: AssetLinks verify と Custom Tabs callback の構造的境界 (= Phase 2a/2b で発覚した根深い仮説)
+
+学び 19 で予告した Phase 2a (PR #149) + Phase 2b (PR #151) を実装したが、**AVD 動作確認で deep link 機能せず** = 「アプリで開く?」ダイアログすら出ない。原因仮説を 6 つ立てた:
+
+| 仮説 | 内容 | 解決策 |
+|---|---|---|
+| 1 | AssetLinks verify が端末側非同期処理で未完了 | 数分〜数時間待つ、または再起動 |
+| 2 | AVD の Play Services 制約で verify 走らない | 実機テストで切り分け |
+| 3 | Render の Content-Type / Cache-Control 不備 | `curl -I` でヘッダ確認 / Google AssetLinks Tester で検証 |
+| 4 | APK 再 install のキャッシュ | Build > Clean Project + 完全アンインストール |
+| 5 | **Custom Tabs 内 callback は AssetLinks 対象外** | Phase 3 (= `@capacitor/browser` plugin) で OAuth フロー全体を Capacitor 制御 |
+| 6 | Google "In-App Browsers Are Not Allowed" 仕様で deep link が発動しない | 仮説 5 と同じ対応 |
+
+**最有力仮説 (= 仮説 5/6)**:
+- AssetLinks verify は **外部リンクのタップ時** (= 別アプリ、メール、SMS、URL バー直接入力) に発動する仕組み
+- **Custom Tabs 内で開かれる URL は対象外** = OAuth callback は Custom Tabs プロセス内で完結する
+- つまり Phase 2a/2b のアプローチは **OAuth Custom Tabs flow には効かない可能性**
+
+**Phase 3 候補 (= Phase 2b で解決しない場合)**:
+- **`@capacitor/browser` plugin** で OAuth フローを Capacitor 制御
+  - `Browser.open()` で Custom Tabs を **明示的に起動 + 戻り制御**
+  - callback URL を Capacitor アプリ側で intercept
+- **Native OAuth plugin** (= `@capacitor-firebase/authentication` 等)
+  - WebView を経由しない OAuth、native レイヤで token 取得
+
+**動作確認の段取り (= 明朝)**:
+1. AVD で再試行 (= 仮説 1、verify 反映待ち)
+2. 実機で試行 (= 仮説 2、AVD 制約か確認)
+3. `curl -I https://weight-dialy.onrender.com/.well-known/assetlinks.json` で Content-Type 確認 (= 仮説 3)
+4. Google AssetLinks Tester で verify (= 仮説 4)
+5. ダメなら **Phase 3 (= `@capacitor/browser`)** に切替
+
+**教訓 (= 実機 (Torque G6) 検証で確定)**:
+- AssetLinks の標準的使い方 (= 外部リンクから自動アプリ起動) と **Custom Tabs 内 OAuth callback は別の問題ドメイン** (= 仮説 5/6 確定)
+- 「deep link 設定すれば OAuth が seamless」は **間違った思い込み** (= 本日の判断ミス確定、Phase 2a/2b は無駄ではないが本筋ではなかった)
+- 後輩教材として **「OAuth × Capacitor では `@capacitor/browser` または Native OAuth plugin が王道、deep link/AssetLinks は補助」** が正しい結論
+- 実機検証データ:
+  - AVD (Pixel 7 API 34): 「アプリで開く?」ダイアログ出ず、Custom Tabs 内で完結
+  - 実機 (KYOCERA Torque G6 KYG03 API 35): 同様、Custom Tabs 内でログイン成功するが Capacitor アプリには戻れない
+  - → AVD 制約 (= 仮説 2) ではなく、構造的問題 (= 仮説 5/6) 確定
+- **Phase 3 着手手順 (= 明朝)**:
+  1. `npm install @capacitor/browser`
+  2. ログインボタンの click handler で `Browser.open({ url: '/auth/google_oauth2' })` 起動
+  3. callback URL を Capacitor アプリ側で intercept (= `@capacitor/app` の appUrlOpen ではなく、Browser plugin のイベント or in-app browser 内 navigation 監視)
+  4. callback 受信 → Capacitor WebView 内で session 確立 → ホーム遷移
+
 ---
 
 ## 🤝 ユーザー (= 本人) の判断ハイライト
@@ -558,8 +611,8 @@ Rails でセッション確立 → redirect_to root_path
 
 ## 📊 統計
 
-- マージした PR: **25 本** (= #82, #87, #92, #97, #98, #100, #101, #102, #104, #107, #108, #110, #111, #113, #115, #117, #127, #130, #133, #136, #137, #140, #142, #146, #147)
-- 起票した Issue: **30 件** (= 15 件 + Issue #40 子 Issue 8 件 #119-#126 + 派生 polish 7 件 #128 #131 #134 #138 #143 #144 #145) + Issue #8 への追記 1 件
+- マージした PR: **27 本** (= #82, #87, #92, #97, #98, #100, #101, #102, #104, #107, #108, #110, #111, #113, #115, #117, #127, #130, #133, #136, #137, #140, #142, #146, #147, #149, #151)
+- 起票した Issue: **31 件** (= 15 件 + Issue #40 子 Issue 8 件 #119-#126 + 派生 polish 8 件 #128 #131 #134 #138 #143 #144 #145 #150) + Issue #8 への追記 1 件
 - close した Issue: **25 件** (= #39, #35, #58, #73, #75, #52, #84, #38, #71, #96, #95, #85, #86, #45, #72, #88, #89, #105, #106, #116, #119, #120, #121, #122, #123)
 - 全体 spec: 348 → **431 examples** (= +83)
 - 起票だけして実装はしないが残った polish Issue: **9 件** (= #83, #85-#86, #88-#91, #93-#94, #99)
