@@ -98,6 +98,7 @@
 - **コンポーネント**: `app/assets/stylesheets/sketchy.css` の `sketch-*` クラスを正とする
 - **Tailwind utility**: `flex` / `grid` / `mt-4` / `container` 等のレイアウト用ユーティリティは引き続き使用 OK
 - **daisyUI コンポーネント** (`btn` / `card` / `navbar` / `alert` 等): **新規利用禁止**。既存箇所も触ったタイミングで `sketch-*` に置換
+- **危険度クラス**: `sketch-box-danger` / `sketch-h-danger` / `sketch-btn-danger` のように **独立クラス** (`sketch-*-danger`) で命名する (= modifier class `.sketch-box.filled` パターンとは別の体系。`-soft` 等の派生を組み合わせやすくするため)
 
 ---
 
