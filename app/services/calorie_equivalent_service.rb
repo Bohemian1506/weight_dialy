@@ -14,7 +14,12 @@
 #
 # nil 返却の条件:
 #   - today_kcal < 90 (= 最小食品 kcal 未満): 意味のある換算にならないため非表示。
-#   - count < 1: 選ばれた食品の kcal が today_kcal より大きい場合も非表示。
+#   - フォールバック時に count < 1: 最大 kcal 食品でも today_kcal が 1 個ぶんに満たない場合。
+#
+# count 上限キャップの設計:
+#   - max_count (デフォルト 5) を超える count は UI 上で冗長になる (例: バナナ 11 本ぶん)。
+#   - FOODS.shuffle で順序を確定し、count が 1..max_count に収まる最初の食品を採用する。
+#   - 全食品で上限を超える場合は最大 kcal 食品で [count, max_count].min にキャップ。
 class CalorieEquivalentService
   Item = Struct.new(:emoji, :name, :unit, :kcal, keyword_init: true)
   private_constant :Item
@@ -40,18 +45,27 @@ class CalorieEquivalentService
 
   # @param today_kcal [Integer] 今日の消費 kcal
   # @param seed [Integer] ランダムシード (テスト時に固定値を注入して確定的な挙動にする)
+  # @param max_count [Integer] count の上限 (デフォルト 5)。これを超える count は再抽選 or キャップ
   # @return [Hash{Symbol=>Object}, nil] { emoji:, name:, unit:, count: } or nil (表示しない)
-  def self.call(today_kcal, seed: Date.current.to_s.bytes.sum)
+  def self.call(today_kcal, seed: Date.current.to_s.bytes.sum, max_count: 5)
     # MIN_KCAL (最小食品 kcal) 未満は意味のある換算にならないため非表示
     return nil if today_kcal < MIN_KCAL
 
-    rng  = Random.new(seed)
-    food = FOODS.sample(random: rng)
-    count = today_kcal / food.kcal  # Integer 除算で切り捨て
+    rng = Random.new(seed)
+    shuffled = FOODS.shuffle(random: rng)
 
-    # 選ばれた食品の kcal が today_kcal より大きい場合は 0 になるため skip
+    # 1 <= count <= max_count を満たす最初の食品を採用 (再抽選ロジック)
+    shuffled.each do |food|
+      count = today_kcal / food.kcal  # Integer 除算で切り捨て
+      return { emoji: food.emoji, name: food.name, unit: food.unit, count: count } if count >= 1 && count <= max_count
+    end
+
+    # フォールバック: 全食品で count > max_count の場合は最大 kcal 食品でキャップ
+    # (例: today_kcal = 5000 では全食品 count > 5 になる)
+    largest = FOODS.max_by(&:kcal)
+    count = today_kcal / largest.kcal
     return nil if count < 1
 
-    { emoji: food.emoji, name: food.name, unit: food.unit, count: count }
+    { emoji: largest.emoji, name: largest.name, unit: largest.unit, count: [ count, max_count ].min }
   end
 end
