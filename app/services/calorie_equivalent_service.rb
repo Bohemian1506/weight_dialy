@@ -17,6 +17,7 @@
 #   - count < 1: 選ばれた食品の kcal が today_kcal より大きい場合も非表示。
 class CalorieEquivalentService
   Item = Struct.new(:emoji, :name, :unit, :kcal, keyword_init: true)
+  private_constant :Item
 
   # 食品定数。外部からの参照を防ぐため private_constant で保護。
   FOODS = [
@@ -33,12 +34,16 @@ class CalorieEquivalentService
   ].freeze
   private_constant :FOODS
 
+  # 最小食品 kcal を定数化。call のたびに FOODS を走査せず一度だけ評価する。
+  MIN_KCAL = FOODS.map(&:kcal).min
+  private_constant :MIN_KCAL
+
   # @param today_kcal [Integer] 今日の消費 kcal
   # @param seed [Integer] ランダムシード (テスト時に固定値を注入して確定的な挙動にする)
   # @return [Hash{Symbol=>Object}, nil] { emoji:, name:, unit:, count: } or nil (表示しない)
   def self.call(today_kcal, seed: Date.current.to_s.bytes.sum)
-    # 90 kcal (最小食品) 未満は意味のある換算にならないため非表示
-    return nil if today_kcal < FOODS.map(&:kcal).min
+    # MIN_KCAL (最小食品 kcal) 未満は意味のある換算にならないため非表示
+    return nil if today_kcal < MIN_KCAL
 
     rng  = Random.new(seed)
     food = FOODS.sample(random: rng)
