@@ -1,6 +1,6 @@
 # Day 7 開発ログ (2026-05-05、発表会前日)
 
-GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + Anthropic Claude 接続を経て **本物の AI が production で動く weight_dialy** に到達した翌日、本日は **発表会前に必須の項目を確実に押さえる** + **scope 整理を徹底する** 1 日。Day 6 で寝かせた PR #82 を起点に、退会機能 → プライバシーポリシー → 食品換算動的化を順次実装。各機能で 3 者並列レビューを 2 ラウンドずつ回し、13 件の別 Issue を起票して「やりたいけど今やらない」を可視化した。さらに **Day 3-7 dev-log の後追い整備 + dev-log 運用ルール化** で教材性インフラを完成。終盤は **OPEN Issue 棚卸し + リファクタ 4 件 (#85 #86 #45 + home_controller 集約) + SQL 集計化 (#72) + 法務記述強化 (#88 #89) + sketchy danger 体系の三色一致 polish 連鎖 (#105 #106 #116)** で polish + perf + 法務まで消化。**夜は Issue #40 (Capacitor + Health Connect Android 対応) に着手**、子 Issue 8 件 (#119-#126) に分解 + 起票後、子 1 (Capacitor 8.3.1 scaffold) → 子 2 (`@capgo/capacitor-health` 導入 + Privacy Policy URL 設定) を順次マージ。**18 PR マージ + 25 Issue 起票 + 22 Issue close** で、発表会前の最終調整に到達 + Android v1.0 の出発点に立つ。
+GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + Anthropic Claude 接続を経て **本物の AI が production で動く weight_dialy** に到達した翌日、本日は **発表会前に必須の項目を確実に押さえる** + **scope 整理を徹底する** 1 日。Day 6 で寝かせた PR #82 を起点に、退会機能 → プライバシーポリシー → 食品換算動的化を順次実装。各機能で 3 者並列レビューを 2 ラウンドずつ回し、13 件の別 Issue を起票して「やりたいけど今やらない」を可視化した。さらに **Day 3-7 dev-log の後追い整備 + dev-log 運用ルール化** で教材性インフラを完成。終盤は **OPEN Issue 棚卸し + リファクタ 4 件 (#85 #86 #45 + home_controller 集約) + SQL 集計化 (#72) + 法務記述強化 (#88 #89) + sketchy danger 体系の三色一致 polish 連鎖 (#105 #106 #116)** で polish + perf + 法務まで消化。**夜は Issue #40 (Capacitor + Health Connect Android 対応) に着手**、子 Issue 8 件 (#119-#126) に分解 + 起票後、子 1 (Capacitor 8.3.1 scaffold) → 子 2 (`@capgo/capacitor-health` 導入 + Privacy Policy URL 設定) → 子 3 (動的パーミッションフロー Stimulus controller) を順次マージ。**19 PR マージ + 26 Issue 起票 + 23 Issue close** で、発表会前の最終調整に到達 + Android v1.0 の出発点に立つ。
 
 セッションの戦略テーマ: **「発表会前日、必須項目を確実に押さえる」+「設計事前 3 者レビューによる手戻り回避」**
 
@@ -42,8 +42,9 @@ GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + An
 | #117 | #116 | polish: `sketch-box-danger-soft` のボーダーを半透明赤 (= `--danger-soft-border` rgba 35%) にして背景・タイトル・ボーダーで赤系三色一致 |
 | #127 | #119 | feat: Capacitor 8.3.1 初期化 + `server.url` を本番 URL (`https://weight-dialy.onrender.com`) にラップ (= Issue #40 子 1、Android v1.0 出発点) |
 | #130 | #120 | feat: `@capgo/capacitor-health` 8.4.9 導入 + Privacy Policy URL を `strings.xml` に設定 (= Issue #40 子 2、Health Connect 連携プラグインの基盤整備) |
+| #133 | #121 | feat: Health Connect 動的パーミッションフロー実装 (= Issue #40 子 3、Stimulus controller 経由で Capacitor 検知 + permission チェック / リクエスト / フォールバック UI、Web 版影響ゼロ) |
 
-### close した Issue (= 22 件)
+### close した Issue (= 23 件)
 
 - **#39 発表会デモシナリオ準備** — 本人プレゼンないので close (= スクープ外と判断)
 - **#35 ngrok 動作確認** — Day 5 で完了済みだったが OPEN 残存だったので close
@@ -56,8 +57,9 @@ GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + An
 - **#116** — sketchy danger-soft ボーダー半透明赤化 (= 三色一致 polish 連鎖の最終ピース)、PR #117 で close
 - **#119** — Capacitor 初期化 + server.url wrap (= Issue #40 子 1、Android v1.0 出発点)、PR #127 で close
 - **#120** — `@capgo/capacitor-health` 導入 + Privacy Policy URL 設定 (= Issue #40 子 2、Health Connect 連携基盤)、PR #130 で close
+- **#121** — Health Connect 動的パーミッションフロー (= Issue #40 子 3、Stimulus controller 経由)、PR #133 で close
 
-### 起票した Issue (= 15 件 + Issue #40 子 Issue 8 件 + 派生 polish 2 件 + Issue #8 追記)
+### 起票した Issue (= 15 件 + Issue #40 子 Issue 8 件 + 派生 polish 3 件 + Issue #8 追記)
 
 - #83 webhook error_message 日本語化
 - #85 webhook_deliveries / step_records FK `on_delete: :cascade`
@@ -90,6 +92,7 @@ GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + An
 
 - #128 Capacitor splash 背景色を sketchy theme `--paper` (`#fbf8f1`) 単色に置き換え (= 発表会前 polish 候補、子 1 のスコープ膨張防ぐため別 Issue 化)
 - #131 `/privacy` に Android Health Connect 経由の取得情報を明記 (= Google 規約対応、PR #130 design レビュー由来、発表会前必須)
+- #134 Health Connect セクションの UI 微調整 (= ボタン文言「歩数を取得する」検討 + 見出し絵文字 📱 削除検討、PR #133 design レビュー由来、v1.1)
 
 - (Issue #8 への追記: 「初回ログイン時の同意モーダル」)
 
@@ -292,6 +295,53 @@ grep -E "permission|activity" node_modules/<plugin>/android/src/main/AndroidMani
 
 **残課題 (= 設計リスク)**: Privacy URL は本番固定 (`https://weight-dialy.onrender.com/privacy`) のため、**Render が落ちると Android アプリの Health Connect 連携が破綻** する依存関係が発生。発表会前リハ手順に「/privacy 疎通確認」を組み込むことで運用カバー、抜本対策 (= ローカル assets 化、ミラー化) は v1.1 で検討。
 
+### 学び 13: Capacitor プラグイン × Importmap = グローバル参照で繋ぐ
+
+Issue #40 子 3 (PR #133) で Stimulus controller から `@capgo/capacitor-health` プラグインを呼び出す方式選択を迫られた。Capacitor 公式は ES module import (= `import { Health } from '@capgo/capacitor-health'`) 標準だが、Rails 8.1 の Importmap (= CDN 直リンク、bundler なし) と組み合わせる慣習は確立されていない。
+
+**3 案のトレードオフ**:
+
+| 案 | 内容 | メリット | デメリット |
+|---|---|---|---|
+| A. Importmap で CDN pin | `pin "@capgo/capacitor-health", to: "https://cdn.jsdelivr.net/.../index.js"` | Rails Way 維持 | CDN 障害リスク、Capacitor の自動読み込みとの順序問題 |
+| **B. window.Capacitor.Plugins.Health 経由** ⭐採用 | グローバル参照、import 不要 | Importmap 触らない、Capacitor 標準 inject 仕様に乗る | TS 型補完なし、動作未確認 (= 実機で確認必要) |
+| C. esbuild / vite で bundle | Importmap 撤回、`app/assets/builds/` に出力 | Capacitor 公式推奨 | Rails 8.1 Importmap 慣習から外れる、教材性低下 |
+
+**B 採用の決め手**:
+- Capacitor は WebView に `window.Capacitor` を inject する仕様、プラグインも `Plugins.<name>` で global access 可能 (= 多くの Capacitor アプリで使われる方式)
+- Rails 8.1 Importmap の慣習を維持 = Web 版に副作用ゼロ (= `feature/capacitor-init` ブランチでも Rails コードゼロ修正)
+- 失敗時 (= プラグインが global に inject されない場合) のロールバックが軽い (= A or C に切替可能)
+
+**実装パターン** (= Stimulus controller):
+```javascript
+// Capacitor 検知
+isCapacitorNative() {
+  const cap = window.Capacitor
+  return typeof cap !== "undefined" &&
+    typeof cap.isNativePlatform === "function" &&
+    cap.isNativePlatform()
+}
+
+// プラグイン参照
+healthPlugin() {
+  return window.Capacitor?.Plugins?.Health
+}
+
+// Web 版での display: none、Capacitor 検知時のみ表示切替
+connect() {
+  if (!this.isCapacitorNative()) return
+  this.element.style.display = ""
+  // ... permission チェック等
+}
+```
+
+**教訓**:
+- **Capacitor プラグイン × Importmap = グローバル参照で繋ぐ** が Rails 8.1 構成の最適解
+- Web 版への副作用ゼロを `display: none` 初期 + Capacitor 検知ガードで担保 (= spec で確認可能)
+- TypeScript 型補完を諦めるトレードオフは許容範囲、教材性は dev-log で補強
+
+**再現性**: 後続子 4 / 子 5a でも同じパターン (= `window.Capacitor.Plugins.Health` 経由) を継続。Capacitor + Rails Importmap の組み合わせを採用する後輩プロジェクトでも再利用可能な型。
+
 ---
 
 ## 🤝 ユーザー (= 本人) の判断ハイライト
@@ -308,9 +358,9 @@ grep -E "permission|activity" node_modules/<plugin>/android/src/main/AndroidMani
 
 ## 📊 統計
 
-- マージした PR: **18 本** (= #82, #87, #92, #97, #98, #100, #101, #102, #104, #107, #108, #110, #111, #113, #115, #117, #127, #130)
-- 起票した Issue: **25 件** (= 15 件 + Issue #40 子 Issue 8 件 #119-#126 + 派生 polish 2 件 #128 #131) + Issue #8 への追記 1 件
-- close した Issue: **22 件** (= #39, #35, #58, #73, #75, #52, #84, #38, #71, #96, #95, #85, #86, #45, #72, #88, #89, #105, #106, #116, #119, #120)
+- マージした PR: **19 本** (= #82, #87, #92, #97, #98, #100, #101, #102, #104, #107, #108, #110, #111, #113, #115, #117, #127, #130, #133)
+- 起票した Issue: **26 件** (= 15 件 + Issue #40 子 Issue 8 件 #119-#126 + 派生 polish 3 件 #128 #131 #134) + Issue #8 への追記 1 件
+- close した Issue: **23 件** (= #39, #35, #58, #73, #75, #52, #84, #38, #71, #96, #95, #85, #86, #45, #72, #88, #89, #105, #106, #116, #119, #120, #121)
 - 全体 spec: 348 → **431 examples** (= +83)
 - 起票だけして実装はしないが残った polish Issue: **9 件** (= #83, #85-#86, #88-#91, #93-#94, #99)
 - memory 永続化: **4 ファイル新規** (= project_day5_summary, feedback_irreversible_action_pr_pattern, feedback_random_with_seed_testability, feedback_dev_log_after_merge) + **MEMORY.md update**
