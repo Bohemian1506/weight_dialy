@@ -30,5 +30,5 @@
 
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "bin/setup --skip-server"
+  "postCreateCommand": "mise trust mise.toml && bin/setup --skip-server"
 }
