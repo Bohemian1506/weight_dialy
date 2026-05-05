@@ -11,6 +11,9 @@ Rails.application.routes.draw do
 
   get "/about", to: "about#show", as: :about
 
+  get "/privacy", to: "legal#privacy", as: :privacy
+  get "/terms",   to: "legal#terms",   as: :terms
+
   get "/auth/:provider/callback", to: "sessions#create", as: :auth_callback
   get "/auth/failure", to: "sessions#failure", as: :auth_failure
   delete "/logout", to: "sessions#destroy", as: :logout

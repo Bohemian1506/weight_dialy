@@ -1,0 +1,97 @@
+<% content_for :title, "プライバシーポリシー — weight daily." %>
+
+<div class="sketch-page-narrow" style="max-width: 40rem;">
+
+  <h1 class="sketch-hh" style="margin-bottom: 4px;">プライバシーポリシー</h1>
+  <p class="sketch-small" style="margin-bottom: 16px;">最終更新: 2026年5月5日</p>
+
+  <p class="sketch-body-text" style="margin-bottom: 24px;">
+    weight daily（以下「本サービス」）は、ユーザーから取得する個人情報および利用情報を以下のとおり取り扱います。
+  </p>
+
+  <div class="sketch-box" style="margin-bottom: 20px;">
+    <h2 class="sketch-h" style="margin-bottom: 8px;">1. 取得する情報</h2>
+    <p class="sketch-body-text" style="margin-bottom: 8px;">本サービスは、サービス提供のため以下の情報を取得します。</p>
+    <ul class="sketch-body-text" style="padding-left: 1.5em; margin-bottom: 8px;">
+      <li>Google アカウントから取得する情報: 氏名、メールアドレス、プロフィール画像</li>
+      <li>ユーザーが Apple Shortcuts 経由で送信する情報: 歩数、距離 (m)、上った階数、記録日</li>
+    </ul>
+    <p class="sketch-body-text">ヘルスケアデータの生データ (GPS、心拍、生体情報など) は取得しません。</p>
+  </div>
+
+  <div class="sketch-box" style="margin-bottom: 20px;">
+    <h2 class="sketch-h" style="margin-bottom: 8px;">2. 利用目的</h2>
+    <p class="sketch-body-text" style="margin-bottom: 8px;">取得した情報は、以下の目的にのみ利用します。</p>
+    <ul class="sketch-body-text" style="padding-left: 1.5em; margin-bottom: 8px;">
+      <li>アプリ画面でのダッシュボード表示</li>
+      <li>AI による行動提案メッセージの生成</li>
+    </ul>
+    <p class="sketch-body-text">
+      なお、AI 提案の生成にあたっては、Anthropic 社の API (Claude) に対し、当日の合計歩数・距離・階数から算出した数値情報のみを送信します。氏名、メールアドレス、その他の個人情報は送信しません。
+    </p>
+  </div>
+
+  <div class="sketch-box" style="margin-bottom: 20px;">
+    <h2 class="sketch-h" style="margin-bottom: 8px;">3. 第三者提供</h2>
+    <p class="sketch-body-text" style="margin-bottom: 8px;">
+      本サービスは、利用者の個人情報を第三者に販売したり、広告目的で提供したりすることはありません。
+    </p>
+    <p class="sketch-body-text" style="margin-bottom: 8px;">
+      ただし、サービスを運営するため、以下のクラウドサービス事業者にデータの保管・処理を委託しています。
+    </p>
+    <ul class="sketch-body-text" style="padding-left: 1.5em; margin-bottom: 8px;">
+      <li>Render (ホスティング、米国)</li>
+      <li>Anthropic (AI による提案メッセージ生成、米国、送信内容は数値情報のみ)</li>
+      <li>Google (OAuth 認証時の氏名・メールアドレス取得)</li>
+    </ul>
+    <p class="sketch-body-text">
+      なお、Anthropic 社のサービスにおいて、API 経由で送信されたデータが学習目的に使用されることはありません。
+    </p>
+  </div>
+
+  <div class="sketch-box" style="margin-bottom: 20px;">
+    <h2 class="sketch-h" style="margin-bottom: 8px;">4. データ保持期間</h2>
+    <p class="sketch-body-text" style="margin-bottom: 8px;">
+      取得した情報は、ユーザーが本サービスを利用している期間中保持します。
+    </p>
+    <p class="sketch-body-text">
+      ユーザーが退会した場合、当該ユーザーに紐づくすべてのデータ (プロフィール情報、歩数記録、Webhook 配信ログ等) を即時削除します。
+    </p>
+  </div>
+
+  <div class="sketch-box" style="margin-bottom: 20px;">
+    <h2 class="sketch-h" style="margin-bottom: 8px;">5. Cookie</h2>
+    <p class="sketch-body-text">
+      本サービスは、ログインセッションを維持するための cookie のみを使用します。アクセス解析や広告配信を目的とした cookie は使用していません。
+    </p>
+  </div>
+
+  <div class="sketch-box" style="margin-bottom: 20px;">
+    <h2 class="sketch-h" style="margin-bottom: 8px;">6. ユーザーの権利</h2>
+    <p class="sketch-body-text">
+      ユーザーは、設定画面の「アカウント削除」機能から、いつでも自身のアカウントおよび関連データの削除を要求できます。削除は即時実行され、取り消すことはできません。
+    </p>
+  </div>
+
+  <div class="sketch-box" style="margin-bottom: 20px;">
+    <h2 class="sketch-h" style="margin-bottom: 8px;">7. お問い合わせ</h2>
+    <p class="sketch-body-text">
+      本ポリシーに関するお問い合わせは、以下のメールアドレスまでご連絡ください。
+    </p>
+    <p class="sketch-body-text" style="margin-top: 8px;">
+      <%= mail_to "weightdaily3@gmail.com", "weightdaily3@gmail.com", style: "color: var(--ink); text-decoration: underline;" %>
+    </p>
+  </div>
+
+  <div class="sketch-box" style="margin-bottom: 20px;">
+    <h2 class="sketch-h" style="margin-bottom: 8px;">8. 改訂</h2>
+    <p class="sketch-body-text">
+      本ポリシーの内容を変更する場合があります。重要な変更を行う場合は、本ページの更新に加え、登録メールアドレス宛の通知またはアプリ内通知でお知らせします。
+    </p>
+  </div>
+
+  <p class="sketch-small" style="color: var(--muted); margin-top: 8px;">
+    改訂履歴: 2026-05-05 初版公開
+  </p>
+
+</div>
