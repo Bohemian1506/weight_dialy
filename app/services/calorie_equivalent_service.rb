@@ -1,0 +1,52 @@
+# 今日の消費 kcal を身近な食品に換算して表示するためのサービス。
+#
+# 設計思想:
+#   - 「消費 kcal = 抽象的な数字」を「アイス N 個ぶん」に変換して直感的に伝える。
+#   - アプリの 3 ステップ思想ステップ ① 「罪悪感を減らす」の補助: 消費を食品で可視化することで
+#     「今日は動いた」という小さな達成感を具体的に実感させる。
+#
+# ランダム性の設計:
+#   - 毎日異なる食品が表示される「日替わり」方式。
+#   - seed に Date.current.to_s.bytes.sum を使うことで 1 日固定 (= 同日はリロードしても同じ)。
+#   - Date.to_s.hash を使わない理由: Ruby 1.9+ でハッシュ値のランダム化が導入されており
+#     実行ごとに異なる値になる可能性があるため。bytes.sum は実装依存なく安全。
+#   - seed: キーワード引数でテスト時に固定値を注入可能 (= テスト容易性)。
+#
+# nil 返却の条件:
+#   - today_kcal < 90 (= 最小食品 kcal 未満): 意味のある換算にならないため非表示。
+#   - count < 1: 選ばれた食品の kcal が today_kcal より大きい場合も非表示。
+class CalorieEquivalentService
+  Item = Struct.new(:emoji, :name, :unit, :kcal, keyword_init: true)
+
+  # 食品定数。外部からの参照を防ぐため private_constant で保護。
+  FOODS = [
+    Item.new(emoji: "🍦", name: "アイス",            unit: "個", kcal: 200),
+    Item.new(emoji: "🍺", name: "缶ビール",          unit: "本", kcal: 140),
+    Item.new(emoji: "🍙", name: "おにぎり",          unit: "個", kcal: 180),
+    Item.new(emoji: "🍌", name: "バナナ",            unit: "本", kcal:  90),
+    Item.new(emoji: "🍫", name: "板チョコ半分",      unit: "枚", kcal: 130),
+    Item.new(emoji: "🍡", name: "大福",              unit: "個", kcal: 170),
+    Item.new(emoji: "🍗", name: "唐揚げ 3 個",       unit: "皿", kcal: 250),
+    Item.new(emoji: "🥮", name: "どら焼き",          unit: "個", kcal: 200),
+    Item.new(emoji: "🥛", name: "カップヨーグルト",  unit: "個", kcal:  90),
+    Item.new(emoji: "☕", name: "カフェラテ",        unit: "杯", kcal: 150)
+  ].freeze
+  private_constant :FOODS
+
+  # @param today_kcal [Integer] 今日の消費 kcal
+  # @param seed [Integer] ランダムシード (テスト時に固定値を注入して確定的な挙動にする)
+  # @return [Hash{Symbol=>Object}, nil] { emoji:, name:, unit:, count: } or nil (表示しない)
+  def self.call(today_kcal, seed: Date.current.to_s.bytes.sum)
+    # 90 kcal (最小食品) 未満は意味のある換算にならないため非表示
+    return nil if today_kcal < FOODS.map(&:kcal).min
+
+    rng  = Random.new(seed)
+    food = FOODS.sample(random: rng)
+    count = today_kcal / food.kcal  # Integer 除算で切り捨て
+
+    # 選ばれた食品の kcal が today_kcal より大きい場合は 0 になるため skip
+    return nil if count < 1
+
+    { emoji: food.emoji, name: food.name, unit: food.unit, count: count }
+  end
+end

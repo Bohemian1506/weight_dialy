@@ -8,7 +8,8 @@ class HomeController < ApplicationController
     @advice          = CalorieAdviceService.call(@today_record&.estimated_kcal.to_i)
     # 貯カロリー (= 月リセット + 累計の二段構造) はチャート用 30 日 records とは別に
     # 全期間 records を渡して算出する (= 累計 total は全期間でないと意味が出ないため)。
-    @calorie_savings = CalorieSavingsService.call(fetch_calorie_records(@dashboard_state))
+    @calorie_savings  = CalorieSavingsService.call(fetch_calorie_records(@dashboard_state))
+    @food_equivalent  = CalorieEquivalentService.call(@today_record&.estimated_kcal.to_i)
   end
 
   private
