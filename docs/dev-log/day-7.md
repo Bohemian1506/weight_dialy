@@ -1,6 +1,6 @@
 # Day 7 開発ログ (2026-05-05、発表会前日)
 
-GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + Anthropic Claude 接続を経て **本物の AI が production で動く weight_dialy** に到達した翌日、本日は **発表会前に必須の項目を確実に押さえる** + **scope 整理を徹底する** 1 日。Day 6 で寝かせた PR #82 を起点に、退会機能 → プライバシーポリシー → 食品換算動的化を順次実装。各機能で 3 者並列レビューを 2 ラウンドずつ回し、13 件の別 Issue を起票して「やりたいけど今やらない」を可視化した。さらに **Day 3-7 dev-log の後追い整備 + dev-log 運用ルール化** で教材性インフラを完成。終盤は **OPEN Issue 棚卸し + リファクタ 4 件 (#85 #86 #45 + home_controller 集約) + SQL 集計化 (#72) + 法務記述強化 (#88 #89) + sketchy danger 体系の三色一致 polish 連鎖 (#105 #106 #116)** で polish + perf + 法務まで消化。**夜は Issue #40 (Capacitor + Health Connect Android 対応) に着手**、子 Issue 8 件 (#119-#126) に分解 + 起票後、子 1 (Capacitor 8.3.1 scaffold) → 子 2 (`@capgo/capacitor-health` 導入 + Privacy Policy URL 設定) → 子 3 (動的パーミッションフロー Stimulus controller) を順次マージ。**19 PR マージ + 26 Issue 起票 + 23 Issue close** で、発表会前の最終調整に到達 + Android v1.0 の出発点に立つ。
+GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + Anthropic Claude 接続を経て **本物の AI が production で動く weight_dialy** に到達した翌日、本日は **発表会前に必須の項目を確実に押さえる** + **scope 整理を徹底する** 1 日。Day 6 で寝かせた PR #82 を起点に、退会機能 → プライバシーポリシー → 食品換算動的化を順次実装。各機能で 3 者並列レビューを 2 ラウンドずつ回し、13 件の別 Issue を起票して「やりたいけど今やらない」を可視化した。さらに **Day 3-7 dev-log の後追い整備 + dev-log 運用ルール化** で教材性インフラを完成。終盤は **OPEN Issue 棚卸し + リファクタ 4 件 (#85 #86 #45 + home_controller 集約) + SQL 集計化 (#72) + 法務記述強化 (#88 #89) + sketchy danger 体系の三色一致 polish 連鎖 (#105 #106 #116)** で polish + perf + 法務まで消化。**夜は Issue #40 (Capacitor + Health Connect Android 対応) に着手**、子 Issue 8 件 (#119-#126) に分解 + 起票後、子 1 (Capacitor 8.3.1 scaffold) → 子 2 (`@capgo/capacitor-health` 導入 + Privacy Policy URL 設定) → 子 3 (動的パーミッションフロー Stimulus controller) → 子 4 (歩数 / 距離 / 階段の取得ロジック) → 子 5a (手動同期ボタン + Webhook POST、**MVP 終端**) を順次マージ、**Issue #40 B スコープの中核機能達成** (= 「Android で歩く → アプリで同期 → ホーム画面に反映」のループ成立)。**21 PR マージ + 27 Issue 起票 + 25 Issue close** で、発表会前の最終調整に到達 + Android v1.0 の出発点に立つ。
 
 セッションの戦略テーマ: **「発表会前日、必須項目を確実に押さえる」+「設計事前 3 者レビューによる手戻り回避」**
 
@@ -43,8 +43,10 @@ GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + An
 | #127 | #119 | feat: Capacitor 8.3.1 初期化 + `server.url` を本番 URL (`https://weight-dialy.onrender.com`) にラップ (= Issue #40 子 1、Android v1.0 出発点) |
 | #130 | #120 | feat: `@capgo/capacitor-health` 8.4.9 導入 + Privacy Policy URL を `strings.xml` に設定 (= Issue #40 子 2、Health Connect 連携プラグインの基盤整備) |
 | #133 | #121 | feat: Health Connect 動的パーミッションフロー実装 (= Issue #40 子 3、Stimulus controller 経由で Capacitor 検知 + permission チェック / リクエスト / フォールバック UI、Web 版影響ゼロ) |
+| #136 | #122 | feat: Health Connect から歩数 / 距離 / 階段データを取得 (= Issue #40 子 4、`queryAggregated` API + 個別フォールバック + JST timezone 修正) |
+| #137 | #123 | feat: 手動同期ボタン + Webhook POST フロー MVP (= Issue #40 子 5a、`/webhooks/health_data` への POST + フィールド名変換 + status 視認性向上、**Issue #40 B スコープ MVP 達成**) |
 
-### close した Issue (= 23 件)
+### close した Issue (= 25 件)
 
 - **#39 発表会デモシナリオ準備** — 本人プレゼンないので close (= スクープ外と判断)
 - **#35 ngrok 動作確認** — Day 5 で完了済みだったが OPEN 残存だったので close
@@ -58,8 +60,10 @@ GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + An
 - **#119** — Capacitor 初期化 + server.url wrap (= Issue #40 子 1、Android v1.0 出発点)、PR #127 で close
 - **#120** — `@capgo/capacitor-health` 導入 + Privacy Policy URL 設定 (= Issue #40 子 2、Health Connect 連携基盤)、PR #130 で close
 - **#121** — Health Connect 動的パーミッションフロー (= Issue #40 子 3、Stimulus controller 経由)、PR #133 で close
+- **#122** — Health Connect 歩数 / 距離 / 階段データ取得 (= Issue #40 子 4、queryAggregated API)、PR #136 で close
+- **#123** — 手動同期ボタン + Webhook POST フロー MVP (= Issue #40 子 5a、B スコープ MVP 達成)、PR #137 で close
 
-### 起票した Issue (= 15 件 + Issue #40 子 Issue 8 件 + 派生 polish 3 件 + Issue #8 追記)
+### 起票した Issue (= 15 件 + Issue #40 子 Issue 8 件 + 派生 polish 4 件 + Issue #8 追記)
 
 - #83 webhook error_message 日本語化
 - #85 webhook_deliveries / step_records FK `on_delete: :cascade`
@@ -93,6 +97,7 @@ GW 6 日目、発表会前日。Day 6 (= 5/4) の Render 本番デプロイ + An
 - #128 Capacitor splash 背景色を sketchy theme `--paper` (`#fbf8f1`) 単色に置き換え (= 発表会前 polish 候補、子 1 のスコープ膨張防ぐため別 Issue 化)
 - #131 `/privacy` に Android Health Connect 経由の取得情報を明記 (= Google 規約対応、PR #130 design レビュー由来、発表会前必須)
 - #134 Health Connect セクションの UI 微調整 (= ボタン文言「歩数を取得する」検討 + 見出し絵文字 📱 削除検討、PR #133 design レビュー由来、v1.1)
+- #138 Webhook POST UX 改善 (= 401 → Settings 誘導 + HTTP status 別日本語化、PR #137 strategic+design レビュー由来、v1.1)
 
 - (Issue #8 への追記: 「初回ログイン時の同意モーダル」)
 
@@ -342,6 +347,41 @@ connect() {
 
 **再現性**: 後続子 4 / 子 5a でも同じパターン (= `window.Capacitor.Plugins.Health` 経由) を継続。Capacitor + Rails Importmap の組み合わせを採用する後輩プロジェクトでも再利用可能な型。
 
+### 学び 14: フィールド名の境界変換は MVP の急所 (= データ送信時の polish 全般)
+
+Issue #40 子 5a (PR #137) で Webhook POST を実装する際、JS 側 (= Health Connect 由来) とサーバー側 (= Apple Shortcuts 互換) のフィールド名 / 型が異なる箇所を **Stimulus controller の payload 構築箇所 1 箇所に集約** する判断をした。
+
+**境界変換の具体例 (= PR #137 sync メソッド)**:
+
+| JS 側 (= Health Connect) | サーバー側 (= 既存 Webhook 互換) | 変換 |
+|---|---|---|
+| `floors_climbed` | `flights_climbed` | キー名変換 (= Apple Health vs Health Connect 歴史的差異) |
+| `distance_meters: 4234.7` (Float) | `distance_meters: 4235` (Integer) | `Math.round(...)` (= サーバー側 `parse_numeric` が小数 Float reject) |
+| `measured_on: "2026-05-05"` (JST) | `recorded_on: "2026-05-05"` (yyyy-MM-dd 厳格) | キー名変換 + JST 基準日付 (= 子 4 で `todayISODate()` 修正済) |
+
+**設計原則**:
+- **サーバー側を緩めない** (= 過去 API との互換性維持)。Apple Shortcuts と Capacitor アプリの両方が同じエンドポイントを叩く設計のため、サーバー側で「Float も受容」「キー名 alias」等の変更は他クライアント影響大
+- **JS 側で吸収する** (= 新規ソースが既存に合わせる)。境界変換ポイントは Stimulus controller の `sync()` メソッド内 payload 構築 1 箇所、後輩がコードを追う際の発見コスト最小化
+- **教訓**: API クライアントを後追いで増やすときは「既存 API ≒ 仕様」とみなし、新クライアント側で吸収する
+
+### 学び 15: Capacitor SecureStorage を捨てて DOM 埋め込みにした判断記録
+
+Issue #40 子 5a (PR #137) で Webhook の Bearer token を JS から参照する方法として、**Stimulus values 経由で Settings ページの HTML data 属性に埋め込む** 方式を採用 (= `data-native-health-webhook-token-value="<%= current_user.webhook_token %>"`)。当初の子 Issue 本文では「Capacitor Preferences / SecureStorage に保存」案だったが採用せず。
+
+**判断の理由**:
+
+1. **server.url モードでは WebView が同一オリジン + Cookie session 共有**: Capacitor アプリの WebView は `https://weight-dialy.onrender.com` を直接読み込み、ログイン Cookie で認証済み。Settings ページにアクセスすれば `current_user.webhook_token` がサーバー側で確定し、HTML 出力できる
+2. **SecureStorage は「token を別途入力 → 永続化」フロー必須**: 初回 token コピー UI / 再生成時の入力やり直し / token 無効化検知 etc.、UX が複雑化
+3. **既存 Apple Shortcuts セクションで token を既に表示済**: settings/show.html.erb の Step 2 で `current_user.webhook_token` を可視化、Capacitor 経由の DOM 埋め込みも同じセキュリティモデル (= ログイン必須、XSS 経由なら漏洩は同等)
+4. **発表会までの時間制約**: SecureStorage 化 + 入力 UI で +1-2h、MVP 完成優先
+
+**トレードオフ**:
+- ❌ ログインしていない状態では token を取得できない → 開発者本人 dogfood 用途では問題なし
+- ❌ Capacitor アプリで Web 版にログイン UI を経由する手間 → server.url で本番 Web を WebView 表示するため、ログイン UI もそのまま動作 (= 追加実装不要)
+- ✅ Stimulus values API で型 / 名前空間が明確、後輩教材として綺麗
+
+**教訓**: ネイティブストレージ (= SecureStorage / Keychain) を使うかは **「サーバー側で確定する値か」** と **「アプリ独自の永続化が必要か」** で判断。weight_dialy のように Web 版がメインで Cookie session が活きる構成では、サーバー埋め込みが最もシンプル。
+
 ---
 
 ## 🤝 ユーザー (= 本人) の判断ハイライト
@@ -358,9 +398,9 @@ connect() {
 
 ## 📊 統計
 
-- マージした PR: **19 本** (= #82, #87, #92, #97, #98, #100, #101, #102, #104, #107, #108, #110, #111, #113, #115, #117, #127, #130, #133)
-- 起票した Issue: **26 件** (= 15 件 + Issue #40 子 Issue 8 件 #119-#126 + 派生 polish 3 件 #128 #131 #134) + Issue #8 への追記 1 件
-- close した Issue: **23 件** (= #39, #35, #58, #73, #75, #52, #84, #38, #71, #96, #95, #85, #86, #45, #72, #88, #89, #105, #106, #116, #119, #120, #121)
+- マージした PR: **21 本** (= #82, #87, #92, #97, #98, #100, #101, #102, #104, #107, #108, #110, #111, #113, #115, #117, #127, #130, #133, #136, #137)
+- 起票した Issue: **27 件** (= 15 件 + Issue #40 子 Issue 8 件 #119-#126 + 派生 polish 4 件 #128 #131 #134 #138) + Issue #8 への追記 1 件
+- close した Issue: **25 件** (= #39, #35, #58, #73, #75, #52, #84, #38, #71, #96, #95, #85, #86, #45, #72, #88, #89, #105, #106, #116, #119, #120, #121, #122, #123)
 - 全体 spec: 348 → **431 examples** (= +83)
 - 起票だけして実装はしないが残った polish Issue: **9 件** (= #83, #85-#86, #88-#91, #93-#94, #99)
 - memory 永続化: **4 ファイル新規** (= project_day5_summary, feedback_irreversible_action_pr_pattern, feedback_random_with_seed_testability, feedback_dev_log_after_merge) + **MEMORY.md update**
