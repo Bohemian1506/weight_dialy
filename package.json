@@ -1,5 +1,12 @@
 {
+  "name": "weight_dialy",
+  "version": "1.0.0",
+  "description": "weight_dialy: Android Capacitor wrapper for Health Connect integration (Web は Rails + Importmap で動作、本ファイルは Capacitor 関連依存のみ管理)",
+  "private": true,
   "devDependencies": {
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/cli": "^8.3.1",
+    "@capacitor/core": "^8.3.1",
     "daisyui": "^5.5.19"
   }
 }
