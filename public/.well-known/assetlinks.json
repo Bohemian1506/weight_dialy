@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.weightdialy.app",
+      "sha256_cert_fingerprints": [
+        "30:BA:CC:77:A0:21:9B:65:AD:D6:70:99:28:C2:C0:11:E0:19:0C:90:1A:E6:3C:4A:39:41:B7:2D:1D:0A:79:84"
+      ]
+    }
+  }
+]

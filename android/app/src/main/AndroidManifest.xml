@@ -22,10 +22,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Deep link (= Phase 2a): OAuth callback を Capacitor アプリで受信
-                 autoVerify="false" のため「アプリで開く?」ダイアログがユーザーに表示される。
-                 autoVerify="true" + AssetLinks 検証は Phase 2b で対応予定 (= seamless 化)。 -->
-            <intent-filter>
+            <!-- Deep link (= Phase 2b): OAuth callback を Capacitor アプリで受信
+                 autoVerify="true" + public/.well-known/assetlinks.json で AssetLinks 検証
+                 → Android OS が SHA-256 fingerprint を検証して seamless にアプリ起動 (= ダイアログなし) -->
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
