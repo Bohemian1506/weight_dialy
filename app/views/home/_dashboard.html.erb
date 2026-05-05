@@ -1,8 +1,9 @@
 <%#
   Dashboard partial — Wireframe v3 の sketchy 再現版。
-  ローカル変数: display_name, records, today_record, streak, advice, calorie_savings
+  ローカル変数: display_name, records, today_record, streak, advice, calorie_savings, food_equivalent
   duck typing: records の各要素は recorded_on / steps / distance_meters / flights_climbed / estimated_kcal を持つ。
   calorie_savings: { this_month:, last_month:, total: } 各 kcal を整数で保持 (CalorieSavingsService 由来)。
+  food_equivalent: { emoji:, name:, unit:, count: } または nil (CalorieEquivalentService 由来)。
 %>
 
 <%# ---- SVG チャート計算 ---- %>
@@ -287,7 +288,11 @@
   <div class="sketch-box filled">
     <div class="sketch-label">🔥 消費</div>
     <div class="sketch-hh">+<%= today_kcal %> <span class="sketch-small">kcal</span></div>
-    <div class="sketch-small">≒ アイス 1 個ぶん</div>
+    <% if food_equivalent %>
+      <div class="sketch-small sketch-food-equivalent">≒ <%= food_equivalent[:emoji] %> <%= food_equivalent[:name] %> <%= food_equivalent[:count] %> <%= food_equivalent[:unit] %>ぶん</div>
+    <% else %>
+      <div class="sketch-small">今日のプラスα</div>
+    <% end %>
   </div>
 
   <div class="sketch-box accent">

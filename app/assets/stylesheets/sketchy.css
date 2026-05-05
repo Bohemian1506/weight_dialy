@@ -128,6 +128,8 @@ body {
 /* font-size 14px 統一 (モバイル + プロジェクタ可読性、design-reviewer 指摘) */
 .sketch-label { font-family: 'Kalam', cursive; font-size: 14px; color: var(--muted); }
 .sketch-small { font-family: 'Kalam', cursive; font-size: 14px; color: var(--ink-2); }
+/* 食品換算テキスト: モバイル 375px で長い文字列が折り返さないよう ellipsis を当てる専用クラス */
+.sketch-food-equivalent { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sketch-body-text { font-family: 'Kalam', cursive; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
 
 /* highlight (黄/緑のマーカー風) */
