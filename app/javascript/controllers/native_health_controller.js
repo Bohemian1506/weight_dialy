@@ -74,8 +74,20 @@ export default class extends Controller {
     }
   }
 
+  // status 表示は先頭絵文字でトーンを自動分岐 (= success / error / info)。
+  // 発表会デモで成功 / 失敗の瞬間を視認しやすくするため、太字 + 色強調を適用する。
   showStatus(message) {
     this.statusTarget.textContent = message
+    if (message.startsWith("✅")) {
+      this.statusTarget.style.fontWeight = "700"
+      this.statusTarget.style.color = "var(--ink)"
+    } else if (message.startsWith("❌") || message.startsWith("⚠️")) {
+      this.statusTarget.style.fontWeight = "700"
+      this.statusTarget.style.color = "var(--danger)"
+    } else {
+      this.statusTarget.style.fontWeight = ""
+      this.statusTarget.style.color = ""
+    }
   }
 
   errorMessage(error) {
@@ -178,6 +190,9 @@ export default class extends Controller {
   // Webhook POST フロー (子 Issue #123 / 子 5a = MVP)
   // -------------------------------------------------------------------------
 
+  // sync は「子 4 で取得したデータをそのまま POST」する設計。
+  // 連打しても同日 recorded_on は冪等 (= サーバー側 find_or_initialize_by で同じレコードを上書き) のため副作用なし。
+  // 子 5b (WorkManager 自動化) でこのロジックを Worker 化する場合も「取得 → POST」の 1 トランザクション前提を継承する。
   async sync() {
     if (!this.lastFetchedData) {
       this.showStatus("⚠️ データ未取得です。再読込してください")
@@ -215,7 +230,11 @@ export default class extends Controller {
 
       if (!response.ok) {
         const errorBody = await response.text()
-        this.showStatus(`❌ 送信失敗 (HTTP ${response.status}): ${errorBody.slice(0, 80)}`)
+        // サーバーは {error: "..."} JSON で 4xx を返す設計、JSON parse 成功時は error を抜粋。
+        // パース失敗時は生 body の先頭 80 字でフォールバック。
+        let message = errorBody.slice(0, 80)
+        try { message = JSON.parse(errorBody).error ?? message } catch (_) {}
+        this.showStatus(`❌ 送信失敗 (HTTP ${response.status}): ${message}`)
         return
       }
 
