@@ -16,6 +16,10 @@ Rails.application.routes.draw do
 
   get "/auth/:provider/callback", to: "sessions#create", as: :auth_callback
   get "/auth/failure", to: "sessions#failure", as: :auth_failure
+  # Phase 3 Capacitor OAuth ブリッジ: Custom Tabs から GET で開いて session フラグ立て + /auth/google_oauth2 へ自動 POST 中継
+  get "/auth/capacitor_start", to: "sessions#capacitor_start", as: :capacitor_oauth_start
+  # Phase 3 Capacitor OAuth ブリッジ: WebView 側で one-time token を消費して WebView cookie storage に session 確立
+  get "/auto_login", to: "sessions#auto_login", as: :auto_login
   delete "/logout", to: "sessions#destroy", as: :logout
 
   # Apple Shortcuts → Rails webhook endpoint (Bearer token auth, no CSRF cookie needed)

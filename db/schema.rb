@@ -10,9 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_05_041407) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_05_212134) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "one_time_login_tokens", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "used_at"
+    t.bigint "user_id", null: false
+    t.index ["token"], name: "index_one_time_login_tokens_on_token", unique: true
+    t.index ["user_id"], name: "index_one_time_login_tokens_on_user_id"
+  end
 
   create_table "step_records", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -50,6 +61,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_041407) do
     t.index ["user_id"], name: "index_webhook_deliveries_on_user_id"
   end
 
+  add_foreign_key "one_time_login_tokens", "users", on_delete: :cascade
   add_foreign_key "step_records", "users", on_delete: :cascade
   add_foreign_key "webhook_deliveries", "users", on_delete: :cascade
 end

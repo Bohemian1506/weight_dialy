@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
+    "@capacitor/browser": "^8.0.3",
     "@capgo/capacitor-health": "^8.4.9"
   }
 }

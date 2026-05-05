@@ -14,6 +14,7 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern,
                 if: -> {
                   next false if request.path.start_with?("/auth/")
+                  next false if request.path == "/auto_login" # Phase 3: overrideUserAgent 剥落時でも token 経路は素通しさせる保険
                   ua = request.user_agent.to_s
                   next false if ua.include?("WeightDialyCapacitor")              # 主軸: Capacitor 識別
                   next false if ua.include?("; wv)")                             # 保険 1: Android WebView
