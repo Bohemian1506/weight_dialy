@@ -1,9 +1,14 @@
 require "rails_helper"
 
 RSpec.describe BuildHomeDashboardService do
-  # UA 定数 (home_spec.rb と同一)
-  IPHONE_UA  = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1"
-  ANDROID_UA = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+  # UA 定数 (home_spec.rb と同等内容)。
+  # トップレベル Object 空間への定数漏れを避けるため `let` に変換 (= 既存 home_spec.rb と整合)。
+  let(:iphone_ua) do
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1"
+  end
+  let(:android_ua) do
+    "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+  end
 
   # 最小限の ActionDispatch::Request double を生成する。
   # PlatformDetectorService は request.user_agent だけ参照するため、
@@ -72,7 +77,7 @@ RSpec.describe BuildHomeDashboardService do
     # ─────────────────────────────────────────────────
     context "state: :android (user あり + Android UA)" do
       let(:user) { create(:user) }
-      subject(:result) { described_class.call(user: user, request: build_request(ua: ANDROID_UA)) }
+      subject(:result) { described_class.call(user: user, request: build_request(ua: android_ua)) }
 
       it "state が :android" do
         expect(result.state).to eq(:android)
@@ -97,7 +102,7 @@ RSpec.describe BuildHomeDashboardService do
     # ─────────────────────────────────────────────────
     context "state: :empty (user あり + iOS UA + step_records なし)" do
       let(:user) { create(:user) }
-      subject(:result) { described_class.call(user: user, request: build_request(ua: IPHONE_UA)) }
+      subject(:result) { described_class.call(user: user, request: build_request(ua: iphone_ua)) }
 
       it "state が :empty" do
         expect(result.state).to eq(:empty)
@@ -118,7 +123,7 @@ RSpec.describe BuildHomeDashboardService do
     context "state: :iphone_with_data (user あり + iOS UA + step_records あり)" do
       let(:user) { create(:user) }
       let!(:step_record) { create(:step_record, user: user, recorded_on: Date.current, steps: 9000) }
-      subject(:result) { described_class.call(user: user, request: build_request(ua: IPHONE_UA)) }
+      subject(:result) { described_class.call(user: user, request: build_request(ua: iphone_ua)) }
 
       it "state が :iphone_with_data" do
         expect(result.state).to eq(:iphone_with_data)
