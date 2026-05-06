@@ -36,6 +36,12 @@ RSpec.describe "POST /webhooks/health_data", type: :request do
     it "records the WebhookDelivery with user = nil (PII protection)" do
       expect(WebhookDelivery.last.user).to be_nil
     end
+
+    it "records the unauthorized error_message via I18n (観点 4: I18n キー欠落検出)" do
+      # authenticate_webhook! が I18n.t("webhook.errors.unauthorized") を error_message に渡すことを確認。
+      # キー名 typo や ja.yml からのキー削除があれば "translation missing:" が混入し fail する。
+      expect(WebhookDelivery.last.error_message).to eq(I18n.t("webhook.errors.unauthorized"))
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -246,8 +252,8 @@ RSpec.describe "POST /webhooks/health_data", type: :request do
       expect(WebhookDelivery.last.status).to eq("invalid")
     end
 
-    it "includes 'JSON parse error' in the error_message" do
-      expect(WebhookDelivery.last.error_message).to include("JSON parse error")
+    it "includes 'Shortcut からのデータを読み取れませんでした' in the error_message" do
+      expect(WebhookDelivery.last.error_message).to include("Shortcut からのデータを読み取れませんでした")
     end
   end
 
@@ -269,8 +275,8 @@ RSpec.describe "POST /webhooks/health_data", type: :request do
       expect(WebhookDelivery.last.status).to eq("invalid")
     end
 
-    it "includes 'missing records array' context in the error_message" do
-      expect(WebhookDelivery.last.error_message).to include("missing 'records' array")
+    it "includes 'Shortcut からのデータが届きませんでした' in the error_message" do
+      expect(WebhookDelivery.last.error_message).to include("Shortcut からのデータが届きませんでした")
     end
   end
 
@@ -309,8 +315,8 @@ RSpec.describe "POST /webhooks/health_data", type: :request do
       expect(WebhookDelivery.last.status).to eq("invalid")
     end
 
-    it "includes 'recorded_on is required' in the error_message" do
-      expect(WebhookDelivery.last.error_message).to include("recorded_on is required")
+    it "includes '記録日の情報が含まれていません' in the error_message" do
+      expect(WebhookDelivery.last.error_message).to include("記録日の情報が含まれていません")
     end
   end
 
@@ -337,8 +343,8 @@ RSpec.describe "POST /webhooks/health_data", type: :request do
           expect(WebhookDelivery.last.status).to eq("invalid")
         end
 
-        it "mentions 'recorded_on must be yyyy-MM-dd' in the error_message" do
-          expect(WebhookDelivery.last.error_message).to include("recorded_on must be yyyy-MM-dd")
+        it "mentions '日付がうまく読み取れませんでした' in the error_message" do
+          expect(WebhookDelivery.last.error_message).to include("日付がうまく読み取れませんでした")
         end
       end
     end
@@ -364,8 +370,8 @@ RSpec.describe "POST /webhooks/health_data", type: :request do
         expect(response).to have_http_status(:unprocessable_content)
       end
 
-      it "mentions 'recorded_on is required' in the error_message (blank check)" do
-        expect(WebhookDelivery.last.error_message).to include("recorded_on is required")
+      it "mentions '記録日の情報が含まれていません' in the error_message (blank check)" do
+        expect(WebhookDelivery.last.error_message).to include("記録日の情報が含まれていません")
       end
     end
 
@@ -409,8 +415,8 @@ RSpec.describe "POST /webhooks/health_data", type: :request do
       expect(WebhookDelivery.last.status).to eq("invalid")
     end
 
-    it "includes 'RecordInvalid' in the error_message" do
-      expect(WebhookDelivery.last.error_message).to include("RecordInvalid")
+    it "includes 'データの値に問題がありました' in the error_message" do
+      expect(WebhookDelivery.last.error_message).to include("データの値に問題がありました")
     end
   end
 
@@ -491,7 +497,9 @@ RSpec.describe "POST /webhooks/health_data", type: :request do
         end
 
         it "mentions the field name in error_message" do
-          expect(WebhookDelivery.last.error_message).to include(field.to_s)
+          # I18n 化後はフィールド名が日本語 (歩数 / 距離 / 登った階数) になる。
+          # 英語キー名 (steps 等) は含まれなくなるため、共通文言「は数値で送ってください」で確認する。
+          expect(WebhookDelivery.last.error_message).to include("は数値で送ってください").or include("は整数で送ってください")
         end
       end
     end

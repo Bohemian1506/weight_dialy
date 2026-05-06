@@ -1,0 +1,16 @@
+ja:
+  webhook:
+    fields:
+      steps: 歩数
+      distance_meters: 距離
+      flights_climbed: 登った階数
+    errors:
+      missing_records_array: "Shortcut からのデータが届きませんでした。Shortcut を再度実行してみてください。"
+      json_parse_error: "Shortcut からのデータを読み取れませんでした。Shortcut を再度実行してみてください。"
+      record_invalid: "データの値に問題がありました。Shortcut を再度実行してみてください。"
+      # 運用ログ用、開発者向け文言なので英語維持 (= 本人画面に出ない経路、user: nil で audit log のみ)
+      unauthorized: "bearer token mismatch or missing"
+      recorded_on_required: "記録日の情報が含まれていません"
+      recorded_on_invalid_format: "日付がうまく読み取れませんでした。Shortcut を最新版に更新してください。"
+      must_be_whole_number: "%{field} は整数で送ってください: 受信値=%{value} (Float)"
+      must_be_number: "%{field} は数値で送ってください: 受信値=%{value} (型: %{type})"
