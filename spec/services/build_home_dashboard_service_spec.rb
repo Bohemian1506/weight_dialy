@@ -101,13 +101,13 @@ RSpec.describe BuildHomeDashboardService do
     # 回帰防止: ログイン済み + Android UA + step_records あり (= Capacitor 同期済 user)
     # 旧版は :android 状態でデモデータを返していた (Issue #158, #159)
     # ─────────────────────────────────────────────────
-    context "state: :iphone_with_data (user あり + Android UA + step_records あり = Capacitor 同期済)" do
+    context "state: :has_data (user あり + Android UA + step_records あり = Capacitor 同期済)" do
       let(:user) { create(:user) }
       let!(:step_record) { create(:step_record, user: user, recorded_on: Date.current, steps: 9000) }
       subject(:result) { described_class.call(user: user, request: build_request(ua: android_ua)) }
 
-      it "state が :iphone_with_data (= Android user でも実データあれば実データ状態を返す)" do
-        expect(result.state).to eq(:iphone_with_data)
+      it "state が :has_data (= Android user でも実データあれば実データ状態を返す)" do
+        expect(result.state).to eq(:has_data)
       end
 
       it "records に DB の StepRecord が含まれる (= デモデータではない)" do
@@ -144,15 +144,15 @@ RSpec.describe BuildHomeDashboardService do
     end
 
     # ─────────────────────────────────────────────────
-    # 状態 :iphone_with_data — ログイン済み + iOS + データあり
+    # 状態 :has_data — ログイン済み + iOS + データあり
     # ─────────────────────────────────────────────────
-    context "state: :iphone_with_data (user あり + iOS UA + step_records あり)" do
+    context "state: :has_data (user あり + iOS UA + step_records あり)" do
       let(:user) { create(:user) }
       let!(:step_record) { create(:step_record, user: user, recorded_on: Date.current, steps: 9000) }
       subject(:result) { described_class.call(user: user, request: build_request(ua: iphone_ua)) }
 
-      it "state が :iphone_with_data" do
-        expect(result.state).to eq(:iphone_with_data)
+      it "state が :has_data" do
+        expect(result.state).to eq(:has_data)
       end
 
       it "display_name が user.name" do

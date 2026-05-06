@@ -1,5 +1,5 @@
 <%# ホーム画面 — 状態別バナー + dashboard 本体。
-    @dashboard_state が :iphone_with_data のときのみ実データ、それ以外はデモデータ。
+    @dashboard_state が :has_data のときのみ実データ、それ以外はデモデータ。
     バナーは最大1つだけ表示される。 %>
 
 <%# 状態別バナー (ゲスト / Android / データなし) %>
@@ -13,8 +13,8 @@
 <% end %>
 
 <%# 実データ ON でない時は dashboard 上部に「※ サンプルデータ」明示 (誤認防止)。
-    iphone_with_data 状態ではバナーも非表示なので、表示中の dashboard が完全に「自分のデータ」になる。 %>
-<% if @dashboard_state != :iphone_with_data %>
+    has_data 状態ではバナーも非表示なので、表示中の dashboard が完全に「自分のデータ」になる。 %>
+<% if @dashboard_state != :has_data %>
   <div class="sketch-small" style="text-align: right; margin: 8px 0 -4px; padding: 0 4px; color: var(--muted);">
     ※ 表示中の数値はサンプルデータです
   </div>

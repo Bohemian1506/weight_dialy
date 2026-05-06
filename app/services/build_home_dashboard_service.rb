@@ -26,7 +26,7 @@ class BuildHomeDashboardService
       today_record = records.find { |r| r.recorded_on == Date.current } || records.last
 
       calorie_savings =
-        if state == :iphone_with_data
+        if state == :has_data
           CalorieSavingsService.call_for_user(user)
         else
           CalorieSavingsService.call(records)
@@ -48,7 +48,7 @@ class BuildHomeDashboardService
 
     # state 判定の優先順位 (= 2026-05-06 Day 8 で見直し):
     # 1. 未ログイン → :guest
-    # 2. 実データあり → :iphone_with_data (= platform に関わらず実データ表示、誤称だが互換性のため名前は据え置き)
+    # 2. 実データあり → :has_data (= platform に関わらず実データ表示。データの有無を最優先で見る軸名)
     # 3. Android UA + データなし → :android (= Capacitor 連携誘導バナー)
     # 4. それ以外 + データなし → :empty (= iOS Shortcut 誘導バナー)
     #
@@ -57,7 +57,7 @@ class BuildHomeDashboardService
     # データの有無を見ずに :android 状態を強制するとデモデータが返る。
     def determine_state(user, request)
       return :guest unless user
-      return :iphone_with_data if user.step_records.exists?
+      return :has_data if user.step_records.exists?
 
       platform = PlatformDetectorService.from_request(request)
       return :android if platform == :android
@@ -68,7 +68,7 @@ class BuildHomeDashboardService
     # 直近 30 日のレコードを返す (チャート描画用)。
     # guest / android / empty は DemoDataService のデモデータで代替。
     def fetch_records(user, state)
-      if state == :iphone_with_data
+      if state == :has_data
         user.step_records
             .where(recorded_on: 30.days.ago.to_date..Date.current)
             .order(:recorded_on)
