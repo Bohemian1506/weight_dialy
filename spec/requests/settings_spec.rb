@@ -272,6 +272,53 @@ RSpec.describe "Settings", type: :request do
         end
       end
     end
+
+    # -------------------------------------------------------------------------
+    # Web Android user 向けプロモセクション出し分け (Issue #184)
+    # -------------------------------------------------------------------------
+    context "UA 別 Android アプリ案内セクション出し分け" do
+      let(:user) { create(:user) }
+
+      before { login(user) }
+
+      context "Web 版 Android Chrome UA でアクセスしたとき" do
+        before do
+          get settings_path, headers: {
+            "HTTP_USER_AGENT" => "Mozilla/5.0 (Linux; Android 13; SM-S908U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+          }
+        end
+
+        it "「インストール手順を準備中」セクションを表示する (= Web Android user 向け新セクション、Issue #184)" do
+          # 新セクションのタイトル (= 「📱 Android Health Connect 連携」) は既存の Capacitor 検知時セクションと
+          # 同一文字列のため、新セクション固有の本文「インストール手順を準備中」で識別する。
+          expect(response.body).to include("インストール手順を準備中")
+        end
+      end
+
+      context "Android Capacitor アプリ (WeightDialyCapacitor を含む UA) でアクセスしたとき" do
+        before do
+          get settings_path, headers: {
+            "HTTP_USER_AGENT" => "Mozilla/5.0 (Linux; Android 13; SM-S908U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36 WeightDialyCapacitor"
+          }
+        end
+
+        it "「インストール手順を準備中」セクションを表示しない (= 既存 native-health セクションが JS で代替表示)" do
+          expect(response.body).not_to include("インストール手順を準備中")
+        end
+      end
+
+      context "PC ブラウザ (Desktop UA) でアクセスしたとき" do
+        before do
+          get settings_path, headers: {
+            "HTTP_USER_AGENT" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"
+          }
+        end
+
+        it "「インストール手順を準備中」セクションを表示しない (= Android UA でないため非表示)" do
+          expect(response.body).not_to include("インストール手順を準備中")
+        end
+      end
+    end
   end
 
   # ---------------------------------------------------------------------------
