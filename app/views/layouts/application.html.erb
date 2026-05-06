@@ -48,11 +48,12 @@
     </header>
 
     <%# flash はトースト風に画面上部 fixed で重ねる (document flow から外れるため、表示/非表示で下のコンテンツがズレない)。
-        top-24 (96px) は navbar 高さ + 余白 + 将来 navbar を sticky 化した時の追加バッファ。
+        top-20 (80px) は navbar 高さ 約 64px (= padding 16px + ボタン約 46px + border-bottom 2px、Issue #49 slim 化後) + 余白 約 16px。
+        Issue #49 で navbar 高さを 74px → 約 64px に縮めたのに合わせて top-24 → top-20 に追従、トーストが navbar 直下から自然に出る。
         FOUC 対策: 初期 opacity-0 + Stimulus connect() で fade-in。JS 無効フォールバックは <head> の <noscript><style> 参照。
         見た目は sketchy トーストに差し替え (sketch-toast)、フェード挙動 (flash_controller.js) は変更しない。 %>
     <% if flash[:notice] || flash[:alert] %>
-      <div class="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md space-y-2">
+      <div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md space-y-2">
         <% if flash[:notice] %>
           <div class="sketch-toast notice opacity-0" role="alert" data-controller="flash">
             <span class="sketch-toast-message"><%= flash[:notice] %></span>
