@@ -37,6 +37,14 @@ RSpec.describe "Legal", type: :request do
         expect(response.body).to include("Google")
       end
 
+      it "「Apple Shortcuts」経由の取得情報を明記している" do
+        expect(response.body).to include("Apple Shortcuts")
+      end
+
+      it "「Android Health Connect」経由の取得情報を明記している (= Issue #131、Google 規約対応)" do
+        expect(response.body).to include("Android Health Connect")
+      end
+
       it "「運営者」セクションを含む" do
         expect(response.body).to include("運営者")
       end
