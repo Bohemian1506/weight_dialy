@@ -1,16 +1,17 @@
-<%# Android ユーザー向けバナー。Capacitor アプリ版で Health Connect 連携が可能。 %>
+<%# Android ユーザー向けバナー。Capacitor アプリで Health Connect 経由の自動送信が可能。
+    CTA 文言「設定を見る」は #126 (= APK sideload 配布) 完了まで維持。配布開始時に
+    「アプリを入手する」 + 直接ダウンロード CTA に書き換える予定 (= Issue #162 design 提案)。 %>
 <div class="sketch-banner sketch-banner-android" role="banner">
   <div class="sketch-banner-body">
     <span class="sketch-banner-icon">🤖</span>
     <div>
       <p class="sketch-banner-text">
-        <strong>Android アプリ版</strong>で Health Connect と連携できます。
-        いまはサンプルデータで雰囲気をご覧ください。iPhone なら「ショートカット」で今すぐ自動連携できます。
+        Android スマホから Health Connect 経由で歩数を自動送信できます。
+        いまはサンプルデータで雰囲気をご覧ください。
       </p>
     </div>
   </div>
   <div class="sketch-banner-action">
-    <%# PR #33 (settings) 未マージのため /settings をハードコード %>
-    <%= link_to "設定を見る", "/settings", class: "sketch-btn" %>
+    <%= link_to "設定を見る", settings_path, class: "sketch-btn sketch-btn-primary" %>
   </div>
 </div>

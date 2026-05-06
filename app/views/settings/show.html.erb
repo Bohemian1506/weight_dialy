@@ -85,6 +85,22 @@
     </p>
   <% end %>
 
+  <%# Web 版 Android user 向け案内 (Issue #184)。Capacitor 検知時はサーバ側で web_android? = false になり非表示、
+      かつ既存の native-health セクション (下記) が JS で代替表示される。UX ループ解消が目的。 %>
+  <% if @show_android_app_promo %>
+    <div class="sketch-box" style="margin-bottom: 24px;">
+      <h2 class="sketch-h" style="margin-bottom: 8px;">📱 Android Health Connect 連携</h2>
+      <p class="sketch-body-text" style="margin-bottom: 12px;">
+        お手元の Android スマホから Health Connect 経由で歩数 / 距離 / 階段を自動同期できます。
+        同期されたデータは Web 版にログインしてダッシュボードで閲覧できます。
+      </p>
+      <p class="sketch-body-text" style="margin-bottom: 0;">
+        現在 Android アプリのインストール手順を準備中です。
+        それまでは <strong>サンプルデータ</strong>で雰囲気をお試しください。
+      </p>
+    </div>
+  <% end %>
+
   <%# Health Connect 連携 (Android のみ、Capacitor 検知で動的表示。Web 版では非表示のまま) %>
   <div data-controller="native-health"
        data-native-health-webhook-token-value="<%= current_user.webhook_token %>"
