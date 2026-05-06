@@ -36,14 +36,20 @@ body {
 }
 
 /* ---------- navbar ---------- */
-/* Issue #49: padding 14px → 8px に縮小して navbar 高さを 74px → 62px に slim 化。
+/* Issue #49: padding 14px → 8px に縮小して navbar 高さを 74px → 約 64px に slim 化。
    ボタン自体の高さ 46px は維持するため WCAG 2.5.5 (= 44px タップ領域) は引き続き満たす。
-   Issue #47 (= sketch-btn 全体 44px 化) のゴールと両立する設計、design-reviewer 事前相談で確定。 */
+   Issue #47 (= sketch-btn 全体 44px 化) のゴールと両立する設計、design-reviewer 事前相談で確定。
+
+   sticky 化 (= position: sticky; top: 0): スクロール時も navbar が常時画面上部に残る。
+   z-index: 30 < flash toast z-50 のため、トーストは navbar より前面に出る (= 階層整合済)。
+   background: var(--paper) は半透明背景 (= scroll で下のコンテンツが透けるのを防ぐ) と
+   sticky 重なり時の視認性確保のためそのまま維持。 */
 .sketch-navbar {
   display: flex; align-items: center; justify-content: space-between;
   padding: 8px 20px; gap: 12px;
   border-bottom: 2px solid var(--ink);
   background: var(--paper);
+  position: sticky; top: 0; z-index: 30;
 }
 .sketch-navbar-title {
   font-family: 'Caveat', cursive; font-weight: 700; font-size: 32px;
