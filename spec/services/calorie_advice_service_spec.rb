@@ -28,6 +28,10 @@ RSpec.describe CalorieAdviceService do
         expect(result.button_label).to be_present
       end
 
+      it "body が nil (= 通常ステートでは body は空ステート専用、回帰防止)" do
+        expect(result.body).to be_nil
+      end
+
       it "各 item が name / kcal / label 構造を持つ" do
         result.items.each do |item|
           expect(item).to respond_to(:name, :kcal, :label)
@@ -69,8 +73,8 @@ RSpec.describe CalorieAdviceService do
       end
     end
 
-    context "29 kcal (= ZERO_THRESHOLD 境界の直前、空ステート扱い)" do
-      let(:kcal) { 29 }
+    context "ZERO_THRESHOLD - 1 kcal (= 境界の直前、空ステート扱い)" do
+      let(:kcal) { CalorieAdviceService::ZERO_THRESHOLD - 1 }
 
       it "items が空配列 (= しきい値未満は 0 と同じ扱い)" do
         expect(result.items).to eq([])
@@ -81,8 +85,8 @@ RSpec.describe CalorieAdviceService do
       end
     end
 
-    context "30 kcal (= ZERO_THRESHOLD ぴったり、通常ステート)" do
-      let(:kcal) { 30 }
+    context "ZERO_THRESHOLD ぴったり kcal (= 通常ステート下限)" do
+      let(:kcal) { CalorieAdviceService::ZERO_THRESHOLD }
 
       include_examples "正常なレスポンス構造"
 
@@ -166,6 +170,8 @@ RSpec.describe CalorieAdviceService do
   end
 
   describe "AI 成功時とフォールバック時の分岐" do
+    # ZERO_THRESHOLD (30) を超えた値を使い、AI / Static の分岐まで到達することを保証する。
+    # 0 kcal 等のしきい値未満を渡すと冒頭ガード節で zero_kcal_result が返ってしまい、AI 経路の検証が成立しない。
     let(:kcal) { 200 }
 
     # ai_available? を true にするため credentials を stub (= 上のメインテストとは別に、AI 経路を試したいので)
