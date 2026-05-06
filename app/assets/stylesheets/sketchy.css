@@ -55,6 +55,9 @@ body {
   border-bottom: 2px solid var(--ink);
   background: var(--paper);
   position: sticky; top: 0; z-index: 30;
+  /* transition は本体側に置く: .is-scrolled 側にだけ書くと付く方向のみ効いて
+     外す方向 (scroll up) で shadow が即時消滅して「バグっぽい」印象になるため (3 者レビュー指摘)。 */
+  transition: box-shadow .15s ease;
 }
 .sketch-navbar-title {
   font-family: 'Caveat', cursive; font-weight: 700; font-size: 32px;
@@ -73,10 +76,10 @@ body {
 }
 /* scroll 中は浮遊感として shadow を付与。
    navbar_scroll_controller.js が window.scrollY > 4px のとき .is-scrolled を element に付与する。
-   transition: box-shadow は CSS 側で宣言し、JS は class の付け外しのみ担当 (= 責務分離)。 */
+   transition は .sketch-navbar 本体に書いてあるため両方向 (付く / 外す) で .15s ease が効く。
+   JS は class の付け外しのみ担当 (= 責務分離)。 */
 .sketch-navbar.is-scrolled {
   box-shadow: 0 2px 6px rgba(0,0,0,.12);
-  transition: box-shadow .15s ease;
 }
 .sketch-navbar-right { display: flex; align-items: center; gap: 12px; }
 .sketch-navbar-name {
