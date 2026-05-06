@@ -35,7 +35,7 @@ class CalorieEquivalentService
 
     rng = Random.new(seed)
     # 同 seed でも候補順をばらけさせ、上限 max_count 超え食品を弾く再抽選を可能にする。
-    # (旧実装の Foods::ALL.sample では 1 食品決め打ちで上限超えを skip できなかった)
+    # (旧実装の FOODS.sample では 1 食品決め打ちで上限超えを skip できなかった)
     shuffled = Foods::ALL.shuffle(random: rng)
 
     # 1 <= count <= max_count を満たす最初の食品を採用 (再抽選ロジック)

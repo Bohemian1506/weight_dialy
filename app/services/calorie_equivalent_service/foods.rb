@@ -8,8 +8,11 @@
 #   - 結果: ロジック (= calorie_equivalent_service.rb) と データ (= 本ファイル) を別ファイルに分離するのが最もシンプル
 #
 # private_constant を付けない理由:
-#   - Rails 8 + Zeitwerk の autoload 規約 (= ファイルパスと定数名が完全一致) と
-#     `private_constant :Foods` の宣言タイミングが両立しづらいため、別ファイル化と引き換えに諦めた
+#   - Rails 8 + Zeitwerk では Foods のロードが遅延評価されるため、
+#     親ファイル (= calorie_equivalent_service.rb) で `private_constant :Foods` を書くと
+#     Foods 定数がまだロードされていない時点で宣言が走り NameError リスクがある。
+#     別ファイル化と引き換えに諦めた (= 明示 `require_relative` で回避する手もあるが、
+#     Rails の autoload 慣習を尊重する判断)。
 #   - 各定数は freeze 済で外部から書き換え不可、実害なし
 #   - 元コードでは Item / FOODS / MIN_KCAL すべて private_constant だったが、本リファクタでは
 #     「データテーブルとして見えてよい」 と判断 (= 単体テスト等で参照しやすくなる副次効果あり)

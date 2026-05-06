@@ -6,7 +6,7 @@ RSpec.describe CalorieEquivalentService do
   # srand リセットは不要。
 
   # 新アルゴリズム (shuffle + 再抽選) での seed 別採用食品:
-  #   - FOODS.shuffle(random: rng) で並び順を確定し、1 <= count <= max_count(5) を
+  #   - Foods::ALL.shuffle(random: rng) で並び順を確定し、1 <= count <= max_count(5) を
   #     満たす最初の食品を採用する。以下は today_kcal=1000, max_count=5 での結果。
   #   seed=0   → おにぎり   180 kcal (count=5)
   #   seed=1   → おにぎり   180 kcal (count=5)
