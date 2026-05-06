@@ -17,7 +17,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 28 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + 動線リハ反映 polish 1 件 + OGP リッチ移行 1 件 + Favicon リッチ移行 1 件 + ログイン CTA 集約 (案 A 逆転) 1 件 + モバイル比率 + Web 下切れ予防 1 件 + AI カード flex + navbar mobile 1 件 + 0 歩警告 + navbar 左寄せ 1 件 + Android 利用ガイド README 1 件 + .sketch-btn nowrap + flex-shrink 1 件 + navbar ボタン縦位置微調整 1 件 + 初回 welcome モーダル 1 件 + welcome モーダル毎回表示 opt-out 化 1 件 + v1.1 backlog 5 件集約)
+## 🏆 達成したこと (= 計 29 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + 動線リハ反映 polish 1 件 + OGP リッチ移行 1 件 + Favicon リッチ移行 1 件 + ログイン CTA 集約 (案 A 逆転) 1 件 + モバイル比率 + Web 下切れ予防 1 件 + AI カード flex + navbar mobile 1 件 + 0 歩警告 + navbar 左寄せ 1 件 + Android 利用ガイド README 1 件 + .sketch-btn nowrap + flex-shrink 1 件 + navbar ボタン縦位置微調整 1 件 + 初回 welcome モーダル 1 件 + welcome モーダル毎回表示 opt-out 化 1 件 + README 改修 + 業界標準アーキテクチャ教材 1 件 + v1.1 backlog 5 件集約)
 
 ### マージ済み PR (= 10 本)
 
@@ -51,6 +51,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #212 | – | polish: モバイル navbar ボタン群を 6px 下にずらす微調整 (= 画像 11 由来、視覚バランス改善)。タイトル「weight daily.」が Caveat 32px で 2 行折り返し時、ボタン群が上寄り過ぎてバランス悪い → モバイル幅で `.sketch-navbar-right` に `margin-top: 6px` 追加で daily. の下半分付近に揃える。微調整レベル、副作用なし |
 | #214 | – | feat: 初回アクセス welcome モーダル追加 (= iPhone Shortcuts 案内 + Android 近日公開予定 + sample 体験可)。ホーム未ログイン時の初回アクセスで表示、localStorage で「見た」フラグ保存して 2 回目以降非表示。内容: 概要 / 📱 iPhone (Apple Shortcuts 連携 3 step) / 🤖 Android (アプリ版近日公開、サンプルデータ体験可、ログイン不要)。背景クリック / Escape / 「確認しました」ボタンで閉じる + ARIA dialog 属性。未ログイン時のみ描画 (= ログイン済 user は既に使い方理解 + home_spec assertion 整合)。新規ファイル 2 つ (welcome_modal_controller.js / _welcome_modal.html.erb) |
 | #216 | – | polish: welcome モーダル仕様変更 (= 「初回 1 回限り」 → 「毎回表示 + opt-out 選択肢」、ユーザー局長要望)。controller の localStorage キー意味反転 (seen → hidden)、connect で「ユーザーが opt-out した場合のみスキップ」、それ以外は毎回表示。close 時に dontShowAgain チェックボックスが ON の時のみ localStorage 保存。partial に「以降表示しない」チェックボックス追加 (= sketchy トーンの軽量 label)。教材性: 初回ガイドの「opt-in vs opt-out」UX 判断、デフォルトでユーザー選択を尊重 |
+| #220 | – | docs: README 改修 3 段階 + 業界標準アーキテクチャ教材追加 + Issue #219 起票。9 章 v1.1 詳細 4 サブ削除 (-25 行) + 12 章に「12-6. なぜこのアーキテクチャか」教材追加 (= +28 行、Google Health 系 API 二分岐表 / Apple/Google プライバシー方針 / Web 公式 API を待つ戦略は無意味の結論) + 11 章デプロイ環境 84 行を docs/deploy-render.md に外出し (-74 行) + 4-4 「スクールの発表会で実物を触る → 同期からの口コミ伝播」削除 (-1 行)。結果: README 557 → 486 行 (-71 行、13% 削減)。api-researcher 調査 (= Google Fit REST 廃止 / Health Connect SDK 限定 / Google Health API は Fitbit + Pixel Watch のみ) を教材化、ニッチ Web 完結ルートとして Issue #219 (Google Health API v1.1) 起票 |
 
 ### close した Issue (= 8 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
@@ -307,7 +308,7 @@ How to apply:
 
 ## 📊 統計
 
-- マージした PR: **28 本** (= 上記 + #216 welcome モーダル opt-out 化)
+- マージした PR: **29 本** (= 上記 + #220 README 改修 + 業界標準アーキテクチャ教材)
 - close した Issue: **13 件** (= 12 件 + #106 既対応確認による close) + Issue #174 部分 close (= A+B+D 完了、C のみ v1.1 持ち越し)
 - 起票した Issue (= v1.1 backlog): **9 件** (= 当日内 #190 safe-area-inset 補正起票追加)
 - 全体 spec: 431 → **557 examples** (= +126)
