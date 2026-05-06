@@ -38,17 +38,60 @@ RSpec.describe CalorieAdviceService do
       end
     end
 
-    context "0 kcal (最小値)" do
+    # Issue #163 (= 0 kcal バナナ余裕誤誘導) で導入された空ステート。
+    # しきい値未満 (= 30 kcal 未満) では AI / Static を呼ばず ZERO_HEADLINE + ZERO_BODY を返す。
+    context "0 kcal (= ZERO_THRESHOLD 未満、空ステート)" do
       let(:kcal) { 0 }
+
+      it "items が空配列" do
+        expect(result.items).to eq([])
+      end
+
+      it "headline が ZERO_HEADLINE「今日のスタートはここから」" do
+        expect(result.headline).to eq("今日のスタートはここから")
+      end
+
+      it "body に ZERO_BODY 文言が入る (= 食品提案の代わり)" do
+        expect(result.body).to eq("歩数が記録されると、食べていいものを提案するよ。")
+      end
+
+      it "button_label が nil (= 0 kcal 時はボタン非表示、design レビュー指摘)" do
+        expect(result.button_label).to be_nil
+      end
+
+      it "ai_used が false (= AI を呼ばずに即返す)" do
+        expect(result.ai_used).to be false
+      end
+
+      it "AI を呼ばない (= API コスト節約、ガード節で先にリターン)" do
+        expect(CalorieAdviceService::Ai).not_to receive(:call)
+        result
+      end
+    end
+
+    context "29 kcal (= ZERO_THRESHOLD 境界の直前、空ステート扱い)" do
+      let(:kcal) { 29 }
+
+      it "items が空配列 (= しきい値未満は 0 と同じ扱い)" do
+        expect(result.items).to eq([])
+      end
+
+      it "headline が ZERO_HEADLINE" do
+        expect(result.headline).to eq("今日のスタートはここから")
+      end
+    end
+
+    context "30 kcal (= ZERO_THRESHOLD ぴったり、通常ステート)" do
+      let(:kcal) { 30 }
 
       include_examples "正常なレスポンス構造"
 
-      it "headline が新コピー「今日の消費カロリーならこれ食べられるよ〜」である (= Issue #42 で確定)" do
+      it "headline が通常 HEADLINE (= 空ステートではない)" do
         expect(result.headline).to eq("今日の消費カロリーならこれ食べられるよ〜")
       end
 
-      it "button_label が規定文字列である" do
-        expect(result.button_label).to eq("食べたい物から逆算 →")
+      it "items が 3 件" do
+        expect(result.items.size).to eq(3)
       end
     end
 
@@ -110,12 +153,13 @@ RSpec.describe CalorieAdviceService do
         end
       end
 
-      # total_kcal = 0 の場合は ratio = 0 → 全件 "余裕"
-      context "total_kcal = 0 の場合" do
+      # Issue #163 fix 後: total_kcal = 0 (= しきい値未満) は空ステートを返すため、
+      # items が空配列で「余裕」誤誘導が発生しないことを保証する (= 旧バグの回帰防止)。
+      context "total_kcal = 0 (= 旧版バグの回帰防止)" do
         let(:kcal) { 0 }
 
-        it "全 item の label が「余裕」である" do
-          expect(result.items.map(&:label)).to all(eq("余裕"))
+        it "items が空配列 (= 全件「余裕」誤誘導の元凶を断つ)" do
+          expect(result.items).to eq([])
         end
       end
     end
