@@ -22,6 +22,11 @@
   --danger: #cc0000;
   --danger-bg: #ffe5e5;
   --danger-soft-border: rgba(204,0,0,0.35); /* sketch-box-danger-soft 用、削除より弱い警告強度 */
+  /* navbar 高さ参照変数。navbar 自体の高さは padding/content で決まり、この変数に引きずられない。
+     参照側 (flash toast の top-offset 等) が --navbar-height を使うことで、
+     navbar 高さを変更した際に参照箇所を一括更新できる (= Issue #174 B)。
+     現在値 64px = padding 8px×2 + ボタン約 46px + border-bottom 2px (= Issue #49 slim 化後の実測値)。 */
+  --navbar-height: 64px;
 }
 
 /* body 全体を紙質背景に。layout から bg-base-200 は外す前提。 */
@@ -50,6 +55,9 @@ body {
   border-bottom: 2px solid var(--ink);
   background: var(--paper);
   position: sticky; top: 0; z-index: 30;
+  /* transition は本体側に置く: .is-scrolled 側にだけ書くと付く方向のみ効いて
+     外す方向 (scroll up) で shadow が即時消滅して「バグっぽい」印象になるため (3 者レビュー指摘)。 */
+  transition: box-shadow .15s ease;
 }
 .sketch-navbar-title {
   font-family: 'Caveat', cursive; font-weight: 700; font-size: 32px;
@@ -65,6 +73,13 @@ body {
   background-position: 0 100%;
   background-size: 100% 42%;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30' preserveAspectRatio='none'><path d='M0,8 C18,0 38,12 56,3 C74,0 88,11 100,4 L100,25 C82,29 62,22 44,26 C26,30 12,23 0,27 Z' fill='%23ffd23f' fill-opacity='0.95'/></svg>");
+}
+/* scroll 中は浮遊感として shadow を付与。
+   navbar_scroll_controller.js が window.scrollY > 4px のとき .is-scrolled を element に付与する。
+   transition は .sketch-navbar 本体に書いてあるため両方向 (付く / 外す) で .15s ease が効く。
+   JS は class の付け外しのみ担当 (= 責務分離)。 */
+.sketch-navbar.is-scrolled {
+  box-shadow: 0 2px 6px rgba(0,0,0,.12);
 }
 .sketch-navbar-right { display: flex; align-items: center; gap: 12px; }
 .sketch-navbar-name {
