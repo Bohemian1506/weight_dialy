@@ -123,7 +123,6 @@
 ### 4-4. ユーザーがサービスを導入して利用するまでのイメージ
 
 **(1) どんな場面でアプリを知る・思い出すか**
-- スクールの発表会で実物を触る → 同期からの口コミ伝播
 - SNS (X / Zenn) で開発者本人が「自分の Streak」を発信して認知拡大
 - 「ラーメン食べていいかな?」と検索した時、AI 提案アプリの選択肢として浮上
 
@@ -274,32 +273,7 @@
 | **v1.1** | カロリー貯金システム (Section 7 で予告した目玉機能) | アプリの哲学 (罪悪感 → 財務感覚) を機能で完成させる |
 | **v2.0** | AI 提案ロジックの個別最適化 | データ蓄積後の差別化の核 |
 
-minor 機能群 (PWA / ダークモード / ウィジェット / SNS / 各種ガチ運動モード機能) は上記の合間に随時取り込み。
-
-### カロリー貯金システム (v1.1 詳細)
-
-Section 7 で予告した目玉機能。仕様の核:
-- 累計消費 - 累計摂取 = 貯金残高
-- マイルストーン到達 (ラーメン 1 杯 ≈ 1000kcal、大盛りカツ丼 ≈ 1500kcal、ジョッキビール ≈ 200kcal) で祝福バナー
-- 摂取側の入力は AI 提案を「食べた!」ボタンで承認した時点で自動引き落とし (= 入力ゼロ理念を維持)
-- 残高がマイナスになったら「赤字警告」(= 罪悪感じゃなく財務感覚で警鐘)
-
-### データが溜まった先のアイデア帳
-
-- **個人ベースライン学習**: 「今日は普段比 +20% 動いた」のような相対評価
-- **季節 / 曜日 / 天気別パターン分析**: 「梅雨は平均 -30% になる傾向」
-- **AI 推定枠**: 「重い荷物の買い物」「坂道散歩」などを歩数 + 心拍データから推定して加点
-
-### 他者との繋がり
-
-- スクール内 / 友人内のストリーク比較 (競争ではなく共感型)
-- カロリー貯金額のシェア機能 (「今週 ラーメン 2 杯分 貯まりました」を SNS シェア)
-
-### 運用・仕組みで価値を出す
-
-- 開発者本人 (Android ユーザー) のドッグフードを v1.0 リリースの定義とし、改善ループを構造的に保証
-- 「今日のずぼら開発者の動き」を SNS 発信、アプリ自体が PR 媒体になる構造
-- スクール卒業後も継続開発を公言、教材性を維持
+minor 機能群 (PWA / ダークモード / ウィジェット / SNS / 各種ガチ運動モード機能) は上記の合間に随時取り込み。詳細は GitHub Issues / `memory/` / `docs/dev-log/` を参照。
 
 ---
 
@@ -373,86 +347,12 @@ Section 7 で予告した目玉機能。仕様の核:
 
 ## 11. デプロイ環境
 
-### 11-1. 採用: Render (Free Tier)
+Render Free Tier 構成 (= 完全無料枠、Solid Trifecta を 1 DB 同居、初回デプロイ手順、Sleep 対策) の **詳細は [`docs/deploy-render.md`](docs/deploy-render.md) を参照**。
 
-| 候補 | 無料枠 | 半日完了 | 採用 |
-|---|---|---|:---:|
-| **Render** | ⭕ Web Service Free + Postgres Free | ⭐⭐⭐⭐⭐ | ✅ |
-| Kamal + さくら VPS / Hetzner | ❌ VPS 月額必須 | ⭐⭐ | (将来) |
-| Fly.io | △ Trial credit 制 (変動あり) | ⭐⭐⭐ |  |
-
-**採用根拠 4 点**:
-
-1. **完全無料枠** で MVP / 発表会用途を完結できる (スクール期間中の費用ゼロ)
-2. **半日でデプロイ完了可能** (= Day 5 の本番デプロイタスクを後ろ倒さない)
-3. **Render の運用経験あり** (= 詰まり時間の最小化)
-4. **将来の DB 分離運用への移行が楽** (= Free Tier では Solid Trifecta を 1 DB に同居させるが、有料化したら `database.yml` の url を切り替えるだけで Rails 8 標準の 4 DB 構成に戻せる、§11-3 参照)
-
-### 11-2. 構成
-
-```
-[Render Web Service: weight-dialy]   ← Ruby 3.4.9 + Rails 8.1.3
-            │
-            ├─ buildCommand: bin/render-build.sh
-            │      (bundle install / assets:precompile / db:prepare)
-            │
-            └─ startCommand: bundle exec rails server -p $PORT -e production
-                                           │
-                                           ▼
-[Render Postgres Free: weight-dialy-db]
-└── app_production
-    ├── users / step_records / webhook_deliveries     ← アプリデータ
-    ├── solid_cache_entries                           ← Solid Cache 同居
-    ├── solid_queue_*                                 ← Solid Queue 同居
-    └── solid_cable_messages                          ← Solid Cable 同居
-```
-
-Infrastructure as Code として `render.yaml` でこの構成を定義 (= Render Dashboard で「New Blueprint」→ リポジトリ指定で自動構築される)。
-
-### 11-3. Solid Trifecta を 1 DB に同居させた判断 (= Free Tier 制約)
-
-**Rails 8 デフォルト**: `primary` / `cache` / `queue` / `cable` の 4 つの database に分離 (負荷分離 + vacuum 影響回避が目的)。
-
-**今回**: Render Postgres Free Tier は 1 インスタンス 1 database のため、**全部を `app_production` に同居** させる構成を採用 (`config/database.yml` の production セクション参照)。
-
-- テーブル名は prefix (`solid_*`) で名前空間が分かれているので衝突しない
-- 個人開発 / 小規模 (< 数千ユーザー) では負荷分離の効果が誤差レベル
-- DHH も「最初は same-DB で十分、後から分離」を推奨
-
-**有料プラン化時の移行パス** (引き返せるパス):
-- Render UI で Postgres を 3 つ追加 (cache / queue / cable 用)
-- `database.yml` の各セクションの url を新 ENV (`CACHE_DATABASE_URL` 等) に切替
-- `bin/rails db:migrate:cache` 等で新 DB に Solid テーブルを作成
-- `migrations_paths` の構造は同居時も維持しているため、移行時に追加作業ゼロ
-- 所要時間 ~1.5 時間
-
-### 11-4. 初回デプロイ手順
-
-1. **ローカルで production-specific credentials を編集** (Google OAuth client_id / secret を入れる)
-   ```bash
-   # VS Code 派 (推奨):
-   EDITOR="code --wait" bin/rails credentials:edit -e production
-   # vim 派:
-   EDITOR=vim bin/rails credentials:edit -e production
-   ```
-   - 生成される `config/credentials/production.yml.enc` (= 暗号化済み) は **commit する**
-   - 生成される `config/credentials/production.key` (= 復号 key) は **`.gitignore` で除外、絶対 commit しない**
-   - 編集 → 保存 → 別ブランチで commit & push & PR (= main 直 push はガードでブロックされる)
-2. **`config/credentials/production.key` の中身を控える** (= デプロイ後の Render 環境変数で必要)
-3. **Google OAuth Console** で本番 redirect URI (`https://<your-render-domain>/auth/google_oauth2/callback`) を許可リストに追加
-4. **Render Dashboard** で `New Blueprint` → 本リポジトリを指定 → `render.yaml` が自動検出される
-5. **環境変数を設定** (Render Dashboard → 該当 Service → Environment):
-   - `RAILS_MASTER_KEY` = ローカルの `config/credentials/production.key` の中身
-   - `APP_HOST` = Render が割り当てたドメイン (例: `weight-dialy.onrender.com`)
-6. **デプロイ完了後**: ブラウザで `https://<your-render-domain>/` にアクセス → 200 OK 確認
-7. **Google ログイン** → ダッシュボード遷移確認
-
-### 11-5. Sleep 対策 (Free Tier の cold start 回避)
-
-Render Free Tier は **15 分非アクセスで sleep** → 初回アクセス cold start ~30 秒。
-発表会で致命的なため、**GAS (Google Apps Script) で 10 分間隔の warmup ping** を仕込む。詳細は Issue #61 で運用設定済み。
-
-**当日朝の必須チェック**: 発表会当日朝に **GAS の実行ログ** (Apps Script 画面の「実行数」) を確認し、最後の ping が想定通り 10 分以内に動いていることを目視で確認する。warmup が止まっていると iPhone Safari のデフォルト 60 秒タイムアウトに対し cold start 25-40 秒の幅が問題になる可能性がある。
+要点:
+- **Render Web Service Free + Postgres Free** で MVP 完結 (= 費用ゼロ)
+- Solid Trifecta (cache / queue / cable) は 1 DB に同居 (= Free Tier 制約、有料化時に分離可能)
+- Free Tier の 15 分 sleep 対策として GAS で 10 分間隔 warmup ping (= Issue #61)
 
 ---
 
@@ -555,3 +455,31 @@ Render Free Tier は **15 分非アクセスで sleep** → 初回アクセス c
 - **API 200 + accepted_count 1 = ユーザー体験的に「成功」とは限らない**: 中身が 0 値ならユーザーは「同期されてない」と感じる。**意味のある成功** (= 数値 > 0) と「処理通過」を区別して UI 表示する重要性 (= PR #206)
 - **Capacitor + Health Connect の plugin 落とし穴**: @capgo/capacitor-health の API 命名が Health Connect 内部 (= FloorsClimbedRecord) と公開 API (= flightsClimbed) で違う、`AuthorizationStatus` 型は `granted` ではなく `readAuthorized: HealthDataType[]` 形式 (= Day 7 学び 22 + PR #156, #157 由来)
 - **エミュレータ vs 実機の差**: 物理センサー有無の違いで「動く / 動かない」が分かれる、外部 SDK 連携は **必ず実機でも検証** が定石 (= 学び 21 端末ガチャ含めた教訓)
+
+### 12-6. なぜこのアーキテクチャか (= 業界標準の王道、Web 完結を待っても無駄)
+
+「Web ベースのアプリなのに、なぜ Capacitor + ネイティブ SDK が必要?」 = 後輩がまず疑問に思うポイント。**結論: 業界標準を踏襲しているだけ、Web 完結のショートカットは構造的に存在しない。**
+
+#### Google の Health 系 API 二分岐 (= 2026 年時点)
+
+| API | タイプ | 対象 | 一般 Android スマホで使えるか |
+|---|---|---|---|
+| Google Fit REST API | Web | 一般 Android | ❌ **2026 年中廃止確定** |
+| Health Connect SDK | Android Native | 一般 Android | ✅ ただし**ネイティブ SDK 経由のみ** (= Web/REST なし) |
+| Google Health API | Web | **Fitbit + Pixel Watch のみ** | ❌ 一般 Android スマホ非対応 |
+
+#### Apple HealthKit も同じ方針
+
+WWDC 2025 で発表されたのも `Medications API` (= ネイティブ iOS) のみで、REST 公開なし。Apple Shortcuts + Webhook が回避策の最善解 (= 本アプリの iPhone 連携経路もこれ)。
+
+#### なぜ Web/REST が出ないか
+
+「健康データを **端末上に閉じる**、クラウド経由で外部に流さない」プライバシー方針が **Apple / Google 両社で一致**。これは意図的設計で、短中期 (2026 年内) に変わる発表は**ない**ことが api-researcher 調査で確定 (= dev-log day-8 + Issue #219 参照)。
+
+#### 結果として業界標準は
+
+**「ハイブリッドアプリ (Capacitor / React Native 等) + ネイティブ SDK + 自前 Webhook」** が唯一の現実解。weight daily の現アーキテクチャ (= Capacitor + Health Connect Native + Rails Webhook) はこの王道を踏襲している。**Web 公式 API を待つ戦略には意味がなく、ハイブリッドアプリ路線で確定でよい**。
+
+#### ニッチオプション
+
+ターゲットが Pixel Watch / Fitbit ユーザーなら **Google Health API で Web 完結連携** が可能 (= Issue #219、v1.1 backlog)。ただし weight daily のメインターゲット (= 通勤通学カジュアル層、一般 Android スマホ) には届かない。サードパーティ aggregator (Thryve / Terra / Validic 等) は月額課金、個人プロジェクトには不向き。
