@@ -54,8 +54,12 @@ RSpec.describe "Settings", type: :request do
         expect(response.body).to include(webhooks_health_data_url)
       end
 
-      it "レスポンスボディに「Apple Shortcuts 連携」を含む" do
-        expect(response.body).to include("Apple Shortcuts 連携")
+      it "レスポンスボディに「データ連携の設定」見出しを含む (= Android user に「関係ない設定」感を出さないため中立タイトル化、公開前 polish)" do
+        expect(response.body).to include("データ連携の設定")
+      end
+
+      it "レスポンスボディにリード文の「Apple Shortcuts」を含む (= 既存対応端末の明示)" do
+        expect(response.body).to include("Apple Shortcuts")
       end
 
       it "レスポンスボディに「Step 1」を含む" do

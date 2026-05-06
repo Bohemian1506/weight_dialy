@@ -2,10 +2,12 @@
 
 <div class="sketch-page-narrow" style="max-width: 36rem;">
 
-  <%# ヘッダー %>
-  <h1 class="sketch-hh" style="margin-bottom: 6px;">Apple Shortcuts 連携</h1>
+  <%# ヘッダー (= データ連携の入口、iPhone Shortcuts / Android Health Connect 両方を内包する。
+       元は「Apple Shortcuts 連携」固定だったが、Android Chrome 評価者が「自分には関係ない設定ページ」と
+       感じる UX 課題が公開前 design レビューで判明 → 中立タイトルに変更し、リード文で対応端末を明示。) %>
+  <h1 class="sketch-hh" style="margin-bottom: 6px;">データ連携の設定</h1>
   <p class="sketch-body-text" style="margin-bottom: 24px;">
-    iPhone のショートカットアプリと連携して、毎日の歩数を自動で取り込みます。
+    iPhone は Apple Shortcuts、Android は Health Connect から、毎日の歩数を自動で取り込みます。
   </p>
 
   <%# Step 1: Webhook トークン %>
