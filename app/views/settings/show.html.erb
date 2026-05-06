@@ -85,16 +85,6 @@
     </p>
   <% end %>
 
-  <%# ポリシーリンク (= Health Connect より上、インフォームドコンセントの順序) %>
-  <div class="sketch-box" style="margin-bottom: 24px;">
-    <h2 class="sketch-h" style="margin-bottom: 8px;">ポリシー</h2>
-    <p class="sketch-body-text">
-      <%= link_to "プライバシーポリシー", privacy_path, style: "color: var(--ink); text-decoration: underline;" %>
-      /
-      <%= link_to "利用規約", terms_path, style: "color: var(--ink); text-decoration: underline;" %>
-    </p>
-  </div>
-
   <%# Health Connect 連携 (Android のみ、Capacitor 検知で動的表示。Web 版では非表示のまま) %>
   <div data-controller="native-health"
        data-native-health-webhook-token-value="<%= current_user.webhook_token %>"
@@ -200,6 +190,21 @@
       </div>
     </div>
 
+  </div>
+
+  <%# Issue #90: ポリシーリンクを退会セクション後 (= フッター的) に配置。
+      設計トレードオフ: 旧位置「危険操作前に見せる」はインフォームドコンセント色 (= 規約系 SaaS の慣習)、
+      新位置「フッター的」は視線フロー UX 色 (= 消費者向けアプリの慣習)。本アプリは消費者向けカジュアル層
+      (= 通勤通学カジュアル) ターゲットのため後者を選択。詳細経緯は Issue #90 / PR description 参照。 %>
+  <div class="sketch-box" style="margin-bottom: 24px;">
+    <p class="sketch-small" style="margin-bottom: 6px; color: var(--muted);">
+      退会前に規約を確認したい場合はこちら
+    </p>
+    <p class="sketch-body-text">
+      <%= link_to "プライバシーポリシー", privacy_path, style: "color: var(--ink); text-decoration: underline;" %>
+      /
+      <%= link_to "利用規約", terms_path, style: "color: var(--ink); text-decoration: underline;" %>
+    </p>
   </div>
 
 </div>
