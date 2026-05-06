@@ -453,3 +453,105 @@ Render Free Tier は **15 分非アクセスで sleep** → 初回アクセス c
 発表会で致命的なため、**GAS (Google Apps Script) で 10 分間隔の warmup ping** を仕込む。詳細は Issue #61 で運用設定済み。
 
 **当日朝の必須チェック**: 発表会当日朝に **GAS の実行ログ** (Apps Script 画面の「実行数」) を確認し、最後の ping が想定通り 10 分以内に動いていることを目視で確認する。warmup が止まっていると iPhone Safari のデフォルト 60 秒タイムアウトに対し cold start 25-40 秒の幅が問題になる可能性がある。
+
+---
+
+## 12. Android アプリ版利用ガイド (= Capacitor + Health Connect 連携)
+
+> **配布状況**: v1.0 で APK の sideload 配布予定 (= Issue #126)。本書は配布開始時点で参照される手順書。本セクション自体は v0 (= 発表会前) に整備し、後輩教材として残す方針。
+
+### 12-1. 全体像 (= データの流れ)
+
+\`\`\`
+スマホの歩数計測アプリ (Google Fit 等) → Health Connect (= Android の OS レベル健康データハブ) → weight daily Android アプリ (= Capacitor + @capgo/capacitor-health) → Webhook POST → Rails サーバ → ダッシュボード表示
+\`\`\`
+
+**ポイント**: Health Connect は **データの読み取り API と書き込み API が完全に分離** されている。weight daily アプリは「読み取り」専用で歩数を取得するが、その前に **書き込みアプリ** (= Google Fit / Samsung Health 等) が Health Connect にデータを書き込んでくれている必要がある。この Android 仕様を踏まえないと「同期成功表示 → 実は 0 歩」のミスリードに陥る (= Day 8 ユーザー局長報告事例、PR #206 で警告誘導追加)。
+
+### 12-2. 前提条件 (= ユーザー環境側)
+
+1. **Android 9+ (= API 28+)**: @capgo/capacitor-health の対応下限
+2. **Health Connect アプリのインストール**:
+   - Android 14+: OS にプリインストール (= 設定 → アプリ → Health Connect で確認可)
+   - Android 9-13: Google Play から手動インストール (= 「Health Connect by Android」)
+3. **歩数計測アプリ (= Health Connect 書き込みアプリ)** のインストール + 設定:
+   - **Google Fit** (推奨、ほぼ全 Android 対応): Google Play から無料インストール
+   - **Samsung Health** (Galaxy 端末標準): プリインストール、Health Connect と公式統合
+   - **Fitbit** / **Garmin Connect** (= 専用デバイス + アプリ): デバイスとセット
+   - ⚠️ **「デイリーステップ」など Health Connect 非対応アプリ**は不可。Health Connect → 「データとアクセス」に該当アプリが表示されない場合は対応外なので別アプリへ切替
+
+### 12-3. セットアップ手順 (= 順序重要)
+
+#### Step 1: 歩数計測アプリの Health Connect 連携を有効化
+
+例: Google Fit 経由
+
+1. Google Play で **Google Fit** をインストール
+2. Google Fit を起動 → Google アカウントでログイン
+3. アクティビティ計測がオンになっていることを確認 (= 通常デフォルト ON)
+4. **Health Connect アプリ** を開く → **データとアクセス** → **Google Fit** が表示されていることを確認 (= 表示されない場合は Google Fit を一度起動して権限ダイアログを承認)
+5. Google Fit に **「歩数」「距離」「上った階数」の書き込み許可** を付与
+6. 数分待つ (= Google Fit が過去データを Health Connect に書き込む)
+7. **Health Connect の「歩数」**を見て、本日の歩数が反映されていることを確認
+
+#### Step 2: weight daily アプリのインストール
+
+1. v1.0 で配布される APK ファイル (= Issue #126 完了で sideload 提供予定) を入手
+2. Android 設定 → セキュリティ → **「不明な提供元のアプリ」許可** (= ダウンロードしたブラウザに対して許可するダイアログが出る)
+3. APK をタップしてインストール
+
+#### Step 3: weight daily アプリで Google ログイン + Health Connect 連携
+
+1. アプリ起動 → ホーム画面の「Google でログイン」をタップ → Custom Tabs で OAuth 完走
+2. Settings 画面の **「📱 Android Health Connect 連携」** セクションが表示される (= Capacitor 検知時のみ)
+3. **「権限を許可する」** をタップ → Health Connect の権限ダイアログが出るので、**「歩数」「距離」「上った階数」の読み取り**を許可
+4. 自動で「同期する」ボタンが表示される
+5. **「同期する」** をタップ → 「✅ 今日のデータを取得しました — N 歩 / X.X km / N 階」と表示されればサーバー送信成功
+6. ホーム画面に戻ると、自分の実データがダッシュボードに反映されている
+
+### 12-4. トラブルシューティング (= 教材性メイン)
+
+#### 症状 A: 「✅ 送信完了 1 件保存」と表示されるが、ホーム画面で 0 歩のまま
+
+**原因**: Health Connect 自体に本日の歩数データが届いていない (= 書き込みアプリが連携していない or データ流入していない)。weight daily アプリは正常動作しており、サーバー側にも 0 値のレコードが保存されている (= status: "success", accepted_count: 1, payload.records[0].steps: 0)。
+
+**確認手順**:
+1. Health Connect アプリを開いて本日の歩数を確認 → 0 歩ならこの仮説が確定
+2. 歩数計測アプリ (= Google Fit 等) が起動している + Health Connect 連携が ON か確認
+3. Health Connect → データとアクセス → 該当アプリの書き込み許可がオンか確認
+4. それでも 0 歩なら、別の歩数計測アプリ (= Samsung Health, Mi Fit 等) を試す
+
+**コード側の警告**: `app/javascript/controllers/native_health_controller.js` の `formatSummary` で `step_count === 0` 時に明示的に警告メッセージを出すよう実装済 (= PR #206)。
+
+#### 症状 B: 「⚠️ Health Connect の権限が不足しています」表示
+
+**原因**: 「権限を許可する」タップ時、Health Connect の権限ダイアログで一部 (= 歩数 / 距離 / 階段) を拒否している。
+
+**対応**: Health Connect アプリ → データとアクセス → weight daily → 全ての読み取り許可をオン。
+
+**設計上の注意**: 「全部拒否」と「一部だけ拒否」の両方ありうるため、weight daily 側のメッセージは断定形「拒否されました」を避けて「不足しています」表現に統一済 (= PR #157 design レビュー反映)。
+
+#### 症状 C: 「⚠️ Health Connect 利用不可」表示
+
+**原因**:
+- Android バージョンが 9 未満 (= 動作対象外)
+- Health Connect アプリが未インストール (= Android 9-13 で Google Play からのインストールを忘れている)
+- 端末メーカーが Health Connect をブロック (= 一部の Chinese OEM)
+
+**対応**: Health Connect の inAvailable() API がエラー reason を返してくるので、`app/javascript/controllers/native_health_controller.js` の `checkPermission` でログ確認 → 該当原因に応じてユーザーに案内。
+
+#### 症状 D: エミュレータ (= AVD) で歩数 0 のまま
+
+**原因**: AVD には**物理歩数センサーが無い** = 自動では Health Connect にデータが書き込まれない。
+
+**対応**:
+- 開発検証目的なら、`adb shell` から Health Connect に**テストデータをインジェクト** (= Health Connect Toolbox 経由)
+- または、エミュレータでの完全動作確認は諦めて **物理スマホでの検証** に切り替える (= 推奨)
+- 配布版では本番想定で物理スマホ動作を担保
+
+### 12-5. 教材性メモ (= 後輩への伝言)
+
+- **Health Connect は「読み取り API ⇄ 書き込み API」で別の仕組み**: weight daily が読み取り専用なら、書き込み側 (= Google Fit 等) を含めた **エコシステム全体** をユーザーに案内する必要がある
+- **API 200 + accepted_count 1 = ユーザー体験的に「成功」とは限らない**: 中身が 0 値ならユーザーは「同期されてない」と感じる。**意味のある成功** (= 数値 > 0) と「処理通過」を区別して UI 表示する重要性 (= PR #206)
+- **Capacitor + Health Connect の plugin 落とし穴**: @capgo/capacitor-health の API 命名が Health Connect 内部 (= FloorsClimbedRecord) と公開 API (= flightsClimbed) で違う、`AuthorizationStatus` 型は `granted` ではなく `readAuthorized: HealthDataType[]` 形式 (= Day 7 学び 22 + PR #156, #157 由来)
+- **エミュレータ vs 実機の差**: 物理センサー有無の違いで「動く / 動かない」が分かれる、外部 SDK 連携は **必ず実機でも検証** が定石 (= 学び 21 端末ガチャ含めた教訓)
