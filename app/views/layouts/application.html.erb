@@ -39,9 +39,15 @@
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <%# Favicon — Claude Design 由来「+kc」スタンプ風デザイン (= bin/render_favicon.sh で再生成可能、
+        ソースは public/favicons/source.html)。サイズ別の link rel で各ブラウザに適切な解像度を指定:
+        16/32 はブラウザタブ用 (= 16 はミニ版「+」のみ、32 は ドット無し)、180 は iOS Home Screen、
+        512 は PWA / 一般 favicon (= 旧 /icon.png 上書き)。 %>
+    <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/favicon-64x64.png" sizes="64x64" type="image/png">
+    <link rel="icon" href="/icon.png" sizes="512x512" type="image/png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
 
     <%# Includes all stylesheet files in app/assets/stylesheets (sketchy.css も含む) %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>

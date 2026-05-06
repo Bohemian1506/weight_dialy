@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>weight daily — favicon A (+kc)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background:#2a2a2a; color:#fbf8f1;
+    font-family:'Kalam', sans-serif; padding: 36px;
+    display:flex; flex-direction:column; gap:36px; align-items:center;
+  }
+  h1{ font-family:'Caveat'; font-size:38px; font-weight:700; }
+  .sub{ opacity:.7; font-size:14px; max-width:640px; text-align:center; line-height:1.5; }
+
+  .row{ display:flex; flex-direction:column; gap:14px; align-items:center; }
+  .row .row-title{ font-family:'Caveat'; font-size:24px; }
+  .grid{ display:grid; grid-template-columns: repeat(5, auto); gap:32px; align-items:flex-end; }
+  .cell{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .cell .label{ font-size:13px; opacity:.7; }
+
+  .fav{ background:#fbf8f1; position:relative; overflow:hidden; }
+  .fav.size-512{ width:512px; height:512px; border-radius:22%; box-shadow:10px 10px 0 #1a1a1a; border: 8px solid #1a1a1a; }
+  .fav.size-180{ width:180px; height:180px; border-radius:22%; box-shadow:6px 6px 0 #1a1a1a; border: 5px solid #1a1a1a; } /* apple touch */
+  .fav.size-64 { width:64px; height:64px;  border-radius:22%; box-shadow:3px 3px 0 #1a1a1a; border: 3px solid #1a1a1a; }
+  .fav.size-32 { width:32px; height:32px;  border-radius:22%; box-shadow:2px 2px 0 #1a1a1a; border: 2px solid #1a1a1a; }
+  .fav.size-16 { width:16px; height:16px;  border-radius:22%; box-shadow:1px 1px 0 #1a1a1a; border: 1px solid #1a1a1a; }
+
+  .fav svg{ width:100%; height:100%; display:block; }
+
+  .browser-mock{
+    background:#fbf8f1; border:3px solid #1a1a1a; border-radius:10px;
+    box-shadow:4px 4px 0 #1a1a1a; padding: 8px 12px; display:flex; align-items:center; gap:8px;
+    color:#1a1a1a; font-family:'Kalam'; font-size:13px;
+  }
+  .browser-mock .tab{
+    display:flex; align-items:center; gap:6px; background:#f3eee0; border:2px solid #1a1a1a;
+    border-radius:8px 8px 0 0; padding: 4px 10px; margin-bottom:-3px;
+  }
+  .browser-mock .tab .fav.size-16{ box-shadow:none; }
+
+  .home-row{ display:flex; gap:18px; align-items:flex-end; }
+  .iphone-app{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    color:#fbf8f1; font-family:'Kalam'; font-size:12px;
+  }
+  .iphone-app .name{ opacity:.85; }
+  .iphone-app .fav.size-180{ width:120px; height:120px; }
+</style>
+</head>
+<body>
+
+<h1>A: 「+kc」スタンプ — final</h1>
+<div class="sub">
+  ノートのスタンプ風。プラスαが消費kcalとして積み上がるという軸を1グリフに圧縮。<br/>
+  右上のオレンジドットは連続記録（ストリーク）バッジ。16pxは「+」だけ残してコンセプトを保ちます。
+</div>
+
+<!-- Sizes -->
+<div class="row">
+  <div class="row-title">サイズ別</div>
+  <div class="grid">
+    <!-- 512 -->
+    <div class="cell">
+      <div class="fav size-512">
+        <svg viewBox="0 0 100 100">
+          <rect x="10" y="48" width="80" height="14" fill="#ffd23f" transform="skewX(-8 50 55)"/>
+          <text x="50" y="64" text-anchor="middle"
+            font-family="Caveat, cursive" font-weight="700" font-size="60" fill="#1a1a1a">+kc</text>
+          <circle cx="82" cy="22" r="9" fill="#ff7a45" stroke="#1a1a1a" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="label">512 (PWA / store)</div>
+    </div>
+    <!-- 180 -->
+    <div class="cell">
+      <div class="fav size-180">
+        <svg viewBox="0 0 100 100">
+          <rect x="10" y="48" width="80" height="14" fill="#ffd23f" transform="skewX(-8 50 55)"/>
+          <text x="50" y="64" text-anchor="middle"
+            font-family="Caveat, cursive" font-weight="700" font-size="60" fill="#1a1a1a">+kc</text>
+          <circle cx="82" cy="22" r="9" fill="#ff7a45" stroke="#1a1a1a" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="label">180 (apple-touch)</div>
+    </div>
+    <!-- 64 -->
+    <div class="cell">
+      <div class="fav size-64">
+        <svg viewBox="0 0 100 100">
+          <rect x="10" y="48" width="80" height="14" fill="#ffd23f" transform="skewX(-8 50 55)"/>
+          <text x="50" y="64" text-anchor="middle"
+            font-family="Caveat, cursive" font-weight="700" font-size="60" fill="#1a1a1a">+kc</text>
+          <circle cx="82" cy="22" r="9" fill="#ff7a45" stroke="#1a1a1a" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="label">64</div>
+    </div>
+    <!-- 32 -->
+    <div class="cell">
+      <div class="fav size-32">
+        <svg viewBox="0 0 100 100">
+          <rect x="10" y="48" width="80" height="14" fill="#ffd23f" transform="skewX(-8 50 55)"/>
+          <text x="50" y="64" text-anchor="middle"
+            font-family="Caveat, cursive" font-weight="700" font-size="60" fill="#1a1a1a">+kc</text>
+        </svg>
+      </div>
+      <div class="label">32</div>
+    </div>
+    <!-- 16 -->
+    <div class="cell">
+      <div class="fav size-16">
+        <svg viewBox="0 0 100 100">
+          <rect x="6" y="46" width="88" height="20" fill="#ffd23f" transform="skewX(-8 50 55)"/>
+          <text x="50" y="68" text-anchor="middle" font-family="Caveat, cursive" font-weight="700" font-size="62" fill="#1a1a1a">+</text>
+        </svg>
+      </div>
+      <div class="label">16</div>
+    </div>
+  </div>
+</div>
+
+<!-- Browser tab -->
+<div class="row">
+  <div class="row-title">タブでの見え方</div>
+  <div style="display:flex; gap:16px; flex-wrap:wrap;">
+    <div class="browser-mock">
+      <div class="tab">
+        <div class="fav size-16"><svg viewBox="0 0 100 100"><rect x="6" y="46" width="88" height="20" fill="#ffd23f" transform="skewX(-8 50 55)"/><text x="50" y="68" text-anchor="middle" font-family="Caveat, cursive" font-weight="700" font-size="62" fill="#1a1a1a">+</text></svg></div>
+        weight daily — today
+      </div>
+    </div>
+    <div class="browser-mock">
+      <div class="tab">
+        <div class="fav size-16"><svg viewBox="0 0 100 100"><rect x="6" y="46" width="88" height="20" fill="#ffd23f" transform="skewX(-8 50 55)"/><text x="50" y="68" text-anchor="middle" font-family="Caveat, cursive" font-weight="700" font-size="62" fill="#1a1a1a">+</text></svg></div>
+        ダッシュボード
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Home screen mock -->
+<div class="row">
+  <div class="row-title">ホーム画面での見え方</div>
+  <div class="home-row">
+    <div class="iphone-app">
+      <div class="fav size-180">
+        <svg viewBox="0 0 100 100">
+          <rect x="10" y="48" width="80" height="14" fill="#ffd23f" transform="skewX(-8 50 55)"/>
+          <text x="50" y="64" text-anchor="middle" font-family="Caveat, cursive" font-weight="700" font-size="60" fill="#1a1a1a">+kc</text>
+          <circle cx="82" cy="22" r="9" fill="#ff7a45" stroke="#1a1a1a" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="name">weight daily</div>
+    </div>
+    <div class="iphone-app">
+      <div class="fav size-180" style="background:#1a1a1a; border-color:#fbf8f1;">
+        <svg viewBox="0 0 100 100">
+          <rect x="10" y="48" width="80" height="14" fill="#ffd23f" transform="skewX(-8 50 55)"/>
+          <text x="50" y="64" text-anchor="middle" font-family="Caveat, cursive" font-weight="700" font-size="60" fill="#fbf8f1">+kc</text>
+          <circle cx="82" cy="22" r="9" fill="#ff7a45" stroke="#fbf8f1" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="name">dark variant</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
