@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
-// flash 自体は layout 側の <div class="fixed top-24 ... z-50"> 配下にあり document flow から外れているため、
+// flash 自体は layout 側の <div class="fixed top-[calc(var(--navbar-height)+16px)] ... z-50"> 配下にあり document flow から外れているため、
+// top offset は CSS 変数 --navbar-height (sketchy.css :root) で navbar 高さと連動する (= Issue #174 B)。
 // 表示/消滅とも下のコンテンツがズレることはない。よって close() はシンプルな opacity フェード → remove で完結する。
 // FOUC 対策: HTML 側で初期 opacity-0 + transition-opacity を仕込んでおき、connect() で次フレームに opacity-0
 // を外す → 自然な fade-in。JS 無効環境では layout 側の <noscript> CSS で opacity:1 が強制適用され、flash が

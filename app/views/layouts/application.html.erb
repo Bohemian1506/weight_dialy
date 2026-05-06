@@ -34,7 +34,7 @@
   </head>
 
   <body>
-    <header class="sketch-navbar">
+    <header class="sketch-navbar" data-controller="navbar-scroll">
       <%= link_to root_path, class: "sketch-navbar-title" do %>
         weight <span class="sketch-swoosh">daily.</span>
       <% end %>
@@ -43,17 +43,30 @@
           <span class="sketch-navbar-name"><%= current_user.name %></span>
           <%= link_to "設定", settings_path, class: "sketch-btn" %>
           <%= button_to "ログアウト", logout_path, method: :delete, class: "sketch-btn" %>
+        <% else %>
+          <%# 未ログイン時 navbar CTA (Issue #174 D)。
+              banner_guest と CTA が 2 箇所になるが、
+              navbar = グローバル CTA / banner = ホーム内コンテキスト CTA、と役割分担で容認。
+              Capacitor アプリ内では未ログイン状態で navbar 自体が出る経路は存在しないが、
+              banner_guest と同じ intercept を保険として付与する。 %>
+          <div data-controller="capacitor-oauth-login">
+            <%= button_to "ログイン", "/auth/google_oauth2",
+                  method: :post,
+                  class: "sketch-btn sketch-btn-primary",
+                  data: { turbo: false, action: "click->capacitor-oauth-login#intercept" } %>
+          </div>
         <% end %>
       </div>
     </header>
 
     <%# flash はトースト風に画面上部 fixed で重ねる (document flow から外れるため、表示/非表示で下のコンテンツがズレない)。
-        top-20 (80px) は navbar 高さ 約 64px (= padding 16px + ボタン約 46px + border-bottom 2px、Issue #49 slim 化後) + 余白 約 16px。
-        Issue #49 で navbar 高さを 74px → 約 64px に縮めたのに合わせて top-24 → top-20 に追従、トーストが navbar 直下から自然に出る。
+        top offset は CSS 変数 --navbar-height (= 64px) + 余白 16px で計算 (= Issue #174 B)。
+        --navbar-height は :root で定義済み (sketchy.css)。参照側のみ変数を使い、navbar 自体の高さは
+        padding/content/border で決まる (= slim 化挙動を壊さないため変数を navbar 本体には適用しない)。
         FOUC 対策: 初期 opacity-0 + Stimulus connect() で fade-in。JS 無効フォールバックは <head> の <noscript><style> 参照。
         見た目は sketchy トーストに差し替え (sketch-toast)、フェード挙動 (flash_controller.js) は変更しない。 %>
     <% if flash[:notice] || flash[:alert] %>
-      <div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md space-y-2">
+      <div class="fixed top-[calc(var(--navbar-height)+16px)] left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md space-y-2">
         <% if flash[:notice] %>
           <div class="sketch-toast notice opacity-0" role="alert" data-controller="flash">
             <span class="sketch-toast-message"><%= flash[:notice] %></span>
