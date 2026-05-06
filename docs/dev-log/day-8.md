@@ -17,7 +17,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 10 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + v1.1 backlog 5 件集約)
+## 🏆 達成したこと (= 計 12 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + v1.1 backlog 5 件集約)
 
 ### マージ済み PR (= 10 本)
 
@@ -34,6 +34,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #171 | #49 | polish: navbar 高さ 74px → 約 64px に slim 化 (= padding 14px → 8px 縮小、ボタン高 46px は維持して WCAG 2.5.5 タップ領域確保 + Issue #47 ゴール両立、design-reviewer 事前相談で候補 3 採用、flash toast 位置 top-24 → top-20 追従) |
 | #173 | – | polish: navbar sticky 化 (= position: sticky + top: 0 + z-index: 30、スクロール時も常時上部表示でブランド訴求 + ナビ可用性向上、design-reviewer #171 提案、3 者全員 Approve) |
 | #180 | #90 | polish: Settings ポリシーリンクを退会セクション後 (= フッター的) に移動 + 「退会前に規約を確認したい場合はこちら」補足、コメントに「インフォームドコンセント色 vs フッター UX 色」設計トレードオフ明示 |
+| #182 | #83 | polish: Webhook 422 エラー文言を I18n 化 + カジュアル層向け日本語化 (= `config/locales/ja.yml` 新規 8 errors キー / 3 fields キー、生例外 message は `Rails.logger.warn` に分離して本人画面非露出、`unauthorized` 値のみ運用ログ用として英語維持、design-reviewer must-fix 反映 + 推奨コピー 4 件全採用) |
 
 ### close した Issue (= 8 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
@@ -45,6 +46,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 - **#128** (= Capacitor splash 背景色を sketchy paper に) — PR #169 で close
 - **#49** (= navbar 高さ膨張、UI 最終段階 polish) — PR #171 で close、design-reviewer 事前相談 → 候補 3 で「タップ領域犠牲なし + 見た目改善」両立解
 - **#90** (= Settings ポリシーリンクをフッター位置に) — PR #180 で close、設計トレードオフ (= インフォームドコンセント vs フッター UX) コメント残置で教材性確保
+- **#83** (= Webhook 422 エラー文言の日本語化) — PR #182 で close、`ja.yml` 新規導入で他機能の I18n 拡張への雛形に。design 推奨 4 件全採用 + must-fix (生例外 message 露出) を `Rails.logger.warn` 分離で対応、教材性ポイントは「全部翻訳するのが正解ではない / ユーザー向け文言と運用ログ向け文言を分ける」
 
 ### 起票した Issue (= v1.1 backlog 集約 7 件)
 
@@ -287,14 +289,13 @@ How to apply:
 
 ## 📊 統計
 
-- マージした PR: **10 本** (= #153 Phase 3 + #154 AssetLinks + #156 flightsClimbed + #157 granted + #160 state 判定 + #165 0 kcal バナナ余裕 + #167 /privacy HC 明記 + #169 splash paper 色 + #171 navbar slim 化 + #173 navbar sticky 化)
-- close した Issue: **8 件** (= #125 子 6 / #158 デモ表記 / #159 設定導線残 / #163 0 kcal バナナ余裕 / #131 /privacy HC 明記 / #150 deep link 回復導線 / #128 splash 色 / #49 navbar 高さ slim 化)
+- マージした PR: **12 本** (= #153 Phase 3 + #154 AssetLinks + #156 flightsClimbed + #157 granted + #160 state 判定 + #165 0 kcal バナナ余裕 + #167 /privacy HC 明記 + #169 splash paper 色 + #171 navbar slim 化 + #173 navbar sticky 化 + #180 Settings ポリシーリンク移動 + #182 Webhook 422 I18n 化)
+- close した Issue: **10 件** (= #125 子 6 / #158 デモ表記 / #159 設定導線残 / #163 0 kcal バナナ余裕 / #131 /privacy HC 明記 / #150 deep link 回復導線 / #128 splash 色 / #49 navbar 高さ slim 化 / #90 Settings ポリシーリンク位置 / #83 Webhook 422 文言)
 - 起票した Issue (= v1.1 backlog): **7 件** (= #161 / #162 / #174 / #175 / #176 / #177 / #178、特に #174-#178 は元 11 個別候補を 5 grouping に集約)
-- 起票した Issue: **2 件** (= #161 リネーム v1.1 / #162 banner 文言 v1.1) + 過去 PR の v1.1 候補メモ複数
-- 全体 spec: 431 → **527 examples** (= +96、Phase 3 関連 35 + state 判定回帰防止 4 + 0 kcal 空ステート 9 + 既存差分)
+- 全体 spec: 431 → **528 examples** (= +97、Phase 3 関連 35 + state 判定回帰防止 4 + 0 kcal 空ステート 9 + Webhook I18n unauthorized 検証 1 + 既存差分)
 - 教訓: **4 件** (= 学び 21 AssetLinks 端末ガチャ / 学び 22 permission flow 完走 / 学び 23 state 判定はデータ最優先 / 学び 24 事前デザイン相談)
 - つまずき / 学び: **10 件** (= 当初 6 件 + 朝の連鎖発見 saga 3 件 + 0 kcal バナナ余裕 1 件)
-- セッション時間: **約 7 時間** (= 朝 06:00〜昼 13:00 過ぎ、発表会まで残り ~6h)
+- セッション時間: **約 8 時間** (= 朝 06:00〜13:30 過ぎ、+ 発表会前の polish 後追い 1-2 件、発表会まで残り ~5h)
 
 ---
 
