@@ -73,9 +73,9 @@ RSpec.describe BuildHomeDashboardService do
     end
 
     # ─────────────────────────────────────────────────
-    # 状態 :android — ログイン済み + Android UA
+    # 状態 :android — ログイン済み + Android UA + step_records なし (= Capacitor 連携誘導)
     # ─────────────────────────────────────────────────
-    context "state: :android (user あり + Android UA)" do
+    context "state: :android (user あり + Android UA + step_records なし)" do
       let(:user) { create(:user) }
       subject(:result) { described_class.call(user: user, request: build_request(ua: android_ua)) }
 
@@ -94,6 +94,32 @@ RSpec.describe BuildHomeDashboardService do
       it "calorie_savings が Hash で 3 キーを持つ" do
         expect(result.calorie_savings).to be_a(Hash)
           .and include(:this_month, :last_month, :total)
+      end
+    end
+
+    # ─────────────────────────────────────────────────
+    # 回帰防止: ログイン済み + Android UA + step_records あり (= Capacitor 同期済 user)
+    # 旧版は :android 状態でデモデータを返していた (Issue #158, #159)
+    # ─────────────────────────────────────────────────
+    context "state: :iphone_with_data (user あり + Android UA + step_records あり = Capacitor 同期済)" do
+      let(:user) { create(:user) }
+      let!(:step_record) { create(:step_record, user: user, recorded_on: Date.current, steps: 9000) }
+      subject(:result) { described_class.call(user: user, request: build_request(ua: android_ua)) }
+
+      it "state が :iphone_with_data (= Android user でも実データあれば実データ状態を返す)" do
+        expect(result.state).to eq(:iphone_with_data)
+      end
+
+      it "records に DB の StepRecord が含まれる (= デモデータではない)" do
+        expect(result.records).to include(step_record)
+      end
+
+      it "today_record が今日の StepRecord (= デモではなく自分のデータ)" do
+        expect(result.today_record).to eq(step_record)
+      end
+
+      it "calorie_savings の this_month が実データ計算 (= 9000 歩 * 0.04 = 360 kcal)" do
+        expect(result.calorie_savings[:this_month]).to eq(360)
       end
     end
 

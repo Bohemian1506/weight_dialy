@@ -46,12 +46,21 @@ class BuildHomeDashboardService
 
     private
 
+    # state 判定の優先順位 (= 2026-05-06 Day 8 で見直し):
+    # 1. 未ログイン → :guest
+    # 2. 実データあり → :iphone_with_data (= platform に関わらず実データ表示、誤称だが互換性のため名前は据え置き)
+    # 3. Android UA + データなし → :android (= Capacitor 連携誘導バナー)
+    # 4. それ以外 + データなし → :empty (= iOS Shortcut 誘導バナー)
+    #
+    # 旧版は 2 と 3 が逆順で「Android Capacitor user は同期成功してもデモデータが永久表示」される設計バグだった
+    # (= Issue #158, #159 で発覚)。Capacitor アプリの overrideUserAgent に "Android" が含まれるため、
+    # データの有無を見ずに :android 状態を強制するとデモデータが返る。
     def determine_state(user, request)
       return :guest unless user
+      return :iphone_with_data if user.step_records.exists?
 
       platform = PlatformDetectorService.from_request(request)
       return :android if platform == :android
-      return :iphone_with_data if user.step_records.exists?
 
       :empty
     end
