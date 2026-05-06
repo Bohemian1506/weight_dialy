@@ -17,7 +17,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 15 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + v1.1 backlog 5 件集約)
+## 🏆 達成したこと (= 計 16 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + v1.1 backlog 5 件集約)
 
 ### マージ済み PR (= 10 本)
 
@@ -38,6 +38,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #185 | #162, #184 | polish: banner_android UX ループ解消 + Settings に Web Android user 向け案内追加 (= **案 E** で 2 Issue 1 PR、`PlatformDetectorService.web_android?` 新設で Capacitor 排除 UA 判定、Settings 新セクションは既存 native-health セクションとサーバ UA で排他制御、文言は「アプリ取得後の本来体験 + 取得手段準備中 + 暫定 sample」3 段構成 — ユーザー局長との認識合わせで「Web 主戦場 / Capacitor は API 送信補助 / 配布 = sideload」の前提整理が大きな成果) |
 | #187 | #174 (A+B+D) | polish: navbar X グループ — scroll shadow + 高さ CSS 変数化 + 未ログイン CTA (= 4 サブのうち軽量 3 件を 1 PR、`navbar_scroll_controller.js` で scrollY > 4 で `.is-scrolled` class 付与 + rAF throttle、`--navbar-height: 64px` 変数化で flash toast を `top-[calc(var(--navbar-height)+16px)]` 連動、未ログイン navbar に「ログイン」CTA、transition は `.sketch-navbar` 本体側で両方向 .15s ease — C ハンバーガーは ViewComponents 導入 #56 と並行で v1.x 持ち越し撤退、Day 8 navbar 系 4 連投回避) |
 | #189 | – | polish: 公開前最終 4 件集約 (= design-reviewer 公開前 Web 最終チェック反映、Settings 見出し「Apple Shortcuts 連携」→「データ連携の設定」中立化 + リード文で iPhone/Android 両 OS 明示 / viewport-fit=cover meta 追加 / ホーム法務リンク色 var(--muted) → var(--ink-2) 濃色化で信頼感向上 / banner_android 文言「ログイン不要で見てみてください」追加で Android 評価者の早期離脱回避 — code 指摘 safe-area-inset 補正は v1.1 別 Issue #190 で起票) |
+| #192 | – | feat: OGP / meta description 最小整備 (= title「weight_dialy」→「weight daily. — 日常のちいさな歩きを自動で拾う」、meta description / OGP 6 タグ / Twitter Card 4 タグ追加、og:image は既存 /icon.png 流用 + summary card 暫定、`og:url` は `request.original_url` 動的生成、専用 1200x630 画像準備でき次第 summary_large_image 格上げ予定 — SNS 共有時のプレビュー対応で公開後の長期 ROI 向上) |
 
 ### close した Issue (= 8 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
@@ -294,10 +295,10 @@ How to apply:
 
 ## 📊 統計
 
-- マージした PR: **15 本** (= #153 Phase 3 + #154 AssetLinks + #156 flightsClimbed + #157 granted + #160 state 判定 + #165 0 kcal バナナ余裕 + #167 /privacy HC 明記 + #169 splash paper 色 + #171 navbar slim 化 + #173 navbar sticky 化 + #180 Settings ポリシーリンク移動 + #182 Webhook 422 I18n 化 + #185 banner_android UX ループ解消 + #187 navbar X グループ + #189 公開前最終 polish 4 件集約)
-- close した Issue: **12 件** + Issue #174 部分 close (= A+B+D 完了、C のみ v1.1 持ち越し)
+- マージした PR: **16 本** (= 上記 + #192 OGP 最小整備)
+- close した Issue: **13 件** (= 12 件 + #106 既対応確認による close) + Issue #174 部分 close (= A+B+D 完了、C のみ v1.1 持ち越し)
 - 起票した Issue (= v1.1 backlog): **9 件** (= 当日内 #190 safe-area-inset 補正起票追加)
-- 全体 spec: 431 → **557 examples** (= +126、Phase 3 関連 35 + state 判定回帰防止 4 + 0 kcal 空ステート 9 + Webhook I18n unauthorized 検証 1 + PlatformDetectorService.web_android? 7 + Settings UA 別出し分け 3 + navbar request spec 9 + Settings 見出し分割 1 + 既存差分)
+- 全体 spec: 431 → **557 examples** (= +126)
 - 教訓: **4 件** (= 学び 21-24)
 - つまずき / 学び: **10 件**
 - セッション時間: **約 9 時間** (= 朝 06:00〜15:00 過ぎ、発表会まで残り ~4h)
