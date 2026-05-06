@@ -17,7 +17,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 18 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + 動線リハ反映 polish 1 件 + OGP リッチ移行 1 件 + v1.1 backlog 5 件集約)
+## 🏆 達成したこと (= 計 19 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + 動線リハ反映 polish 1 件 + OGP リッチ移行 1 件 + Favicon リッチ移行 1 件 + v1.1 backlog 5 件集約)
 
 ### マージ済み PR (= 10 本)
 
@@ -41,6 +41,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #192 | – | feat: OGP / meta description 最小整備 (= title「weight_dialy」→「weight daily. — 日常のちいさな歩きを自動で拾う」、meta description / OGP 6 タグ / Twitter Card 4 タグ追加、og:image は既存 /icon.png 流用 + summary card 暫定、`og:url` は `request.original_url` 動的生成、専用 1200x630 画像準備でき次第 summary_large_image 格上げ予定 — SNS 共有時のプレビュー対応で公開後の長期 ROI 向上) |
 | #194 | – | polish: 動線リハ反映 — banner_empty を settings_path 化 + about ページ法務リンク濃色化 (= AI コードベース動線リハで対称性/一貫性の漏れ 2 件発見。α: banner_empty.html.erb 「/settings」ハードコードを settings_path に + 陳腐化コメント削除 (banner_android #185 と対称性回復)、β: about/show.html.erb 法務リンク色 var(--muted) → var(--ink-2) (ホーム index #189 と一貫性回復)) |
 | #196 | – | feat: OGP リッチ画像移行 — Claude Design 由来 1200x630 PNG (= ユーザー局長が claude.ai/design で作成した sketchy トーン HTML プロトタイプを bundle 受領、puppeteer 経由で headless Chrome レンダリング → 2400x1260 retina PNG 自動生成、`bin/render_ogp.sh` で再生成可能、フォントは Caveat/Kalam/Patrick Hand 英字 + Klee One 日本語 + Noto Color Emoji 絵文字の 3 段フォールバック、application.html.erb で og:image を /ogp.png に差し替え + twitter:card を summary_large_image 格上げ — Claude Design HTML プロトタイプ → 静的 PNG レンダリング 教材性◎) |
+| #198 | – | feat: Favicon リッチ移行 — Claude Design 由来「+kc」スタンプ風 5 サイズ (= 16/32/64/180/512px、Caveat font 「+kc」+ 黄色蛍光ペン帯 + オレンジストリークドット、16px はミニ版「+」のみで縮小視認性確保。bin/render_favicon.sh で puppeteer + element.screenshot による各サイズ個別 capture、deviceScaleFactor: 1 で純粋ピクセル。link rel に sizes 属性で各ブラウザに適切な解像度指定、旧 icon.svg placeholder 削除) |
 
 ### close した Issue (= 8 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
@@ -297,7 +298,7 @@ How to apply:
 
 ## 📊 統計
 
-- マージした PR: **18 本** (= 上記 + #196 OGP リッチ移行)
+- マージした PR: **19 本** (= 上記 + #198 Favicon リッチ移行)
 - close した Issue: **13 件** (= 12 件 + #106 既対応確認による close) + Issue #174 部分 close (= A+B+D 完了、C のみ v1.1 持ち越し)
 - 起票した Issue (= v1.1 backlog): **9 件** (= 当日内 #190 safe-area-inset 補正起票追加)
 - 全体 spec: 431 → **557 examples** (= +126)
