@@ -16,7 +16,12 @@
     </style>
 
 
+    <!-- Issue #128: Capacitor デフォルトの「Android ロボット + 水色背景」を sketchy theme の paper 色 (#fbf8f1) に置き換え、
+         Web 版とブランドカラー一貫性を保つ。
+         windowSplashScreenBackground は Android 12+ (API 31+) の AndroidX SplashScreen API 標準属性、
+         android:background は API 30 以下のフォールバック。両方書くことで全 Android version で paper 色を保証する。 -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="android:background">@drawable/splash</item>
+        <item name="windowSplashScreenBackground">@color/colorSplashBackground</item>
+        <item name="android:background">@color/colorSplashBackground</item>
     </style>
 </resources>
