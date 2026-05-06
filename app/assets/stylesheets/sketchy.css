@@ -334,5 +334,8 @@ body {
   .sketch-navbar { justify-content: flex-start; }
   .sketch-navbar-name { display: none; }
   .sketch-navbar-right .sketch-btn { padding: 8px 14px; font-size: 14px; }
+  /* モバイル幅では sketch-navbar-title (= 「weight daily.」 Caveat 32px) が 2 行折り返しになるため、
+     ボタン群を少し下にずらして daily. の下半分付近に揃え、視覚バランスを取る (画像 11 ユーザー報告由来、微調整レベル)。 */
+  .sketch-navbar-right { margin-top: 6px; }
 }
 
