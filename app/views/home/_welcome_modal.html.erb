@@ -38,6 +38,15 @@
         </p>
       </div>
 
+      <%# 「以降表示しない」チェックボックス。ON で閉じると localStorage に opt-out フラグが保存され、次回以降非表示。
+          OFF (= デフォルト) で閉じると、次回も表示される (= 局長判断「毎回出す + opt-out 選択肢」)。 %>
+      <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer; font-family: 'Kalam', cursive; font-size: 14px; color: var(--ink-2);">
+        <input type="checkbox"
+               data-welcome-modal-target="dontShowAgain"
+               style="width: 16px; height: 16px; cursor: pointer;">
+        以降表示しない
+      </label>
+
       <button type="button"
               class="sketch-btn sketch-btn-primary"
               style="width: 100%;"
