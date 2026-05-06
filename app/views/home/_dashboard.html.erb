@@ -186,53 +186,53 @@
   <%# 右: AI 提案 + ストリーク %>
   <div class="sketch-side">
 
-    <%# AI プラマイ提案カード %>
+    <%# AI プラマイ提案カード。
+        ヘッダだけアバター横の flex、本文以下は flex の外で左端揃え (= 他カードと位置を揃えるため、
+        アバター幅 36px + gap 10px 分の右ズレを回避、画像 5 ユーザー報告由来)。 %>
     <div class="sketch-box dashed" style="background: #fff7e0;">
-      <div style="display: flex; align-items: flex-start; gap: 10px;">
+      <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
         <div class="sketch-ai-avatar" aria-hidden="true">AI</div>
-        <div style="flex: 1;">
-          <h3 class="sketch-h"><%= advice.headline %></h3>
-          <% if advice.items.any? %>
-            <div class="sketch-small">
-              きょうのプラスα消費 <strong>+<%= today_kcal %> kcal</strong> なら…
-            </div>
-            <ul style="margin: 8px 0 0 16px; padding: 0; list-style: disc;">
-              <% advice.items.each do |item| %>
-                <li class="sketch-body-text" style="line-height: 1.6;">
-                  <%= item.name %>（<%= item.kcal %>kcal）
-                  <% if item.label %>
-                    <span class="<%= item.label == "余裕" ? "sketch-hl-green" : "sketch-hl-yellow" %>">
-                      <%= item.label %>
-                    </span>
-                  <% end %>
-                </li>
-              <% end %>
-            </ul>
-            <%# Issue #75: AI 経路で生成された時のみ「Powered by Claude」を控えめに表示 (= フォールバック時は隠す)。
-                ユーザーへの透明性 + 発表会での教材性アピール用。 %>
-            <% if advice.ai_used %>
-              <div class="sketch-small" style="margin-top: 6px; color: var(--muted); font-size: 12px;">
-                Powered by Claude (Anthropic)
-              </div>
-            <% end %>
-            <div style="margin-top: 10px;">
-              <span class="sketch-btn" style="cursor: default; opacity: 0.6;"
-                    title="この機能は近日公開予定です">
-                <%= advice.button_label %>
-              </span>
-              <%# title 属性は mobile でホバー不可のため、下に明示テキストを併置する %>
-              <div class="sketch-small" style="margin-top: 4px;">(近日公開予定)</div>
-            </div>
-          <% else %>
-            <%# Issue #163: 消費 0 kcal (= しきい値未満) 時の空ステート。
-                3 ステップ思想 ① (罪悪感を減らす) のため、食品提案 + button を出さずに優しい body 文言だけを表示。
-                CTA を出さないのは「同期する」ボタンが既にホーム上部にあり、ここで重ねると圧力が二重になるため。 %>
-            <p class="sketch-body-text" style="line-height: 1.6; margin-top: 8px;">
-              <%= advice.body %>
-            </p>
-          <% end %>
-        </div>
+        <h3 class="sketch-h" style="flex: 1; margin: 0;"><%= advice.headline %></h3>
       </div>
+      <% if advice.items.any? %>
+        <div class="sketch-small">
+          きょうのプラスα消費 <strong>+<%= today_kcal %> kcal</strong> なら…
+        </div>
+        <ul style="margin: 8px 0 0 16px; padding: 0; list-style: disc;">
+          <% advice.items.each do |item| %>
+            <li class="sketch-body-text" style="line-height: 1.6;">
+              <%= item.name %>(<%= item.kcal %>kcal)
+              <% if item.label %>
+                <span class="<%= item.label == "余裕" ? "sketch-hl-green" : "sketch-hl-yellow" %>">
+                  <%= item.label %>
+                </span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+        <%# Issue #75: AI 経路で生成された時のみ「Powered by Claude」を控えめに表示 (= フォールバック時は隠す)。
+            ユーザーへの透明性 + 発表会での教材性アピール用。 %>
+        <% if advice.ai_used %>
+          <div class="sketch-small" style="margin-top: 6px; color: var(--muted); font-size: 12px;">
+            Powered by Claude (Anthropic)
+          </div>
+        <% end %>
+        <div style="margin-top: 10px;">
+          <span class="sketch-btn" style="cursor: default; opacity: 0.6;"
+                title="この機能は近日公開予定です">
+            <%= advice.button_label %>
+          </span>
+          <%# title 属性は mobile でホバー不可のため、下に明示テキストを併置する %>
+          <div class="sketch-small" style="margin-top: 4px;">(近日公開予定)</div>
+        </div>
+      <% else %>
+        <%# Issue #163: 消費 0 kcal (= しきい値未満) 時の空ステート。
+            3 ステップ思想 ① (罪悪感を減らす) のため、食品提案 + button を出さずに優しい body 文言だけを表示。
+            CTA を出さないのは「同期する」ボタンが既にホーム上部にあり、ここで重ねると圧力が二重になるため。 %>
+        <p class="sketch-body-text" style="line-height: 1.6;">
+          <%= advice.body %>
+        </p>
+      <% end %>
     </div>
 
     <%# ストリークカード %>
