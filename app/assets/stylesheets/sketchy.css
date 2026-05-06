@@ -322,8 +322,12 @@ body {
   /* navbar はモバイル幅で「タイトル + 名前 + 設定 + ログアウト」が総幅オーバーになり、
      設定/ログアウトのボタン内テキストが「設/定」「ロ/グ/ア/ウ/ト」と 1 文字ずつ縦書きみたいに
      圧縮される事象が発生 (画像 6 由来)。名前を非表示にしてスペース確保 + ボタンを padding/font-size
-     縮小で軽量化することで横並び維持。 */
+     縮小で軽量化することで横並び維持。
+     PR #204 で padding 6px 10px / font-size 14px に縮小したが、それでも縦書き状の圧縮が解消されず
+     (画像 8 由来) → space-between から flex-start に変更してボタン群を左寄せにし、
+     ボタンに割り当て可能な横幅を確保。padding は 8px 14px に戻して読みやすさ優先。 */
+  .sketch-navbar { justify-content: flex-start; }
   .sketch-navbar-name { display: none; }
-  .sketch-navbar-right .sketch-btn { padding: 6px 10px; font-size: 14px; }
+  .sketch-navbar-right .sketch-btn { padding: 8px 14px; font-size: 14px; }
 }
 

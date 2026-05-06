@@ -195,6 +195,15 @@ export default class extends Controller {
   }
 
   formatSummary(data) {
+    // 0 歩は Health Connect 自体にデータが届いていない可能性が高い。
+    // よくある原因: ① Health Connect で「データソース」(= 歩数計測アプリ) が未設定
+    //             ② エミュレータ (= 物理歩数センサー無し)
+    //             ③ 計測アプリの書き込み権限 OFF
+    // ユーザー局長が「同期成功 → 実は 0 歩」のミスリードでハマった事例から、明示的に「Health Connect 側を見て」と誘導する。
+    if ((data.step_count || 0) === 0) {
+      return "⚠️ Health Connect から本日のデータが取得できません。Health Connect アプリで「データソース」が設定され、歩数計測アプリ (デイリーステップ / Google Fit 等) の書き込みが有効か確認してください。"
+    }
+
     const steps = (data.step_count || 0).toLocaleString()
     const km = ((data.distance_meters || 0) / 1000).toFixed(1) // ホーム画面と同じ 1 桁表示
     const floors = data.floors_climbed
