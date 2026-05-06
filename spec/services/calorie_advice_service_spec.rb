@@ -28,6 +28,10 @@ RSpec.describe CalorieAdviceService do
         expect(result.button_label).to be_present
       end
 
+      it "body が nil (= 通常ステートでは body は空ステート専用、回帰防止)" do
+        expect(result.body).to be_nil
+      end
+
       it "各 item が name / kcal / label 構造を持つ" do
         result.items.each do |item|
           expect(item).to respond_to(:name, :kcal, :label)
@@ -38,17 +42,60 @@ RSpec.describe CalorieAdviceService do
       end
     end
 
-    context "0 kcal (最小値)" do
+    # Issue #163 (= 0 kcal バナナ余裕誤誘導) で導入された空ステート。
+    # しきい値未満 (= 30 kcal 未満) では AI / Static を呼ばず ZERO_HEADLINE + ZERO_BODY を返す。
+    context "0 kcal (= ZERO_THRESHOLD 未満、空ステート)" do
       let(:kcal) { 0 }
+
+      it "items が空配列" do
+        expect(result.items).to eq([])
+      end
+
+      it "headline が ZERO_HEADLINE「今日のスタートはここから」" do
+        expect(result.headline).to eq("今日のスタートはここから")
+      end
+
+      it "body に ZERO_BODY 文言が入る (= 食品提案の代わり)" do
+        expect(result.body).to eq("歩数が記録されると、食べていいものを提案するよ。")
+      end
+
+      it "button_label が nil (= 0 kcal 時はボタン非表示、design レビュー指摘)" do
+        expect(result.button_label).to be_nil
+      end
+
+      it "ai_used が false (= AI を呼ばずに即返す)" do
+        expect(result.ai_used).to be false
+      end
+
+      it "AI を呼ばない (= API コスト節約、ガード節で先にリターン)" do
+        expect(CalorieAdviceService::Ai).not_to receive(:call)
+        result
+      end
+    end
+
+    context "ZERO_THRESHOLD - 1 kcal (= 境界の直前、空ステート扱い)" do
+      let(:kcal) { CalorieAdviceService::ZERO_THRESHOLD - 1 }
+
+      it "items が空配列 (= しきい値未満は 0 と同じ扱い)" do
+        expect(result.items).to eq([])
+      end
+
+      it "headline が ZERO_HEADLINE" do
+        expect(result.headline).to eq("今日のスタートはここから")
+      end
+    end
+
+    context "ZERO_THRESHOLD ぴったり kcal (= 通常ステート下限)" do
+      let(:kcal) { CalorieAdviceService::ZERO_THRESHOLD }
 
       include_examples "正常なレスポンス構造"
 
-      it "headline が新コピー「今日の消費カロリーならこれ食べられるよ〜」である (= Issue #42 で確定)" do
+      it "headline が通常 HEADLINE (= 空ステートではない)" do
         expect(result.headline).to eq("今日の消費カロリーならこれ食べられるよ〜")
       end
 
-      it "button_label が規定文字列である" do
-        expect(result.button_label).to eq("食べたい物から逆算 →")
+      it "items が 3 件" do
+        expect(result.items.size).to eq(3)
       end
     end
 
@@ -110,18 +157,21 @@ RSpec.describe CalorieAdviceService do
         end
       end
 
-      # total_kcal = 0 の場合は ratio = 0 → 全件 "余裕"
-      context "total_kcal = 0 の場合" do
+      # Issue #163 fix 後: total_kcal = 0 (= しきい値未満) は空ステートを返すため、
+      # items が空配列で「余裕」誤誘導が発生しないことを保証する (= 旧バグの回帰防止)。
+      context "total_kcal = 0 (= 旧版バグの回帰防止)" do
         let(:kcal) { 0 }
 
-        it "全 item の label が「余裕」である" do
-          expect(result.items.map(&:label)).to all(eq("余裕"))
+        it "items が空配列 (= 全件「余裕」誤誘導の元凶を断つ)" do
+          expect(result.items).to eq([])
         end
       end
     end
   end
 
   describe "AI 成功時とフォールバック時の分岐" do
+    # ZERO_THRESHOLD (30) を超えた値を使い、AI / Static の分岐まで到達することを保証する。
+    # 0 kcal 等のしきい値未満を渡すと冒頭ガード節で zero_kcal_result が返ってしまい、AI 経路の検証が成立しない。
     let(:kcal) { 200 }
 
     # ai_available? を true にするため credentials を stub (= 上のメインテストとは別に、AI 経路を試したいので)
