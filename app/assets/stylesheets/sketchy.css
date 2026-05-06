@@ -101,6 +101,11 @@ body {
   color: var(--ink); text-decoration: none; cursor: pointer;
   box-shadow: 2px 2px 0 var(--ink);
   transition: transform .08s ease, box-shadow .08s ease;
+  /* ボタン内テキストの自動折り返し禁止 (= モバイル幅で「ログ / アウト」2 行折り返しを解消)。
+     flex-shrink: 0 は flex container 内 (= navbar など) でボタンが圧縮されて
+     padding すら奪われ「設 / 定」と縦書き状になる事象を抑える (画像 10 由来)。 */
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .sketch-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
 .sketch-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
