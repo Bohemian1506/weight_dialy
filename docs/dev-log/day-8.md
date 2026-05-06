@@ -17,7 +17,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 13 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + v1.1 backlog 5 件集約)
+## 🏆 達成したこと (= 計 14 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + v1.1 backlog 5 件集約)
 
 ### マージ済み PR (= 10 本)
 
@@ -36,6 +36,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #180 | #90 | polish: Settings ポリシーリンクを退会セクション後 (= フッター的) に移動 + 「退会前に規約を確認したい場合はこちら」補足、コメントに「インフォームドコンセント色 vs フッター UX 色」設計トレードオフ明示 |
 | #182 | #83 | polish: Webhook 422 エラー文言を I18n 化 + カジュアル層向け日本語化 (= `config/locales/ja.yml` 新規 8 errors キー / 3 fields キー、生例外 message は `Rails.logger.warn` に分離して本人画面非露出、`unauthorized` 値のみ運用ログ用として英語維持、design-reviewer must-fix 反映 + 推奨コピー 4 件全採用) |
 | #185 | #162, #184 | polish: banner_android UX ループ解消 + Settings に Web Android user 向け案内追加 (= **案 E** で 2 Issue 1 PR、`PlatformDetectorService.web_android?` 新設で Capacitor 排除 UA 判定、Settings 新セクションは既存 native-health セクションとサーバ UA で排他制御、文言は「アプリ取得後の本来体験 + 取得手段準備中 + 暫定 sample」3 段構成 — ユーザー局長との認識合わせで「Web 主戦場 / Capacitor は API 送信補助 / 配布 = sideload」の前提整理が大きな成果) |
+| #187 | #174 (A+B+D) | polish: navbar X グループ — scroll shadow + 高さ CSS 変数化 + 未ログイン CTA (= 4 サブのうち軽量 3 件を 1 PR、`navbar_scroll_controller.js` で scrollY > 4 で `.is-scrolled` class 付与 + rAF throttle、`--navbar-height: 64px` 変数化で flash toast を `top-[calc(var(--navbar-height)+16px)]` 連動、未ログイン navbar に「ログイン」CTA、transition は `.sketch-navbar` 本体側で両方向 .15s ease — C ハンバーガーは ViewComponents 導入 #56 と並行で v1.x 持ち越し撤退、Day 8 navbar 系 4 連投回避) |
 
 ### close した Issue (= 8 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
@@ -292,13 +293,13 @@ How to apply:
 
 ## 📊 統計
 
-- マージした PR: **13 本** (= #153 Phase 3 + #154 AssetLinks + #156 flightsClimbed + #157 granted + #160 state 判定 + #165 0 kcal バナナ余裕 + #167 /privacy HC 明記 + #169 splash paper 色 + #171 navbar slim 化 + #173 navbar sticky 化 + #180 Settings ポリシーリンク移動 + #182 Webhook 422 I18n 化 + #185 banner_android UX ループ解消)
-- close した Issue: **12 件** (= #125 子 6 / #158 デモ表記 / #159 設定導線残 / #163 0 kcal バナナ余裕 / #131 /privacy HC 明記 / #150 deep link 回復導線 / #128 splash 色 / #49 navbar 高さ slim 化 / #90 Settings ポリシーリンク位置 / #83 Webhook 422 文言 / #162 banner_android polish / #184 Settings Web Android セクション)
-- 起票した Issue (= v1.1 backlog): **8 件** (= #161 / #162 / #174 / #175 / #176 / #177 / #178 + 当日内 #184 起票即 close、#174-#178 は元 11 個別候補を 5 grouping に集約)
-- 全体 spec: 431 → **547 examples** (= +116、Phase 3 関連 35 + state 判定回帰防止 4 + 0 kcal 空ステート 9 + Webhook I18n unauthorized 検証 1 + PlatformDetectorService.web_android? 7 + Settings UA 別出し分け 3 + 既存差分)
-- 教訓: **4 件** (= 学び 21 AssetLinks 端末ガチャ / 学び 22 permission flow 完走 / 学び 23 state 判定はデータ最優先 / 学び 24 事前デザイン相談)
-- つまずき / 学び: **10 件** (= 当初 6 件 + 朝の連鎖発見 saga 3 件 + 0 kcal バナナ余裕 1 件)
-- セッション時間: **約 8.5 時間** (= 朝 06:00〜14:30 過ぎ、発表会まで残り ~4.5h)
+- マージした PR: **14 本** (= #153 Phase 3 + #154 AssetLinks + #156 flightsClimbed + #157 granted + #160 state 判定 + #165 0 kcal バナナ余裕 + #167 /privacy HC 明記 + #169 splash paper 色 + #171 navbar slim 化 + #173 navbar sticky 化 + #180 Settings ポリシーリンク移動 + #182 Webhook 422 I18n 化 + #185 banner_android UX ループ解消 + #187 navbar X グループ)
+- close した Issue: **12 件** + Issue #174 部分 close (= A+B+D 完了、C のみ v1.1 持ち越し)
+- 起票した Issue (= v1.1 backlog): **8 件**
+- 全体 spec: 431 → **556 examples** (= +125、Phase 3 関連 35 + state 判定回帰防止 4 + 0 kcal 空ステート 9 + Webhook I18n unauthorized 検証 1 + PlatformDetectorService.web_android? 7 + Settings UA 別出し分け 3 + navbar request spec 9 + 既存差分)
+- 教訓: **4 件** (= 学び 21-24)
+- つまずき / 学び: **10 件**
+- セッション時間: **約 9 時間** (= 朝 06:00〜15:00 過ぎ、発表会まで残り ~4h)
 
 ---
 
