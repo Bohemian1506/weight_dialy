@@ -17,9 +17,9 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 7 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件)
+## 🏆 達成したこと (= 計 8 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件)
 
-### マージ済み PR (= 7 本)
+### マージ済み PR (= 8 本)
 
 | PR | Issue | 内容 |
 |---|---|---|
@@ -30,13 +30,16 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #160 | #158, #159 | fix: `BuildHomeDashboardService#determine_state` で「データの有無」判定を「Android UA」判定より前に移動 (= Capacitor 同期済 user にデモデータが永久表示される設計バグ駆除、+ 連携バナー残留バグも同 PR で同時 close) |
 | #165 | #163 | fix: 消費 0 kcal で「バナナ余裕」誤誘導バグ駆除 (= ZERO_THRESHOLD ガード節 + Result Struct に body field 追加 + view で items.any? 分岐、design-reviewer **事前相談**で文言 / UX 確定後に実装) |
 | #167 | #131 | fix: /privacy に Android Health Connect 経由の取得情報を明記 (= Google Health Connect Privacy Policy 要件遵守、案 A の 1 行追加 + 注記文言を「生データ」→「1 日合計値」に書き直し + 単位表記統一) |
+| #169 | #128, #150 | polish: Capacitor splash 背景を sketchy paper 色 (#fbf8f1) に + ic_launcher 背景も同色化 (= AndroidX SplashScreen API で「白い矩形が paper 上に浮く」問題解消、design-reviewer 指摘) |
 
-### close した Issue (= 5 件)
+### close した Issue (= 7 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
 - **#158** (= Capacitor アプリで実データが反映されない) — PR #160 で close
 - **#159** (= 連携済なのに設定画面導線が残る) — PR #160 で close (= #158 と同根の bug を 1 PR で同時駆除)
 - **#163** (= 消費 0 kcal でバナナ余裕誤誘導、3 ステップ思想と矛盾) — PR #165 で close
 - **#131** (= /privacy に Health Connect 取得情報明記、発表会前必須) — PR #167 で close
+- **#150** (= deep link「ブラウザで開く」誤選択時の回復導線) — Phase 3 で前提解消、コメント付き手動 close
+- **#128** (= Capacitor splash 背景色を sketchy paper に) — PR #169 で close
 
 ### 起票した Issue
 - **#161**: refactor: 状態名 `:iphone_with_data` → `:user_with_data` リネーム (= v1.1 backlog、Android user 到達で誤称化したため)
@@ -271,8 +274,8 @@ How to apply:
 
 ## 📊 統計
 
-- マージした PR: **7 本** (= #153 Phase 3 + #154 AssetLinks + #156 flightsClimbed + #157 granted + #160 state 判定 + #165 0 kcal バナナ余裕 + #167 /privacy HC 明記)
-- close した Issue: **5 件** (= #125 子 6 / #158 デモ表記 / #159 設定導線残 / #163 0 kcal バナナ余裕 / #131 /privacy HC 明記)
+- マージした PR: **8 本** (= #153 Phase 3 + #154 AssetLinks + #156 flightsClimbed + #157 granted + #160 state 判定 + #165 0 kcal バナナ余裕 + #167 /privacy HC 明記 + #169 splash paper 色)
+- close した Issue: **7 件** (= #125 子 6 / #158 デモ表記 / #159 設定導線残 / #163 0 kcal バナナ余裕 / #131 /privacy HC 明記 / #150 deep link 回復導線 (= Phase 3 で前提解消) / #128 splash 色)
 - 起票した Issue: **2 件** (= #161 リネーム v1.1 / #162 banner 文言 v1.1) + 過去 PR の v1.1 候補メモ複数
 - 全体 spec: 431 → **527 examples** (= +96、Phase 3 関連 35 + state 判定回帰防止 4 + 0 kcal 空ステート 9 + 既存差分)
 - 教訓: **4 件** (= 学び 21 AssetLinks 端末ガチャ / 学び 22 permission flow 完走 / 学び 23 state 判定はデータ最優先 / 学び 24 事前デザイン相談)
