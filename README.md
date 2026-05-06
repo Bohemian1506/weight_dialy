@@ -274,32 +274,7 @@
 | **v1.1** | カロリー貯金システム (Section 7 で予告した目玉機能) | アプリの哲学 (罪悪感 → 財務感覚) を機能で完成させる |
 | **v2.0** | AI 提案ロジックの個別最適化 | データ蓄積後の差別化の核 |
 
-minor 機能群 (PWA / ダークモード / ウィジェット / SNS / 各種ガチ運動モード機能) は上記の合間に随時取り込み。
-
-### カロリー貯金システム (v1.1 詳細)
-
-Section 7 で予告した目玉機能。仕様の核:
-- 累計消費 - 累計摂取 = 貯金残高
-- マイルストーン到達 (ラーメン 1 杯 ≈ 1000kcal、大盛りカツ丼 ≈ 1500kcal、ジョッキビール ≈ 200kcal) で祝福バナー
-- 摂取側の入力は AI 提案を「食べた!」ボタンで承認した時点で自動引き落とし (= 入力ゼロ理念を維持)
-- 残高がマイナスになったら「赤字警告」(= 罪悪感じゃなく財務感覚で警鐘)
-
-### データが溜まった先のアイデア帳
-
-- **個人ベースライン学習**: 「今日は普段比 +20% 動いた」のような相対評価
-- **季節 / 曜日 / 天気別パターン分析**: 「梅雨は平均 -30% になる傾向」
-- **AI 推定枠**: 「重い荷物の買い物」「坂道散歩」などを歩数 + 心拍データから推定して加点
-
-### 他者との繋がり
-
-- スクール内 / 友人内のストリーク比較 (競争ではなく共感型)
-- カロリー貯金額のシェア機能 (「今週 ラーメン 2 杯分 貯まりました」を SNS シェア)
-
-### 運用・仕組みで価値を出す
-
-- 開発者本人 (Android ユーザー) のドッグフードを v1.0 リリースの定義とし、改善ループを構造的に保証
-- 「今日のずぼら開発者の動き」を SNS 発信、アプリ自体が PR 媒体になる構造
-- スクール卒業後も継続開発を公言、教材性を維持
+minor 機能群 (PWA / ダークモード / ウィジェット / SNS / 各種ガチ運動モード機能) は上記の合間に随時取り込み。詳細は GitHub Issues / `memory/` / `docs/dev-log/` を参照。
 
 ---
 
@@ -555,3 +530,31 @@ Render Free Tier は **15 分非アクセスで sleep** → 初回アクセス c
 - **API 200 + accepted_count 1 = ユーザー体験的に「成功」とは限らない**: 中身が 0 値ならユーザーは「同期されてない」と感じる。**意味のある成功** (= 数値 > 0) と「処理通過」を区別して UI 表示する重要性 (= PR #206)
 - **Capacitor + Health Connect の plugin 落とし穴**: @capgo/capacitor-health の API 命名が Health Connect 内部 (= FloorsClimbedRecord) と公開 API (= flightsClimbed) で違う、`AuthorizationStatus` 型は `granted` ではなく `readAuthorized: HealthDataType[]` 形式 (= Day 7 学び 22 + PR #156, #157 由来)
 - **エミュレータ vs 実機の差**: 物理センサー有無の違いで「動く / 動かない」が分かれる、外部 SDK 連携は **必ず実機でも検証** が定石 (= 学び 21 端末ガチャ含めた教訓)
+
+### 12-6. なぜこのアーキテクチャか (= 業界標準の王道、Web 完結を待っても無駄)
+
+「Web ベースのアプリなのに、なぜ Capacitor + ネイティブ SDK が必要?」 = 後輩がまず疑問に思うポイント。**結論: 業界標準を踏襲しているだけ、Web 完結のショートカットは構造的に存在しない。**
+
+#### Google の Health 系 API 二分岐 (= 2026 年時点)
+
+| API | タイプ | 対象 | 一般 Android スマホで使えるか |
+|---|---|---|---|
+| Google Fit REST API | Web | 一般 Android | ❌ **2026 年中廃止確定** |
+| Health Connect SDK | Android Native | 一般 Android | ✅ ただし**ネイティブ SDK 経由のみ** (= Web/REST なし) |
+| Google Health API | Web | **Fitbit + Pixel Watch のみ** | ❌ 一般 Android スマホ非対応 |
+
+#### Apple HealthKit も同じ方針
+
+WWDC 2025 で発表されたのも `Medications API` (= ネイティブ iOS) のみで、REST 公開なし。Apple Shortcuts + Webhook が回避策の最善解 (= 本アプリの iPhone 連携経路もこれ)。
+
+#### なぜ Web/REST が出ないか
+
+「健康データを **端末上に閉じる**、クラウド経由で外部に流さない」プライバシー方針が **Apple / Google 両社で一致**。これは意図的設計で、短中期 (2026 年内) に変わる発表は**ない**ことが api-researcher 調査で確定 (= dev-log day-8 + Issue #219 参照)。
+
+#### 結果として業界標準は
+
+**「ハイブリッドアプリ (Capacitor / React Native 等) + ネイティブ SDK + 自前 Webhook」** が唯一の現実解。weight daily の現アーキテクチャ (= Capacitor + Health Connect Native + Rails Webhook) はこの王道を踏襲している。**Web 公式 API を待つ戦略には意味がなく、ハイブリッドアプリ路線で確定でよい**。
+
+#### ニッチオプション
+
+ターゲットが Pixel Watch / Fitbit ユーザーなら **Google Health API で Web 完結連携** が可能 (= Issue #219、v1.1 backlog)。ただし weight daily のメインターゲット (= 通勤通学カジュアル層、一般 Android スマホ) には届かない。サードパーティ aggregator (Thryve / Terra / Validic 等) は月額課金、個人プロジェクトには不向き。
