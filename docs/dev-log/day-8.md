@@ -17,7 +17,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 23 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + 動線リハ反映 polish 1 件 + OGP リッチ移行 1 件 + Favicon リッチ移行 1 件 + ログイン CTA 集約 (案 A 逆転) 1 件 + モバイル比率 + Web 下切れ予防 1 件 + AI カード flex + navbar mobile 1 件 + 0 歩警告 + navbar 左寄せ 1 件 + v1.1 backlog 5 件集約)
+## 🏆 達成したこと (= 計 24 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + 動線リハ反映 polish 1 件 + OGP リッチ移行 1 件 + Favicon リッチ移行 1 件 + ログイン CTA 集約 (案 A 逆転) 1 件 + モバイル比率 + Web 下切れ予防 1 件 + AI カード flex + navbar mobile 1 件 + 0 歩警告 + navbar 左寄せ 1 件 + Android 利用ガイド README 1 件 + v1.1 backlog 5 件集約)
 
 ### マージ済み PR (= 10 本)
 
@@ -46,6 +46,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #202 | – | polish: モバイル比率修正 + Web 下切れ予防 4 件集約 (= モバイル実機リハで判明 3 件 + 再現性なし下切れ予防 1 件)。A: bottom-grid を repeat(N, minmax(0, 1fr)) で grid item の min-width auto bleed を抑制 (= 「+5.4」「7,200」が container 右切れする事象解消)。B: banner をモバイル幅 (760px 以下) で flex-direction: column 縦並び化 (= flex-shrink: 0 ボタンが幅を奪い「これ/サン/プル/デー/タ/で/す」と 1-3 文字ずつ折り返しする事象解消)。C-2: html, body min-height: 100vh 追加 (= viewport 短コンテンツ予防策)。C-3: dashboard padding-bottom 32 → 48px (= scroll restoration / font swap layout shift 予防策)。教材性: CSS Grid の min-width auto 落とし穴 + Flexbox + flex-shrink:0 のモバイル潰れ パターンの定石対処を後輩教材としてコメント残置 |
 | #204 | – | polish: AI カード flex 構造修正 + navbar モバイルボタン縮小 (画像 5 / 6 ユーザー報告由来)。AI カード: ヘッダ (= アバター + h3) だけ flex 横並び、本文以下 (= リスト / Powered by Claude / ボタン) を flex の外に出して左端揃え、アバター幅 36px + gap 10px 分の右ズレ解消。navbar mobile: モバイル幅で .sketch-navbar-name 非表示 + .sketch-btn の padding 6px 10px / font-size 14px 縮小、「設/定」「ロ/グ/ア/ウ/ト」と縦書き状の極小圧縮を解消。教材性: flex 横並びカード内 content shift の典型対処 + 「タイトル + 名前 + 複数ボタン」総幅オーバー時の定石 (= 情報密度低い要素を非表示 + ボタン縮小) |
 | #206 | – | polish: 0 歩警告強化 + navbar モバイル左寄せ + ボタン padding 戻し。0 歩警告: native_health_controller.js の formatSummary で step_count === 0 時に「⚠️ Health Connect から本日のデータが取得できません + データソース設定確認」を明示誘導 (= ユーザー局長 16:11 報告「同期成功 → 実は 0 歩」事例由来、本番 DB 調査で WebhookDelivery 6 件全部 0 値と確定)。navbar mobile: PR #204 の縮小 (= padding 6px 10px) でも縦書き状圧縮が解消されず (画像 8 由来)、justify-content を space-between → flex-start に変更してボタン群を左寄せにし、padding を 8px 14px に戻して読みやすさ優先。教材性: 「API 200 + accepted_count 1」でも中身 0 値ならユーザー体験的に失敗、意味のある成功表示を区別する重要性 |
+| #208 | – | docs: README に「12. Android アプリ版利用ガイド (Capacitor + Health Connect 連携)」セクション追加 (= 102 行)。子 7 #126 (APK sideload 配布手順整備) で配布開始時に参照される雛形。全体像 (データの流れ) / 前提条件 / セットアップ手順 (Step 1: 歩数計測アプリ連携 ←最重要 / Step 2: APK / Step 3: weight daily 内 OAuth + 同期) / トラブルシューティング 4 症状 (0 歩のまま / 権限不足 / Health Connect 利用不可 / エミュレータ動作確認) / 教材性メモ (読み取り/書き込み API 分離 / 「API 200 = 成功」の罠 / Capacitor plugin 落とし穴 / エミュ vs 実機差) を集約。ユーザー局長判断「E (Settings ガイダンス) は 19:00 以降緊急タスク、今は B (README) で教材性整備」を反映 |
 
 ### close した Issue (= 8 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
@@ -302,7 +303,7 @@ How to apply:
 
 ## 📊 統計
 
-- マージした PR: **23 本** (= 上記 + #206 0 歩警告 + navbar 左寄せ)
+- マージした PR: **24 本** (= 上記 + #208 README Android 利用ガイド)
 - close した Issue: **13 件** (= 12 件 + #106 既対応確認による close) + Issue #174 部分 close (= A+B+D 完了、C のみ v1.1 持ち越し)
 - 起票した Issue (= v1.1 backlog): **9 件** (= 当日内 #190 safe-area-inset 補正起票追加)
 - 全体 spec: 431 → **557 examples** (= +126)
