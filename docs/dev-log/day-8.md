@@ -17,7 +17,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 16 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + v1.1 backlog 5 件集約)
+## 🏆 達成したこと (= 計 17 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + 動線リハ反映 polish 1 件 + v1.1 backlog 5 件集約)
 
 ### マージ済み PR (= 10 本)
 
@@ -39,6 +39,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #187 | #174 (A+B+D) | polish: navbar X グループ — scroll shadow + 高さ CSS 変数化 + 未ログイン CTA (= 4 サブのうち軽量 3 件を 1 PR、`navbar_scroll_controller.js` で scrollY > 4 で `.is-scrolled` class 付与 + rAF throttle、`--navbar-height: 64px` 変数化で flash toast を `top-[calc(var(--navbar-height)+16px)]` 連動、未ログイン navbar に「ログイン」CTA、transition は `.sketch-navbar` 本体側で両方向 .15s ease — C ハンバーガーは ViewComponents 導入 #56 と並行で v1.x 持ち越し撤退、Day 8 navbar 系 4 連投回避) |
 | #189 | – | polish: 公開前最終 4 件集約 (= design-reviewer 公開前 Web 最終チェック反映、Settings 見出し「Apple Shortcuts 連携」→「データ連携の設定」中立化 + リード文で iPhone/Android 両 OS 明示 / viewport-fit=cover meta 追加 / ホーム法務リンク色 var(--muted) → var(--ink-2) 濃色化で信頼感向上 / banner_android 文言「ログイン不要で見てみてください」追加で Android 評価者の早期離脱回避 — code 指摘 safe-area-inset 補正は v1.1 別 Issue #190 で起票) |
 | #192 | – | feat: OGP / meta description 最小整備 (= title「weight_dialy」→「weight daily. — 日常のちいさな歩きを自動で拾う」、meta description / OGP 6 タグ / Twitter Card 4 タグ追加、og:image は既存 /icon.png 流用 + summary card 暫定、`og:url` は `request.original_url` 動的生成、専用 1200x630 画像準備でき次第 summary_large_image 格上げ予定 — SNS 共有時のプレビュー対応で公開後の長期 ROI 向上) |
+| #194 | – | polish: 動線リハ反映 — banner_empty を settings_path 化 + about ページ法務リンク濃色化 (= AI コードベース動線リハで対称性/一貫性の漏れ 2 件発見。α: banner_empty.html.erb 「/settings」ハードコードを settings_path に + 陳腐化コメント削除 (banner_android #185 と対称性回復)、β: about/show.html.erb 法務リンク色 var(--muted) → var(--ink-2) (ホーム index #189 と一貫性回復)) |
 
 ### close した Issue (= 8 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
@@ -295,7 +296,7 @@ How to apply:
 
 ## 📊 統計
 
-- マージした PR: **16 本** (= 上記 + #192 OGP 最小整備)
+- マージした PR: **17 本** (= 上記 + #194 動線リハ反映 polish)
 - close した Issue: **13 件** (= 12 件 + #106 既対応確認による close) + Issue #174 部分 close (= A+B+D 完了、C のみ v1.1 持ち越し)
 - 起票した Issue (= v1.1 backlog): **9 件** (= 当日内 #190 safe-area-inset 補正起票追加)
 - 全体 spec: 431 → **557 examples** (= +126)
