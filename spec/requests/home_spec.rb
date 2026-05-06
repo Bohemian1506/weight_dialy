@@ -130,9 +130,9 @@ RSpec.describe "Home", type: :request do
     end
 
     # ─────────────────────────────────────────────────
-    # 状態 :iphone_with_data — ログイン済み + iOS UA + データあり
+    # 状態 :has_data — ログイン済み + iOS UA + データあり
     # ─────────────────────────────────────────────────
-    context "状態 :iphone_with_data (ログイン済み + iPhone UA + step_records あり)" do
+    context "状態 :has_data (ログイン済み + iPhone UA + step_records あり)" do
       let(:user) { create(:user) }
       let!(:step_record) do
         create(:step_record, user: user, recorded_on: Date.current, steps: 9000)
@@ -181,9 +181,9 @@ RSpec.describe "Home", type: :request do
     end
 
     # ─────────────────────────────────────────────────
-    # 状態 :iphone_with_data かつ「今月のレコードがゼロ + 累計あり」 (= 月初励まし発火条件、Issue #70)
+    # 状態 :has_data かつ「今月のレコードがゼロ + 累計あり」 (= 月初励まし発火条件、Issue #70)
     # ─────────────────────────────────────────────────
-    context "状態 :iphone_with_data + 今月 0 + 累計あり (= 月初励まし発火条件、Issue #70)" do
+    context "状態 :has_data + 今月 0 + 累計あり (= 月初励まし発火条件、Issue #70)" do
       # travel_to で日付を固定して月境界 issue を予防 (= code-reviewer 指摘)。
       # CI が月末/月初に走った時の偶発バグを防ぎ、再現性を担保する。
       around { |ex| travel_to(Date.new(2026, 5, 15)) { ex.run } }
