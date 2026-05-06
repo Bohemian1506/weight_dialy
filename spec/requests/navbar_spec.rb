@@ -2,27 +2,29 @@ require "rails_helper"
 
 # navbar の表示内容を担保する request spec (Issue #174 D)。
 # A (scroll shadow) / B (CSS 変数) は visual な挙動のため request spec では検証しない。
-# D (未ログイン時 navbar CTA) を中心に、ログイン時との分岐を確認する。
+# 案 A (= 未ログイン navbar CTA を削除して banner_guest に集約) 後の検証に書き換え済。
 RSpec.describe "Navbar", type: :request do
+  # response.body から <header>...</header> 部分だけ抽出するヘルパー (= navbar 単体の確認用)。
+  def header_html(body)
+    body.match(%r{<header[^>]*>.*?</header>}m)&.[](0).to_s
+  end
+
   describe "GET /" do
     context "未ログイン時" do
       before { get root_path }
 
-      it "navbar 内にログインボタン (CTA) が含まれる" do
-        # button_to で生成される form action に /auth/google_oauth2 が含まれる
+      it "ホームページに Google ログインボタンが含まれる (= banner_guest 由来、案 A で navbar から banner に集約)" do
         expect(response.body).to include("/auth/google_oauth2")
+        expect(response.body).to include("Google でログイン")
       end
 
-      it "navbar 内に sketch-btn-primary クラスのボタンが含まれる" do
-        expect(response.body).to include("sketch-btn-primary")
+      it "navbar 単体には未ログイン CTA を含まない (= 案 A 反映、認知負荷回避)" do
+        nav = header_html(response.body)
+        expect(nav).not_to include("/auth/google_oauth2")
+        expect(nav).not_to include("ログイン")
       end
 
-      it "「ログイン」文言が含まれる" do
-        expect(response.body).to include("ログイン")
-      end
-
-      it "「設定」リンクを含まない" do
-        # ログイン時専用の navbar アイテムが未ログイン時に露出しないことを確認
+      it "「設定」リンクを含まない (= ログイン時専用 navbar アイテム)" do
         expect(response.body).not_to include(">設定<")
       end
 

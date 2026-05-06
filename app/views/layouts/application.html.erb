@@ -74,19 +74,10 @@
           <span class="sketch-navbar-name"><%= current_user.name %></span>
           <%= link_to "設定", settings_path, class: "sketch-btn" %>
           <%= button_to "ログアウト", logout_path, method: :delete, class: "sketch-btn" %>
-        <% else %>
-          <%# 未ログイン時 navbar CTA (Issue #174 D)。
-              banner_guest と CTA が 2 箇所になるが、
-              navbar = グローバル CTA / banner = ホーム内コンテキスト CTA、と役割分担で容認。
-              Capacitor アプリ内では未ログイン状態で navbar 自体が出る経路は存在しないが、
-              banner_guest と同じ intercept を保険として付与する。 %>
-          <div data-controller="capacitor-oauth-login">
-            <%= button_to "ログイン", "/auth/google_oauth2",
-                  method: :post,
-                  class: "sketch-btn sketch-btn-primary",
-                  data: { turbo: false, action: "click->capacitor-oauth-login#intercept" } %>
-          </div>
         <% end %>
+        <%# 未ログイン時の CTA は banner_guest に集約 (= ホーム画面の「サンプル → Google でログイン」ストーリー優先)。
+            navbar に同じ CTA を置くと 2 箇所同時表示で認知負荷が出るため削除。
+            ホーム以外 (/privacy /terms /about) からのログインは「weight daily.」タイトル → root_path → banner CTA で 2 タップ。 %>
       </div>
     </header>
 
