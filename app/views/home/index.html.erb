@@ -32,6 +32,14 @@
         food_equivalent: @food_equivalent %>
 </div>
 
+<%# 初回アクセス welcome モーダル (= localStorage 判定で 1 回限り表示)。
+    未ログイン時のみ表示 — ログイン済 user は既にアプリ使い方を理解している前提 +
+    モーダル文中に「Google でログイン」を含むため、ログイン済の home_spec assertion (= response.body から
+    Google でログインを除外) との整合のためログイン後は描画しない。 %>
+<% unless logged_in? %>
+  <%= render "welcome_modal" %>
+<% end %>
+
 <%# ポリシーフッター (= 未ログインでも到達できる経路) %>
 <div style="margin-top: 2rem; padding: 1rem; text-align: center;">
   <p class="sketch-small" style="color: var(--ink-2)">
