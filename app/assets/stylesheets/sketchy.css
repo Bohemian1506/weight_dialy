@@ -29,7 +29,9 @@
   --navbar-height: 64px;
 }
 
-/* body 全体を紙質背景に。layout から bg-base-200 は外す前提。 */
+/* body 全体を紙質背景に。layout から bg-base-200 は外す前提。
+   min-height 100vh は viewport 短コンテンツ時に下端余白が崩れる事象 (= Web 版で稀に「下が切れる」) への予防策。 */
+html, body { min-height: 100vh; }
 body {
   background: var(--paper);
   background-image:
@@ -226,8 +228,11 @@ body {
 }
 .sketch-banner-action { flex-shrink: 0; }
 
-/* ---- Dashboard ラッパー ---- */
-.sketch-dashboard { padding-bottom: 32px; }
+/* ---- Dashboard ラッパー ----
+   padding-bottom 48px は 下段カードの box-shadow (3px 3px 0) や frame アクセサリーが
+   viewport 下端で見切れないようにするための余裕。32px だと scroll restoration や
+   font load 時の layout shift で稀に「下が切れる」事象が発生していたため、48px に増量 (= 予防的)。 */
+.sketch-dashboard { padding-bottom: 48px; }
 
 /* ---- トップバー ---- */
 .sketch-topbar {
@@ -292,17 +297,26 @@ body {
   margin-right: 4px;
 }
 
-/* ---- 下段 4 カードグリッド ---- */
+/* ---- 下段 4 カードグリッド ----
+   minmax(0, 1fr) は CSS Grid の min-width: auto デフォルト挙動 (= grid item 内容が長いと
+   grid 全体が container を超えて bleed する) を抑える。30px Caveat の「+5.4」「7,200」等が
+   モバイル幅 (= 2 列) で右切れしていた事象 (画像 1 由来) への対処。 */
 .sketch-bottom-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
 
 /* ---- レスポンシブ (760px 以下: グリッドを縦積みに) ---- */
 @media (max-width: 760px) {
   .sketch-main-grid   { grid-template-columns: 1fr; }
-  .sketch-bottom-grid { grid-template-columns: repeat(2, 1fr); }
+  .sketch-bottom-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .sketch-topbar      { flex-direction: column; align-items: flex-start; gap: 6px; }
+
+  /* banner はモバイル幅で flex 横並び + flex-shrink: 0 のボタンが幅を奪い、テキスト領域が
+     極小に潰れる (= 「これは / サンプ / ルデー / タで / す。」と 1-3 文字ずつ折り返し) ため、
+     縦並びに切り替えて icon + text を 1 ブロック / CTA を次行に展開する (画像 3 由来)。 */
+  .sketch-banner       { flex-direction: column; align-items: stretch; }
+  .sketch-banner-action { display: flex; justify-content: flex-start; }
 }
 
