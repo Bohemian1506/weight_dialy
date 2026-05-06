@@ -17,7 +17,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 20 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + 動線リハ反映 polish 1 件 + OGP リッチ移行 1 件 + Favicon リッチ移行 1 件 + ログイン CTA 集約 (案 A 逆転) 1 件 + v1.1 backlog 5 件集約)
+## 🏆 達成したこと (= 計 21 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + 動線リハ反映 polish 1 件 + OGP リッチ移行 1 件 + Favicon リッチ移行 1 件 + ログイン CTA 集約 (案 A 逆転) 1 件 + モバイル比率 + Web 下切れ予防 1 件 + v1.1 backlog 5 件集約)
 
 ### マージ済み PR (= 10 本)
 
@@ -43,6 +43,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #196 | – | feat: OGP リッチ画像移行 — Claude Design 由来 1200x630 PNG (= ユーザー局長が claude.ai/design で作成した sketchy トーン HTML プロトタイプを bundle 受領、puppeteer 経由で headless Chrome レンダリング → 2400x1260 retina PNG 自動生成、`bin/render_ogp.sh` で再生成可能、フォントは Caveat/Kalam/Patrick Hand 英字 + Klee One 日本語 + Noto Color Emoji 絵文字の 3 段フォールバック、application.html.erb で og:image を /ogp.png に差し替え + twitter:card を summary_large_image 格上げ — Claude Design HTML プロトタイプ → 静的 PNG レンダリング 教材性◎) |
 | #198 | – | feat: Favicon リッチ移行 — Claude Design 由来「+kc」スタンプ風 5 サイズ (= 16/32/64/180/512px、Caveat font 「+kc」+ 黄色蛍光ペン帯 + オレンジストリークドット、16px はミニ版「+」のみで縮小視認性確保。bin/render_favicon.sh で puppeteer + element.screenshot による各サイズ個別 capture、deviceScaleFactor: 1 で純粋ピクセル。link rel に sizes 属性で各ブラウザに適切な解像度指定、旧 icon.svg placeholder 削除) |
 | #200 | – | polish: ログイン CTA を banner_guest に集約 (= 案 A、navbar 未ログイン CTA を削除して認知負荷回避)。動線リハで「navbar『ログイン』+ banner『Google でログイン』2 箇所同時表示」の違和感を確認、PR #187 で追加した navbar 未ログイン CTA をユーザー局長判断で逆転削除。banner_guest が「サンプル → Google でログイン」のホーム第一印象を主役、navbar はブランド訴求 (= sketchy swoosh タイトル) に集中。spec も「navbar 単体に CTA 無し」を担保する形に書き換え |
+| #202 | – | polish: モバイル比率修正 + Web 下切れ予防 4 件集約 (= モバイル実機リハで判明 3 件 + 再現性なし下切れ予防 1 件)。A: bottom-grid を repeat(N, minmax(0, 1fr)) で grid item の min-width auto bleed を抑制 (= 「+5.4」「7,200」が container 右切れする事象解消)。B: banner をモバイル幅 (760px 以下) で flex-direction: column 縦並び化 (= flex-shrink: 0 ボタンが幅を奪い「これ/サン/プル/デー/タ/で/す」と 1-3 文字ずつ折り返しする事象解消)。C-2: html, body min-height: 100vh 追加 (= viewport 短コンテンツ予防策)。C-3: dashboard padding-bottom 32 → 48px (= scroll restoration / font swap layout shift 予防策)。教材性: CSS Grid の min-width auto 落とし穴 + Flexbox + flex-shrink:0 のモバイル潰れ パターンの定石対処を後輩教材としてコメント残置 |
 
 ### close した Issue (= 8 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
@@ -299,7 +300,7 @@ How to apply:
 
 ## 📊 統計
 
-- マージした PR: **20 本** (= 上記 + #200 ログイン CTA 集約 [案 A 逆転])
+- マージした PR: **21 本** (= 上記 + #202 モバイル比率 + Web 下切れ予防)
 - close した Issue: **13 件** (= 12 件 + #106 既対応確認による close) + Issue #174 部分 close (= A+B+D 完了、C のみ v1.1 持ち越し)
 - 起票した Issue (= v1.1 backlog): **9 件** (= 当日内 #190 safe-area-inset 補正起票追加)
 - 全体 spec: 431 → **557 examples** (= +126)
