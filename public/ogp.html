@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>weight daily — OGP 1200×630</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@400;700&family=Klee+One:wght@400;600&family=Noto+Color+Emoji&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ background:#2a2a2a; }
+  body{ display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px; font-family:'Patrick Hand', 'Klee One', 'Noto Color Emoji', sans-serif; }
+  .ogp{
+    width:1200px; height:630px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(0,0,0,0.04) 0 1px, transparent 1px) 0 0/14px 14px,
+      radial-gradient(circle at 80% 60%, rgba(0,0,0,0.03) 0 1px, transparent 1px) 0 0/22px 22px,
+      #fbf8f1;
+    border:6px solid #1a1a1a;
+    box-shadow: 14px 14px 0 #1a1a1a;
+    color:#1a1a1a;
+  }
+  .strip{
+    position:absolute; left:0; right:0; top:0; height:46px;
+    background:#f3eee0; border-bottom: 4px solid #1a1a1a;
+    display:flex; align-items:center; gap:10px; padding:0 22px;
+    font-family:'Kalam', 'Klee One', 'Noto Color Emoji', sans-serif; font-size:14px; color:#3a3a3a;
+  }
+  .strip .dot{ width:14px; height:14px; border-radius:50%; border:2px solid #1a1a1a; }
+  .strip .url{ flex:1; border:2px solid #1a1a1a; border-radius:999px;
+    padding:3px 14px; background:#fbf8f1; font-size:13px; max-width:520px; }
+
+  .body{ position:absolute; inset:46px 0 78px 0; display:grid; grid-template-columns: 1.05fr 1fr; }
+  .left{ padding:30px 36px 18px 56px; display:flex; flex-direction:column; }
+  .left .meta{ margin-top: 18px; }
+  .right{ position:relative; padding:30px 56px 28px 22px; }
+
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    border:3px solid #1a1a1a; background:#fbf8f1;
+    padding:6px 14px; border-radius:999px;
+    font-family:'Kalam', 'Klee One', 'Noto Color Emoji', sans-serif; font-size:18px; font-weight:700;
+  }
+  .eyebrow .pulse{ width:10px; height:10px; border-radius:50%; background:#ff7a45; border:2px solid #1a1a1a; }
+
+  h1{
+    font-family:'Caveat', 'Klee One', 'Noto Color Emoji', cursive; font-weight:700;
+    font-size:128px; line-height:.92; letter-spacing:-1px;
+    margin-top:14px;
+  }
+  h1 .swoosh{ position:relative; display:inline-block; }
+  h1 .swoosh::after{
+    content:""; position:absolute; left:-6px; right:-6px; bottom:10px; height:24px;
+    background:#ffd23f; z-index:-1; transform:skewX(-8deg); opacity:.92;
+  }
+  .tag{
+    margin-top:14px; font-family:'Kalam', 'Klee One', 'Noto Color Emoji', sans-serif; font-size:23px; line-height:1.35;
+    max-width: 560px;
+  }
+  .tag b{ background:#ffd23f; padding:0 6px; white-space:nowrap; }
+  .meta{
+    display:flex; gap:8px; font-family:'Kalam', 'Klee One', 'Noto Color Emoji', sans-serif; font-size:18px; color:#3a3a3a;
+  }
+  .meta .chip{
+    border:2px solid #1a1a1a; border-radius:999px; padding:4px 12px; background:#f3eee0;
+  }
+
+  /* right side: chart card */
+  .card{
+    position:absolute; top:46px; left:18px; right:46px; bottom:80px;
+    background:#fbf8f1; border:4px solid #1a1a1a; border-radius:14px;
+    box-shadow: 10px 10px 0 #1a1a1a; padding:18px 18px 12px;
+    transform: rotate(-1.5deg);
+  }
+  .card .ch-head{
+    display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 6px;
+  }
+  .card h3{ font-family:'Caveat', 'Klee One', 'Noto Color Emoji', cursive; font-size:32px; font-weight:700; }
+  .card .small{ font-family:'Kalam', 'Klee One', 'Noto Color Emoji', sans-serif; font-size:13px; color:#3a3a3a; }
+  .card svg{ display:block; width:100%; height:230px; }
+
+  .today-pill{
+    position:absolute; right:-18px; top:-18px;
+    background:#ffd23f; border:3px solid #1a1a1a; border-radius:14px;
+    padding:8px 14px; font-family:'Caveat', 'Klee One', 'Noto Color Emoji', cursive; font-size:30px;
+    box-shadow: 4px 4px 0 #1a1a1a; transform: rotate(6deg);
+  }
+
+  .stamp{
+    position:absolute; right:30px; bottom:18px;
+    width:148px; height:148px; border:3px dashed #1a1a1a; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    background:rgba(255,210,63,.55); transform: rotate(-8deg);
+    font-family:'Caveat', 'Klee One', 'Noto Color Emoji', cursive; line-height:.9;
+  }
+  .stamp .big{ font-size:54px; font-weight:700; }
+  .stamp .small{ font-size:18px; font-family:'Kalam', 'Klee One', 'Noto Color Emoji', sans-serif; margin-top:4px; }
+
+  .stickers{
+    position:absolute; left:-12px; bottom:120px;
+    background:#fbf8f1; border:3px solid #1a1a1a; padding:8px 14px;
+    font-family:'Caveat', 'Klee One', 'Noto Color Emoji', cursive; font-size:24px; transform: rotate(-3deg);
+    box-shadow: 3px 3px 0 #1a1a1a;
+  }
+
+  .arrow{
+    position:absolute; right:170px; top:30px;
+    font-family:'Caveat', 'Klee One', 'Noto Color Emoji', cursive; font-size:24px;
+  }
+  .arrow svg{ display:block; }
+
+  .footer{
+    position:absolute; left:56px; right:56px; bottom:24px;
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'Kalam', 'Klee One', 'Noto Color Emoji', sans-serif; font-size:18px; color:#3a3a3a;
+    border-top: 3px dashed #1a1a1a; padding-top:12px;
+  }
+  .logo-mark{
+    display:inline-flex; align-items:center; gap:8px; font-family:'Caveat', 'Klee One', 'Noto Color Emoji', cursive; font-size:28px;
+  }
+  .logo-mark .dotty{ width:18px; height:18px; border-radius:50%; background:#ff7a45; border:3px solid #1a1a1a; }
+</style>
+</head>
+<body>
+
+<div class="ogp">
+  <div class="strip">
+    <span class="dot" style="background:#ff8a8a;"></span>
+    <span class="dot" style="background:#ffd861;"></span>
+    <span class="dot" style="background:#9be39b;"></span>
+    <span class="url">weight-daily.app</span>
+    <span style="font-family:'Kalam', 'Klee One', 'Noto Color Emoji', sans-serif; font-size:13px;">ゆるく続ける · 自動記録</span>
+  </div>
+
+  <div class="body">
+    <div class="left">
+      <div>
+        <span class="eyebrow"><span class="pulse"></span>日常プラスα トラッカー</span>
+        <h1>weight<br/><span class="swoosh">daily.</span></h1>
+        <p class="tag">
+          エスカレーターより階段、1駅手前で下車。
+          <b>「ちょっと頑張った」</b>を自動で記録して、<br/>
+          AIが <b>今日食べていいもの</b> <span style="white-space:nowrap;">を教えてくれる。</span>
+        </p>
+      </div>
+      <div class="meta">
+        <span class="chip">手入力ゼロ</span>
+        <span class="chip">スマホ自動連携</span>
+        <span class="chip">ストリーク</span>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="card">
+        <div class="today-pill">+128 kcal 🔥</div>
+
+        <div class="ch-head">
+          <h3>消費カロリー（30日）</h3>
+          <div class="small">きょうは黄色のバー</div>
+        </div>
+
+        <svg viewBox="0 0 500 240" preserveAspectRatio="none">
+          <g stroke="#000" stroke-opacity=".08" stroke-width="1">
+            <line x1="0" y1="60" x2="500" y2="60"/>
+            <line x1="0" y1="120" x2="500" y2="120"/>
+            <line x1="0" y1="180" x2="500" y2="180"/>
+          </g>
+          <line x1="0" y1="220" x2="500" y2="220" stroke="#1a1a1a" stroke-width="2"/>
+
+          <g>
+            <rect x="10"  y="180" width="14" height="40" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="30"  y="190" width="14" height="30" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="50"  y="160" width="14" height="60" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="70"  y="200" width="14" height="20" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="90"  y="135" width="14" height="85" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="110" y="120" width="14" height="100" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="130" y="212" width="14" height="8"  fill="#cfcfcf" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="150" y="180" width="14" height="40" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="170" y="148" width="14" height="72" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="190" y="128" width="14" height="92" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="210" y="110" width="14" height="110" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="230" y="200" width="14" height="20" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="250" y="170" width="14" height="50" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="270" y="150" width="14" height="70" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="290" y="208" width="14" height="12" fill="#cfcfcf" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="310" y="178" width="14" height="42" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="330" y="130" width="14" height="90" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="350" y="200" width="14" height="20" fill="#cfcfcf" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="370" y="155" width="14" height="65" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="390" y="115" width="14" height="105" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="410" y="98"  width="14" height="122" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="430" y="180" width="14" height="40" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <rect x="450" y="135" width="14" height="85" fill="#7ac74f" stroke="#1a1a1a" stroke-width="1.6"/>
+            <!-- today -->
+            <rect x="470" y="80"  width="20" height="140" fill="#ffd23f" stroke="#1a1a1a" stroke-width="2.5"/>
+          </g>
+
+          <polyline fill="none" stroke="#ff7a45" stroke-width="2.5" stroke-dasharray="5 4"
+            points="17,190 37,188 57,178 77,176 97,158 117,140 137,180 157,176 177,156 197,144 217,132 237,148 257,148 277,138 297,156 317,150 337,128 357,150 377,140 397,118 417,108 437,150 457,140 477,118"/>
+        </svg>
+
+        <div style="display:flex; gap:14px; margin-top:6px; font-family:'Kalam', 'Klee One', 'Noto Color Emoji', sans-serif; font-size:12px;">
+          <span><span style="display:inline-block;width:12px;height:12px;background:#7ac74f;border:1.5px solid #1a1a1a;vertical-align:-2px;margin-right:4px;"></span>プラスα消費</span>
+          <span><span style="display:inline-block;width:12px;height:12px;background:#ffd23f;border:1.5px solid #1a1a1a;vertical-align:-2px;margin-right:4px;"></span>本日</span>
+          <span><span style="display:inline-block;width:12px;height:12px;background:#ff7a45;border:1.5px solid #1a1a1a;vertical-align:-2px;margin-right:4px;"></span>7日平均</span>
+        </div>
+      </div>
+
+      <div class="stickers">🚶 +1.2km　🪜 +42段</div>
+
+      <div class="stamp">
+        <div class="big">11日</div>
+        <div class="small">連続記録 🔥</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="logo-mark"><span class="dotty"></span> weight daily</span>
+    <span>weight-daily.app</span>
+  </div>
+</div>
+
+</body>
+</html>
