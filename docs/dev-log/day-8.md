@@ -17,27 +17,32 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 2 PR + 子 6 完走)
+## 🏆 達成したこと (= 計 5 PR + 子 6 完走 + Day 7 連鎖バグ 3 件全駆除)
 
-### マージ済み PR (= 2 本)
+### マージ済み PR (= 5 本)
 
 | PR | Issue | 内容 |
 |---|---|---|
 | #153 | #125 子 6 | feat: Phase 3 — `@capacitor/browser` + one-time token で OAuth cookie 分離問題を構造解決 (= Stimulus intercept + Browser.open + 中継ページ + OneTimeLoginToken + custom scheme deep link、Auth0 quickstart パターン、3 者レビュー反映済) |
 | #154 | #125 子 6 | fix: AssetLinks intent-filter 削除 (= 実機検証で OAuth callback URL を `appUrlOpen` 経由で WebView 転送 → state 不整合で「キャンセル」障害発覚、custom scheme 一本に統一) |
+| #156 | – | fix: Health Connect 階段データ型を `flightsClimbed` に修正 (= 実機検証で `floorsClimbed` typo 発覚、@capgo/capacitor-health の API 名は米国流) |
+| #157 | – | fix: Health Connect authorization 結果を `readAuthorized` ベースで判定に修正 (= `result?.granted` という存在しないプロパティを参照していたため、許可済でも常に「拒否」表示されるバグ駆除) |
+| #160 | #158, #159 | fix: `BuildHomeDashboardService#determine_state` で「データの有無」判定を「Android UA」判定より前に移動 (= Capacitor 同期済 user にデモデータが永久表示される設計バグ駆除、+ 連携バナー残留バグも同 PR で同時 close) |
 
-### close した Issue
+### close した Issue (= 3 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
+- **#158** (= Capacitor アプリで実データが反映されない) — PR #160 で close
+- **#159** (= 連携済なのに設定画面導線が残る) — PR #160 で close (= #158 と同根の bug を 1 PR で同時駆除)
 
-### 起票した Issue (= v1.1 候補、メモのみ)
-- `public/.well-known/assetlinks.json` 物理削除 cleanup
-- token GC ジョブ (= TTL 30s でも数日で堆積、Solid Queue で `expired.delete_all`)
-- Mobile Chrome bypass 整理 (= ApplicationController の Phase 3 工事痕)
-- `auto_login` に `Cache-Control: no-store` (= Turbo Drive prefetch 予防)
+### 起票した Issue
+- **#161**: refactor: 状態名 `:iphone_with_data` → `:user_with_data` リネーム (= v1.1 backlog、Android user 到達で誤称化したため)
+- **#162**: polish: banner_android 文言と CTA を Android user 向けに最適化 (= v1.1 backlog、design-reviewer 指摘)
+- **#163**: bug: 消費 0 kcal で食べ物提案カードが「バナナ余裕」と誤誘導 (= 3 ステップ思想と矛盾、発表前に対処予定)
+- (= 過去 PR の v1.1 candidate メモ): assetlinks.json 物理削除 / token GC ジョブ / Mobile Chrome bypass 整理 / `/auto_login` Cache-Control: no-store
 
 ---
 
-## 🧠 教訓ハイライト (= 1 件本日確立、Day 7 学び 20 の更新)
+## 🧠 教訓ハイライト (= 3 件本日確立)
 
 ### 学び 21: AssetLinks の実機挙動は端末ガチャ、custom URL scheme 一本が最も安定
 
@@ -52,9 +57,33 @@ How to apply:
 - custom URL scheme + one-time token (= server side で発行、TTL 30s + 1 回限り消費) を使うのが業界標準で安定 (= Auth0 / Firebase / Cognito モバイル SDK が全部この形)
 - Android Manifest で `<data android:scheme="@string/custom_url_scheme" />` の intent-filter 一本だけで済む
 
+### 学び 22: 外部 SDK 連携の「実装完了」判定は「permission UI が出る」までではなく「データが画面に出る」まで保留する
+
+子 6 完走後の実機検証で、Day 7 実装に **2 つの API 仕様ミスマッチ** (= flightsClimbed typo / `granted` プロパティ存在しない) が連鎖発覚 (PR #156, #157)。両方とも **permission リクエスト UI が出る** ところまでで「子 3 完成」と判定していたため、**permission 通過後の判定 (= checkAuthorization 戻り値の shape) と queryAggregated の戻り値整合性** まで実機で踏んでいなかったことが原因。
+
+→ 解決: 「permission リクエスト UI が出る」「APIをcallできる」までではなく、「**データが画面に意図通り表示される**」まで実装完了判定を保留する運用ルール化。
+
+How to apply:
+- 外部 SDK (= Capacitor plugin / OAuth provider / API gem) は **TypeScript 型定義 / interface 定義を必ず読む**。SDK ラッパーは内部仕様と公開 API で命名が異なることが多い (= 例: Health Connect の `FloorsClimbedRecord` は @capgo/capacitor-health の API 上 `flightsClimbed`)
+- E2E (= UI トリガー → SDK 呼び出し → 戻り値判定 → 画面反映) を 1 本繋ぐまで「実装中」扱い
+- 特に「権限系」「認証系」は UI が出ても通過判定が間違っていたら本番で詰む
+
+### 学び 23: state machine の判定順は「データの有無」を最優先にする、platform / UA は同点判定でしか使わない
+
+`BuildHomeDashboardService#determine_state` で 旧設計が `return :android if platform == :android` を `return :iphone_with_data if user.step_records.exists?` より先に書いていたため、Capacitor 同期済 user に **永久にデモデータ** が表示される設計バグ (Issue #158, #159) が発覚。
+
+旧設計時 (= Day 5-7) は「Android UA = まだ Capacitor 連携してない user」という暗黙の前提があったが、Capacitor アプリ完成後 (= Day 8 子 6 完走) にこの前提が崩れた。
+
+→ 解決: `determine_state` で「step_records.exists?」判定を「platform 判定」より前に移動 (PR #160、1 行差し替え)。
+
+How to apply:
+- state machine の判定では **「データ / 状態の有無」を「環境 / platform」より優先**する。「UA = ユーザータイプ」のような暗黙前提は時間経過で必ず崩れる
+- `return :STATE if platform == :X` のような guard には本来 `&& !user.has_data?` が併記されるべき
+- 設計時の前提は「コメントで明記 + 前提が変わった時の影響テスト spec」をセットで残しておく
+
 ---
 
-## 🔥 つまずき / 学び (= 本日 6 件)
+## 🔥 つまずき / 学び (= 本日 9 件)
 
 ### 1. Brakeman の false positive で CI 失敗 (= 1 PR で発覚)
 
@@ -153,6 +182,45 @@ How to apply:
 - 学び 20 で確定した「AssetLinks 不発」の前提が学び 21 で覆される、**実機は仮説をひっくり返す**
 - 障害発覚時は logcat の URL を必ず確認 (= 何が `appUrlOpen` に来ているかで原因が一発判明)
 
+### 7. Health Connect の API 名 typo (= `floorsClimbed` vs `flightsClimbed`、PR #156)
+
+子 6 完走後、設定画面の「Android Health Connect 連携」カードに **「❌ 確認エラー: Unsupported data type: FloorsClimbed」** エラー。@capgo/capacitor-health の `HealthDataType` 型は **`flightsClimbed`** (= 米国流「階段の段数」) で、Day 7 実装で `floorsClimbed` (= フロア数) と書いていた typo。plugin 内部 native レイヤは Health Connect の `FloorsClimbedRecord` (= 内部記録名は floors) を使うが、JS API 名は flights という命名ミスマッチが原因。
+
+→ 解決: PR #156 で 3 箇所文字列置換 + UI 文言「階段(未対応)」→「階段なし」に同梱変更。`grep -r "floorsClimbed"` で 0 件確認 (= memory feedback_grep_zero_after_fix.md ルール準拠)。
+
+How to apply:
+- API ラッパー plugin の **TypeScript 型定義 / interface 定義を必ず読む**。「内部仕様書」ではなく「公開 API」が正
+- typo 系 fix は 1 行修正でも grep zero 確認を Test plan に明記する
+
+### 8. Health Connect authorization 結果の API 仕様ミスマッチ (= `result?.granted` 存在しない、PR #157)
+
+PR #156 マージ後の実機検証で「ヘルスケアアプリで権限許可した直後に、戻ってきたアプリで『⚠️ 権限が拒否されました』」エラー。Logcat から原因即特定:
+
+```
+Health.checkAuthorization 返り値: {"readAuthorized":["steps","distance","flightsClimbed"],"readDenied":[],...}
+```
+
+つまり Health Connect は **3 つとも許可済を返している** のに、JS が `result?.granted` という **存在しないプロパティ** を見ていて常に「拒否」判定 → ボタンが「権限を許可する」のままで先に進めない。@capgo/capacitor-health の `AuthorizationStatus` 型は `{ readAuthorized, readDenied }` で `granted` 自体が存在しなかった (= Day 7 実装の API 仕様 typo)。
+
+→ 解決: PR #157 で `allReadAuthorized(result)` ヘルパー追加、`HEALTH_READ_TYPES` が全て `readAuthorized` に含まれるかで判定。design-reviewer 指摘で「権限が拒否されました」を「Health Connect の権限が不足しています。Health Connect アプリで…」に文言変更も同梱。
+
+How to apply:
+- **学び 22 の事例 1**: permission UI が出るところまでで完了判定すると本番で詰む
+- 「権限系」「認証系」エラーは Logcat の API 戻り値 raw を見ると原因が一発判明する
+- 文言は「全拒否」「一部拒否」両方ありうるため断定形「拒否されました」を避けて「不足しています」表現に
+
+### 9. Capacitor 同期済 user にデモデータが永久表示される設計バグ (= state machine 順序、PR #160)
+
+PR #157 で permission flow が動くようになり、ユーザーが Capacitor アプリで Health Connect 同期成功 → ホーム画面で **「+294 kcal」「サンプルデータです」表記** + **連携誘導バナー残留** という症状を目視確認。当初「実データ反映されていない」「キャッシュ問題」と仮説立てたが、コード解析で **「+294 kcal」が DemoDataService の今日値と完全一致** (= `7200 * 0.04 + 12 * 0.5 = 294`) と判明 → デモデータ強制表示の設計バグ確定。
+
+`BuildHomeDashboardService#determine_state` で `return :android if platform == :android` を `return :iphone_with_data if user.step_records.exists?` より先に書いていたため、Capacitor アプリ (= overrideUserAgent に Android 含む) では **データの有無を見ずに `:android` 状態強制** → DemoData 返却。
+
+→ 解決: PR #160 で 1 行順序変更 (= step_records 判定を platform 判定より前に)。Issue #158 (デモ表記) + Issue #159 (設定導線残) を 1 PR で同時 close。spec 4 件追加で回帰防止。
+
+How to apply:
+- **学び 23 の事例 1**: state machine の判定順は「データの有無」を最優先に
+- 「数値が想定外」 系のバグは **既知データ (= demo / fixture / seed)** との突合チェックで原因が一発判明 (= 今回は「+294 kcal が demo の今日値と完全一致」で確定)
+
 ---
 
 ## 🤝 ユーザー (= 本人) の判断ハイライト
@@ -164,18 +232,24 @@ How to apply:
 5. **「過去のいきさつって見れます?」** (= セッション中の整理確認、メタ的に俯瞰)
 6. **「一歩ずつ進んでる感じがしていいですね」** (= 障害連発でも前進感を維持するメンタル管理力)
 7. **「ログインできました!」** (= 完走確認、達成宣言)
+8. **「c は抜いて d と e やりましょう」** (= 発表会フォーム提出は本人作業として保留、記録優先)
+9. **「無事に連携できました」** (= permission flow fix 後の完走確認、達成宣言 2)
+10. **「a + c ハイブリッドがいいですね」「デザイン担当にも今の段階で意見を聞いてみましょう」** (= 実装前の事前 design 相談、3 者並列レビューを「事後」だけでなく「事前」にも回す判断)
+11. **「鮮度優先で a にしましょう」** (= dev-log ルール違反を即指摘 → 同 session 内 retroactive 反映、運用ルールの厳守姿勢)
+12. **「render cli とか render の MCP とか入れてみませんか?」** (= 開発インフラ投資の提案、「待ち時間」を tooling 改善に回す思考)
 
 ---
 
 ## 📊 統計
 
-- マージした PR: **2 本** (= #153 Phase 3 主幹実装 + #154 AssetLinks 削除緊急 fix)
-- close した Issue: **1 件** (= #125 子 6 = Capacitor 実機 E2E)
-- 全体 spec: 431 → **515 examples** (= +84、Phase 3 関連 35 + Day 7 後追い分の取り込み等)
-- 教訓: **1 件** (= 学び 21、Day 7 学び 20 の更新版)
-- つまずき / 学び: **6 件** (= Brakeman false positive / ngrok hybrid smoke test / Java 8 / WSL-Windows 同期 / CSRF test 仕様 / AssetLinks 横取り)
-- v1.1 候補 / 別 Issue 起票: **4 件** (= assetlinks.json 物理削除 / token GC / Mobile Chrome bypass 整理 / Cache-Control: no-store)
-- セッション時間: **約 4 時間** (= 朝〜昼、発表会まで残り ~5h 確保)
+- マージした PR: **5 本** (= #153 Phase 3 主幹実装 + #154 AssetLinks 削除 + #156 flightsClimbed typo fix + #157 granted shape fix + #160 state 判定 fix)
+- close した Issue: **3 件** (= #125 子 6 / #158 デモ表記 / #159 設定導線残)
+- 起票した Issue: **3 件** (= #161 リネーム v1.1 / #162 banner 文言 v1.1 / #163 0 kcal バナナ余裕 = 発表前対応)
+- 全体 spec: 431 → **519 examples** (= +88、Phase 3 関連 35 + state 判定回帰防止 4 + 既存差分)
+- 教訓: **3 件** (= 学び 21 AssetLinks 端末ガチャ / 学び 22 permission flow 完走 / 学び 23 state 判定はデータ最優先)
+- つまずき / 学び: **9 件** (= 当初 6 件 + flightsClimbed typo / granted shape / state 判定 = 朝の連鎖発見 saga 3 件)
+- v1.1 候補 / 別 Issue 起票: **+ 3 件** (= 既存 4 件 + Issue #161 リネーム + #162 banner 文言 + #163 0 kcal)
+- セッション時間: **約 6 時間** (= 朝 06:00〜昼 12:00 過ぎ、発表会まで残り ~7h)
 
 ---
 
