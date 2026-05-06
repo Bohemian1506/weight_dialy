@@ -17,9 +17,9 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 9 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar slim 化 1 件)
+## 🏆 達成したこと (= 計 10 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + v1.1 backlog 5 件集約)
 
-### マージ済み PR (= 9 本)
+### マージ済み PR (= 10 本)
 
 | PR | Issue | 内容 |
 |---|---|---|
@@ -32,6 +32,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #167 | #131 | fix: /privacy に Android Health Connect 経由の取得情報を明記 (= Google Health Connect Privacy Policy 要件遵守、案 A の 1 行追加 + 注記文言を「生データ」→「1 日合計値」に書き直し + 単位表記統一) |
 | #169 | #128, #150 | polish: Capacitor splash 背景を sketchy paper 色 (#fbf8f1) に + ic_launcher 背景も同色化 (= AndroidX SplashScreen API で「白い矩形が paper 上に浮く」問題解消、design-reviewer 指摘) |
 | #171 | #49 | polish: navbar 高さ 74px → 約 64px に slim 化 (= padding 14px → 8px 縮小、ボタン高 46px は維持して WCAG 2.5.5 タップ領域確保 + Issue #47 ゴール両立、design-reviewer 事前相談で候補 3 採用、flash toast 位置 top-24 → top-20 追従) |
+| #173 | – | polish: navbar sticky 化 (= position: sticky + top: 0 + z-index: 30、スクロール時も常時上部表示でブランド訴求 + ナビ可用性向上、design-reviewer #171 提案、3 者全員 Approve) |
 
 ### close した Issue (= 8 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
@@ -43,10 +44,18 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 - **#128** (= Capacitor splash 背景色を sketchy paper に) — PR #169 で close
 - **#49** (= navbar 高さ膨張、UI 最終段階 polish) — PR #171 で close、design-reviewer 事前相談 → 候補 3 で「タップ領域犠牲なし + 見た目改善」両立解
 
-### 起票した Issue
-- **#161**: refactor: 状態名 `:iphone_with_data` → `:user_with_data` リネーム (= v1.1 backlog、Android user 到達で誤称化したため)
-- **#162**: polish: banner_android 文言と CTA を Android user 向けに最適化 (= v1.1 backlog、design-reviewer 指摘)
-- (= 過去 PR の v1.1 candidate メモ): assetlinks.json 物理削除 / token GC ジョブ / Mobile Chrome bypass 整理 / `/auto_login` Cache-Control: no-store / ZERO_THRESHOLD 管理画面化 / AI プロンプトに過剰提案防止サニティ追加
+### 起票した Issue (= v1.1 backlog 集約 7 件)
+
+#### 単発起票
+- **#161**: refactor: 状態名 `:iphone_with_data` → `:user_with_data` リネーム
+- **#162**: polish: banner_android 文言と CTA を Android user 向けに最適化
+
+#### Day 8 終盤に集約起票 (= テーマで grouping、元の 11 個別候補を 5 Issue に整理)
+- **#174**: v1.1: navbar polish set (= scroll shadow / CSS 変数化 / hamburger / login CTA、4 提案集約)
+- **#175**: v1.1: Phase 3 cleanup set (= assetlinks.json 物理削除 + Mobile Chrome bypass 整理)
+- **#176**: v1.1: OneTimeLoginToken 運用整備 (= GC ジョブ + Cache-Control: no-store)
+- **#177**: v1.1: calorie_advice 改善 set (= ZERO_THRESHOLD 管理画面化 + AI サニティ + 同期導線)
+- **#178**: v1.1: /privacy マトリクス化 + 用途別記述 (= Google Play 申請時用)
 
 ---
 
@@ -276,8 +285,9 @@ How to apply:
 
 ## 📊 統計
 
-- マージした PR: **9 本** (= #153 Phase 3 + #154 AssetLinks + #156 flightsClimbed + #157 granted + #160 state 判定 + #165 0 kcal バナナ余裕 + #167 /privacy HC 明記 + #169 splash paper 色 + #171 navbar slim 化)
+- マージした PR: **10 本** (= #153 Phase 3 + #154 AssetLinks + #156 flightsClimbed + #157 granted + #160 state 判定 + #165 0 kcal バナナ余裕 + #167 /privacy HC 明記 + #169 splash paper 色 + #171 navbar slim 化 + #173 navbar sticky 化)
 - close した Issue: **8 件** (= #125 子 6 / #158 デモ表記 / #159 設定導線残 / #163 0 kcal バナナ余裕 / #131 /privacy HC 明記 / #150 deep link 回復導線 / #128 splash 色 / #49 navbar 高さ slim 化)
+- 起票した Issue (= v1.1 backlog): **7 件** (= #161 / #162 / #174 / #175 / #176 / #177 / #178、特に #174-#178 は元 11 個別候補を 5 grouping に集約)
 - 起票した Issue: **2 件** (= #161 リネーム v1.1 / #162 banner 文言 v1.1) + 過去 PR の v1.1 候補メモ複数
 - 全体 spec: 431 → **527 examples** (= +96、Phase 3 関連 35 + state 判定回帰防止 4 + 0 kcal 空ステート 9 + 既存差分)
 - 教訓: **4 件** (= 学び 21 AssetLinks 端末ガチャ / 学び 22 permission flow 完走 / 学び 23 state 判定はデータ最優先 / 学び 24 事前デザイン相談)
