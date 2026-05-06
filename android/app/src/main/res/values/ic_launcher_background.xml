@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#FFFFFF</color>
+    <!-- Issue #128: app icon (= ic_launcher) の背景色を sketchy theme paper (#fbf8f1) に揃える。
+         AndroidX SplashScreen API (= Android 12+) は windowSplashScreenAnimatedIcon に未指定の場合、
+         この ic_launcher を splash 中央に重ねるため、白背景のままだと paper 色 splash の上に「白い矩形」が浮く視覚問題が発生する (= design-reviewer 指摘)。
+         paper 色に揃えると splash 背景とアイコン背景が連続して見える。 -->
+    <color name="ic_launcher_background">#fbf8f1</color>
 </resources>
