@@ -36,9 +36,12 @@ body {
 }
 
 /* ---------- navbar ---------- */
+/* Issue #49: padding 14px → 8px に縮小して navbar 高さを 74px → 62px に slim 化。
+   ボタン自体の高さ 46px は維持するため WCAG 2.5.5 (= 44px タップ領域) は引き続き満たす。
+   Issue #47 (= sketch-btn 全体 44px 化) のゴールと両立する設計、design-reviewer 事前相談で確定。 */
 .sketch-navbar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 20px; gap: 12px;
+  padding: 8px 20px; gap: 12px;
   border-bottom: 2px solid var(--ink);
   background: var(--paper);
 }
