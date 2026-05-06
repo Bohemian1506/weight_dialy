@@ -34,6 +34,7 @@
 - **現状**: 新規利用は既に禁止、既存は触ったタイミングで置換中
 - **ゴール**: `btn` / `card` / `navbar` / `alert` 等を sketch-* に統一
 - **見積**: 大 (= 1 PR 1 partial の小分けが筋)
+- **前提テスト**: なし (= system spec が薄いため、1 partial ずつスクショ目視 + 触ったタイミング置換が現実解)
 - **関連**: CLAUDE.md「🎨 スタイル使い分けルール」
 
 ---
@@ -49,17 +50,19 @@
 - **前提テスト**: `webhooks_controller_spec.rb` 充実度確認 (= 多分既にある、要 spec/ 確認)
 
 ### 5. `BuildHomeDashboardService` の state 命名整理
-- **場所**: `app/services/build_home_dashboard_service.rb:50-66`
+- **場所**: `app/services/build_home_dashboard_service.rb` — `:iphone_with_data` シンボル使用箇所 = 29, 60, 71 行 / `determine_state` メソッド全体 = 50-66 行
 - **現状**: `:iphone_with_data` という名前が誤称 (= 全プラットフォームの実データ表示状態を指している)
 - **ゴール**: `:has_data` 等への改名 (= view / spec / banner partials も追従)
 - **見積**: 小 (= grep + sed レベル)
+- **前提テスト**: `spec/services/build_home_dashboard_service_spec.rb` の state 別挙動 spec 存在確認 (= state を改名するなら spec の expect 値も追従)
 - **教材性**: ⭐⭐ 「コメントで認められた誤称をどう清算するか」
 
 ### 6. `CalorieAdviceService` の `body` フィールド整理
-- **場所**: `app/services/calorie_advice_service.rb:14`, 30-32
+- **場所**: `app/services/calorie_advice_service.rb` — Result Struct 定義 = 14 行 / `body` 使用箇所 = `zero_kcal_result` メソッド (58-60 行)
 - **現状**: 0kcal 専用ステートでだけ使う `body` フィールドが Result Struct に常時存在
 - **ゴール**: 専用 Result クラスに分割 or Null Object パターン
 - **見積**: 小
+- **前提テスト**: `spec/services/calorie_advice_service_spec.rb` の 0 kcal 経路カバレッジ確認
 - **教材性**: ⭐⭐ 「特殊ステートの表現方法 3 種比較」
 
 ---
