@@ -17,9 +17,9 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 5 PR + 子 6 完走 + Day 7 連鎖バグ 3 件全駆除)
+## 🏆 達成したこと (= 計 6 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件全駆除)
 
-### マージ済み PR (= 5 本)
+### マージ済み PR (= 6 本)
 
 | PR | Issue | 内容 |
 |---|---|---|
@@ -28,21 +28,22 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #156 | – | fix: Health Connect 階段データ型を `flightsClimbed` に修正 (= 実機検証で `floorsClimbed` typo 発覚、@capgo/capacitor-health の API 名は米国流) |
 | #157 | – | fix: Health Connect authorization 結果を `readAuthorized` ベースで判定に修正 (= `result?.granted` という存在しないプロパティを参照していたため、許可済でも常に「拒否」表示されるバグ駆除) |
 | #160 | #158, #159 | fix: `BuildHomeDashboardService#determine_state` で「データの有無」判定を「Android UA」判定より前に移動 (= Capacitor 同期済 user にデモデータが永久表示される設計バグ駆除、+ 連携バナー残留バグも同 PR で同時 close) |
+| #165 | #163 | fix: 消費 0 kcal で「バナナ余裕」誤誘導バグ駆除 (= ZERO_THRESHOLD ガード節 + Result Struct に body field 追加 + view で items.any? 分岐、design-reviewer **事前相談**で文言 / UX 確定後に実装) |
 
-### close した Issue (= 3 件)
+### close した Issue (= 4 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
 - **#158** (= Capacitor アプリで実データが反映されない) — PR #160 で close
 - **#159** (= 連携済なのに設定画面導線が残る) — PR #160 で close (= #158 と同根の bug を 1 PR で同時駆除)
+- **#163** (= 消費 0 kcal でバナナ余裕誤誘導、3 ステップ思想と矛盾) — PR #165 で close
 
 ### 起票した Issue
 - **#161**: refactor: 状態名 `:iphone_with_data` → `:user_with_data` リネーム (= v1.1 backlog、Android user 到達で誤称化したため)
 - **#162**: polish: banner_android 文言と CTA を Android user 向けに最適化 (= v1.1 backlog、design-reviewer 指摘)
-- **#163**: bug: 消費 0 kcal で食べ物提案カードが「バナナ余裕」と誤誘導 (= 3 ステップ思想と矛盾、発表前に対処予定)
-- (= 過去 PR の v1.1 candidate メモ): assetlinks.json 物理削除 / token GC ジョブ / Mobile Chrome bypass 整理 / `/auto_login` Cache-Control: no-store
+- (= 過去 PR の v1.1 candidate メモ): assetlinks.json 物理削除 / token GC ジョブ / Mobile Chrome bypass 整理 / `/auto_login` Cache-Control: no-store / ZERO_THRESHOLD 管理画面化 / AI プロンプトに過剰提案防止サニティ追加
 
 ---
 
-## 🧠 教訓ハイライト (= 3 件本日確立)
+## 🧠 教訓ハイライト (= 4 件本日確立)
 
 ### 学び 21: AssetLinks の実機挙動は端末ガチャ、custom URL scheme 一本が最も安定
 
@@ -81,9 +82,23 @@ How to apply:
 - `return :STATE if platform == :X` のような guard には本来 `&& !user.has_data?` が併記されるべき
 - 設計時の前提は「コメントで明記 + 前提が変わった時の影響テスト spec」をセットで残しておく
 
+### 学び 24: 「実装前のデザイン相談」で polish 往復を削減できる (= 事前 3 者レビューの拡張版)
+
+Issue #163 (= 消費 0 kcal でバナナ余裕誤誘導) の修正で、**コードを書く前に design-reviewer に相談** (= ヘッダ文言 / 本文 / ボタン挙動 / しきい値 / AI 取扱の 5 項目) → 方針確定 → 実装 → 3 者最終レビューでほぼ無修正マージ、という流れで時間を節約できた。
+
+旧フロー (= 実装 → 3 者レビュー → polish 反映 → 再レビュー or 妥協マージ) では、特に「コピー」「文言」系で「もう書いたから後戻り面倒」が発生し、design-reviewer の指摘が v1.1 送りになりがちだった。**事前相談で「これで進めてください」のトーンが揃えば、その後の 3 者最終レビューは確認だけで済む**。
+
+→ 解決策: 「文言 / 状態出し分け / UX フロー」を含む実装は **着手前に design-reviewer に方針相談** を打つ運用ルール化。Day 7 学び (= 「事前 3 者レビュー」) の design-only バリエーション。
+
+How to apply:
+- 「ボタン文言」「エラーメッセージ」「空ステート文言」「状態遷移後の表示」など、コピー / UX が伴う実装は事前に design-reviewer 起票
+- 質問の粒度: 「(A) ボタン非表示 / (B) ボタン残し disabled / (C) ボタン文言変更」のような選択肢を 2-3 提示すると design-reviewer が判断しやすい
+- 結果として最終レビューの「文言ちゃぶ台返し」がほぼゼロになる
+- 注意: 設計判断 (= モデル構造 / API 形状) は code-reviewer / strategic-reviewer の領分、混ぜない
+
 ---
 
-## 🔥 つまずき / 学び (= 本日 9 件)
+## 🔥 つまずき / 学び (= 本日 10 件)
 
 ### 1. Brakeman の false positive で CI 失敗 (= 1 PR で発覚)
 
@@ -209,6 +224,18 @@ How to apply:
 - 「権限系」「認証系」エラーは Logcat の API 戻り値 raw を見ると原因が一発判明する
 - 文言は「全拒否」「一部拒否」両方ありうるため断定形「拒否されました」を避けて「不足しています」表現に
 
+### 10. 消費 0 kcal で「バナナ余裕」誤誘導 (= ratio = 0 ガード不在、PR #165、Issue #163)
+
+Capacitor 同期完了 + state 判定 fix 後の実機確認で、**消費 0 kcal の画面に「バナナ 1 本 余裕」「ヨーグルト 1 個 余裕」** が表示されるバグ発覚。3 ステップ思想 ① (= 罪悪感を減らす) と真逆の誤誘導。
+
+原因: `build_items` で `ratio = food_kcal / total_kcal` を計算するが、`total_kcal = 0` の時 `ratio = 0` で **常に `< 0.5` が true** → 全食品に「余裕」label。Static / AI 両方が同じ判定ルールで動くため両方バグ。
+
+→ 解決: PR #165 で `ZERO_THRESHOLD = 30` ガード節追加 (= AI / Static を呼ばずに空ステート即返し)、`Result` Struct に `body` field 追加、view で `items.any?` 分岐。design-reviewer 事前相談で文言 / UX 確定 (= 学び 24)。
+
+How to apply:
+- **学び 23 の事例 2 (= 0 / nil ガード)**: 「ratio = 食品 / 消費」のような割り算は `divisor == 0` ケースを必ず先回りガード
+- 「ゼロ除算防御 (= 技術) + UX しきい値」の **二軸を 1 つの定数で表現** する場合はコメントで両方明記 (= 後で別の場所に育つ可能性あり)
+
 ### 9. Capacitor 同期済 user にデモデータが永久表示される設計バグ (= state machine 順序、PR #160)
 
 PR #157 で permission flow が動くようになり、ユーザーが Capacitor アプリで Health Connect 同期成功 → ホーム画面で **「+294 kcal」「サンプルデータです」表記** + **連携誘導バナー残留** という症状を目視確認。当初「実データ反映されていない」「キャッシュ問題」と仮説立てたが、コード解析で **「+294 kcal」が DemoDataService の今日値と完全一致** (= `7200 * 0.04 + 12 * 0.5 = 294`) と判明 → デモデータ強制表示の設計バグ確定。
@@ -242,14 +269,13 @@ How to apply:
 
 ## 📊 統計
 
-- マージした PR: **5 本** (= #153 Phase 3 主幹実装 + #154 AssetLinks 削除 + #156 flightsClimbed typo fix + #157 granted shape fix + #160 state 判定 fix)
-- close した Issue: **3 件** (= #125 子 6 / #158 デモ表記 / #159 設定導線残)
-- 起票した Issue: **3 件** (= #161 リネーム v1.1 / #162 banner 文言 v1.1 / #163 0 kcal バナナ余裕 = 発表前対応)
-- 全体 spec: 431 → **519 examples** (= +88、Phase 3 関連 35 + state 判定回帰防止 4 + 既存差分)
-- 教訓: **3 件** (= 学び 21 AssetLinks 端末ガチャ / 学び 22 permission flow 完走 / 学び 23 state 判定はデータ最優先)
-- つまずき / 学び: **9 件** (= 当初 6 件 + flightsClimbed typo / granted shape / state 判定 = 朝の連鎖発見 saga 3 件)
-- v1.1 候補 / 別 Issue 起票: **+ 3 件** (= 既存 4 件 + Issue #161 リネーム + #162 banner 文言 + #163 0 kcal)
-- セッション時間: **約 6 時間** (= 朝 06:00〜昼 12:00 過ぎ、発表会まで残り ~7h)
+- マージした PR: **6 本** (= #153 Phase 3 + #154 AssetLinks + #156 flightsClimbed + #157 granted + #160 state 判定 + #165 0 kcal バナナ余裕)
+- close した Issue: **4 件** (= #125 子 6 / #158 デモ表記 / #159 設定導線残 / #163 0 kcal バナナ余裕)
+- 起票した Issue: **2 件** (= #161 リネーム v1.1 / #162 banner 文言 v1.1) + 過去 PR の v1.1 候補メモ複数
+- 全体 spec: 431 → **527 examples** (= +96、Phase 3 関連 35 + state 判定回帰防止 4 + 0 kcal 空ステート 9 + 既存差分)
+- 教訓: **4 件** (= 学び 21 AssetLinks 端末ガチャ / 学び 22 permission flow 完走 / 学び 23 state 判定はデータ最優先 / 学び 24 事前デザイン相談)
+- つまずき / 学び: **10 件** (= 当初 6 件 + 朝の連鎖発見 saga 3 件 + 0 kcal バナナ余裕 1 件)
+- セッション時間: **約 7 時間** (= 朝 06:00〜昼 13:00 過ぎ、発表会まで残り ~6h)
 
 ---
 
