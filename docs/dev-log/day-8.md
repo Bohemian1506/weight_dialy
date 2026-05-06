@@ -17,7 +17,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 
 ---
 
-## 🏆 達成したこと (= 計 26 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + 動線リハ反映 polish 1 件 + OGP リッチ移行 1 件 + Favicon リッチ移行 1 件 + ログイン CTA 集約 (案 A 逆転) 1 件 + モバイル比率 + Web 下切れ予防 1 件 + AI カード flex + navbar mobile 1 件 + 0 歩警告 + navbar 左寄せ 1 件 + Android 利用ガイド README 1 件 + .sketch-btn nowrap + flex-shrink 1 件 + navbar ボタン縦位置微調整 1 件 + v1.1 backlog 5 件集約)
+## 🏆 達成したこと (= 計 27 PR + 子 6 完走 + Day 7 連鎖バグ 3 件 + 3 ステップ思想バグ 1 件 + 法務 Health Connect 対応 1 件 + Capacitor splash polish 1 件 + navbar 2 連 polish + Settings ポリシーリンク移動 1 件 + Webhook 422 文言 I18n 化 1 件 + banner_android UX ループ解消 1 件 + navbar X グループ 1 件 + 公開前最終 polish 4 件集約 1 件 + OGP 最小整備 1 件 + 動線リハ反映 polish 1 件 + OGP リッチ移行 1 件 + Favicon リッチ移行 1 件 + ログイン CTA 集約 (案 A 逆転) 1 件 + モバイル比率 + Web 下切れ予防 1 件 + AI カード flex + navbar mobile 1 件 + 0 歩警告 + navbar 左寄せ 1 件 + Android 利用ガイド README 1 件 + .sketch-btn nowrap + flex-shrink 1 件 + navbar ボタン縦位置微調整 1 件 + 初回 welcome モーダル 1 件 + v1.1 backlog 5 件集約)
 
 ### マージ済み PR (= 10 本)
 
@@ -49,6 +49,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #208 | – | docs: README に「12. Android アプリ版利用ガイド (Capacitor + Health Connect 連携)」セクション追加 (= 102 行)。子 7 #126 (APK sideload 配布手順整備) で配布開始時に参照される雛形。全体像 (データの流れ) / 前提条件 / セットアップ手順 (Step 1: 歩数計測アプリ連携 ←最重要 / Step 2: APK / Step 3: weight daily 内 OAuth + 同期) / トラブルシューティング 4 症状 (0 歩のまま / 権限不足 / Health Connect 利用不可 / エミュレータ動作確認) / 教材性メモ (読み取り/書き込み API 分離 / 「API 200 = 成功」の罠 / Capacitor plugin 落とし穴 / エミュ vs 実機差) を集約。ユーザー局長判断「E (Settings ガイダンス) は 19:00 以降緊急タスク、今は B (README) で教材性整備」を反映 |
 | #210 | – | polish: .sketch-btn に white-space: nowrap + flex-shrink: 0 追加 (= 画像 10 由来「設/定」「ログ/アウト」縦書き状 2 行折り返し解消)。原因 2 つ: ① white-space デフォルト = ボタン狭幅でテキスト自動折り返し / ② flex-shrink デフォルト 1 = .sketch-navbar-right 内でボタン圧縮されて padding すら奪われる極小化。両対処を 1 行ずつ追加。教材性: flex item は default で flex-shrink: 1 で縮められる、ボタンのように内容を保ちたい要素には flex-shrink: 0 を明示するのが定石 |
 | #212 | – | polish: モバイル navbar ボタン群を 6px 下にずらす微調整 (= 画像 11 由来、視覚バランス改善)。タイトル「weight daily.」が Caveat 32px で 2 行折り返し時、ボタン群が上寄り過ぎてバランス悪い → モバイル幅で `.sketch-navbar-right` に `margin-top: 6px` 追加で daily. の下半分付近に揃える。微調整レベル、副作用なし |
+| #214 | – | feat: 初回アクセス welcome モーダル追加 (= iPhone Shortcuts 案内 + Android 近日公開予定 + sample 体験可)。ホーム未ログイン時の初回アクセスで表示、localStorage で「見た」フラグ保存して 2 回目以降非表示。内容: 概要 / 📱 iPhone (Apple Shortcuts 連携 3 step) / 🤖 Android (アプリ版近日公開、サンプルデータ体験可、ログイン不要)。背景クリック / Escape / 「確認しました」ボタンで閉じる + ARIA dialog 属性。未ログイン時のみ描画 (= ログイン済 user は既に使い方理解 + home_spec assertion 整合)。新規ファイル 2 つ (welcome_modal_controller.js / _welcome_modal.html.erb) |
 
 ### close した Issue (= 8 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
@@ -305,7 +306,7 @@ How to apply:
 
 ## 📊 統計
 
-- マージした PR: **26 本** (= 上記 + #212 navbar ボタン縦位置微調整)
+- マージした PR: **27 本** (= 上記 + #214 初回 welcome モーダル)
 - close した Issue: **13 件** (= 12 件 + #106 既対応確認による close) + Issue #174 部分 close (= A+B+D 完了、C のみ v1.1 持ち越し)
 - 起票した Issue (= v1.1 backlog): **9 件** (= 当日内 #190 safe-area-inset 補正起票追加)
 - 全体 spec: 431 → **557 examples** (= +126)
