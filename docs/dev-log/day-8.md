@@ -33,6 +33,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 | #169 | #128, #150 | polish: Capacitor splash 背景を sketchy paper 色 (#fbf8f1) に + ic_launcher 背景も同色化 (= AndroidX SplashScreen API で「白い矩形が paper 上に浮く」問題解消、design-reviewer 指摘) |
 | #171 | #49 | polish: navbar 高さ 74px → 約 64px に slim 化 (= padding 14px → 8px 縮小、ボタン高 46px は維持して WCAG 2.5.5 タップ領域確保 + Issue #47 ゴール両立、design-reviewer 事前相談で候補 3 採用、flash toast 位置 top-24 → top-20 追従) |
 | #173 | – | polish: navbar sticky 化 (= position: sticky + top: 0 + z-index: 30、スクロール時も常時上部表示でブランド訴求 + ナビ可用性向上、design-reviewer #171 提案、3 者全員 Approve) |
+| #180 | #90 | polish: Settings ポリシーリンクを退会セクション後 (= フッター的) に移動 + 「退会前に規約を確認したい場合はこちら」補足、コメントに「インフォームドコンセント色 vs フッター UX 色」設計トレードオフ明示 |
 
 ### close した Issue (= 8 件)
 - **#125 子 6 (= Capacitor 実機 E2E)** — 本日完走、Issue #40 B スコープのほぼ全達成
@@ -43,6 +44,7 @@ GW 7 日目、発表会当日。Day 7 (= 5/5) で **子 1-5a (= MVP) 完成** + 
 - **#150** (= deep link「ブラウザで開く」誤選択時の回復導線) — Phase 3 で前提解消、コメント付き手動 close
 - **#128** (= Capacitor splash 背景色を sketchy paper に) — PR #169 で close
 - **#49** (= navbar 高さ膨張、UI 最終段階 polish) — PR #171 で close、design-reviewer 事前相談 → 候補 3 で「タップ領域犠牲なし + 見た目改善」両立解
+- **#90** (= Settings ポリシーリンクをフッター位置に) — PR #180 で close、設計トレードオフ (= インフォームドコンセント vs フッター UX) コメント残置で教材性確保
 
 ### 起票した Issue (= v1.1 backlog 集約 7 件)
 
