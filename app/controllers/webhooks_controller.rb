@@ -17,7 +17,7 @@ class WebhooksController < ActionController::API
     records_data = parsed["records"]
 
     unless records_data.is_a?(Array)
-      record_delivery!(status: "invalid", accepted_count: 0, error_message: "missing 'records' array")
+      record_delivery!(status: "invalid", accepted_count: 0, error_message: I18n.t("webhook.errors.missing_records_array"))
       render json: { error: "Invalid payload" }, status: :unprocessable_content
       return
     end
@@ -26,7 +26,8 @@ class WebhooksController < ActionController::API
     record_delivery!(status: "success", accepted_count: accepted)
     render json: { accepted: accepted }, status: :ok
   rescue JSON::ParserError => e
-    record_delivery!(status: "invalid", accepted_count: 0, error_message: "JSON parse error: #{e.message.truncate(120)}")
+    Rails.logger.warn("[WebhooksController] JSON parse error: #{e.message.truncate(120)}")
+    record_delivery!(status: "invalid", accepted_count: 0, error_message: I18n.t("webhook.errors.json_parse_error"))
     render json: { error: "Invalid payload" }, status: :unprocessable_content
   rescue InvalidPayload => e
     record_delivery!(status: "invalid", accepted_count: 0, error_message: e.message.truncate(120))
@@ -34,7 +35,8 @@ class WebhooksController < ActionController::API
   rescue ActiveRecord::RecordInvalid => e
     # 個々のレコードのバリデーション違反 (負数 / 不正な日付等) を 500 ではなく 422 + 監査ログで返す。
     # rails-implementer の意図 (全体失敗方式) を実装まで貫徹するため。
-    record_delivery!(status: "invalid", accepted_count: 0, error_message: "RecordInvalid: #{e.message.truncate(120)}")
+    Rails.logger.warn("[WebhooksController] RecordInvalid: #{e.message.truncate(120)}")
+    record_delivery!(status: "invalid", accepted_count: 0, error_message: I18n.t("webhook.errors.record_invalid"))
     render json: { error: "Invalid payload" }, status: :unprocessable_content
   end
 
@@ -71,7 +73,7 @@ class WebhooksController < ActionController::API
     return if token_valid
 
     # Intentionally vague: do not reveal whether the token or the user was the problem.
-    record_delivery!(status: "unauthorized", error_message: "bearer token mismatch or missing", user: nil)
+    record_delivery!(status: "unauthorized", error_message: I18n.t("webhook.errors.unauthorized"), user: nil)
     render json: { error: "Unauthorized" }, status: :unauthorized and return
   end
 
@@ -87,19 +89,16 @@ class WebhooksController < ActionController::API
   # 正規表現で「正確に 4-2-2 桁」を先に検査してから Date.strptime に渡す二段構え。
   ISO_DATE_FORMAT = /\A\d{4}-\d{2}-\d{2}\z/
 
-  # truncate を inspect の前にかけることで、攻撃者が巨大な recorded_on 値 (1MB body キャップ内で
-  # 数百 KB を詰める) を送った時に、エラーメッセージ生成段階で巨大文字列が一時的にヒープに乗るのを防ぐ。
   def parse_recorded_on(raw)
-    raise InvalidPayload, "recorded_on is required" if raw.blank?
+    raise InvalidPayload, I18n.t("webhook.errors.recorded_on_required") if raw.blank?
     raw_str = raw.to_s
-    truncated = raw_str.truncate(40).inspect
     unless raw_str.match?(ISO_DATE_FORMAT)
-      raise InvalidPayload, "recorded_on must be yyyy-MM-dd format: got #{truncated}"
+      raise InvalidPayload, I18n.t("webhook.errors.recorded_on_invalid_format")
     end
     Date.strptime(raw_str, "%Y-%m-%d")
   rescue Date::Error
     # 月日の値域違反 (例: "2026-13-99")
-    raise InvalidPayload, "recorded_on must be yyyy-MM-dd format: got #{truncated}"
+    raise InvalidPayload, I18n.t("webhook.errors.recorded_on_invalid_format")
   end
 
   # 数値フィールド (steps / distance_meters / flights_climbed) を厳格パースする (Issue #52)。
@@ -116,10 +115,10 @@ class WebhooksController < ActionController::API
     when Integer
       raw
     when Float
-      raise InvalidPayload, "#{field_name} must be a whole number, got Float #{raw}" unless raw == raw.to_i
+      raise InvalidPayload, I18n.t("webhook.errors.must_be_whole_number", field: I18n.t("webhook.fields.#{field_name}"), value: raw) unless raw == raw.to_i
       raw.to_i
     else
-      raise InvalidPayload, "#{field_name} must be a number, got #{raw.class}: #{raw.to_s.truncate(40).inspect}"
+      raise InvalidPayload, I18n.t("webhook.errors.must_be_number", field: I18n.t("webhook.fields.#{field_name}"), value: raw.to_s.truncate(40).gsub(/[[:cntrl:]]/, "?"), type: raw.class)
     end
   end
 
