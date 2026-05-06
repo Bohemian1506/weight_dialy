@@ -6,6 +6,8 @@
         用意でき次第 og:image / twitter:card を差し替える (= 別 PR、本日後刻 or 発表会後)。 %>
     <% page_title = content_for?(:title) ? content_for(:title) : "weight daily. — 日常のちいさな歩きを自動で拾う" %>
     <% page_description = content_for?(:description) ? content_for(:description) : "通勤通学で歩く・階段を選ぶ等の日常の小さな前向きな選択を、自動で拾って褒めてくれる Web アプリ。" %>
+    <%# og:image / twitter:image を 1 箇所に集約 (= 将来ドメイン変更や OGP 専用画像差し替え時の修正漏れ防止)。 %>
+    <% ogp_image_url = "https://weight-dialy.onrender.com/icon.png" %>
 
     <title><%= page_title %></title>
     <meta name="description" content="<%= page_description %>">
@@ -24,13 +26,13 @@
     <meta property="og:title" content="<%= page_title %>">
     <meta property="og:description" content="<%= page_description %>">
     <meta property="og:url" content="<%= request.original_url %>">
-    <meta property="og:image" content="https://weight-dialy.onrender.com/icon.png">
+    <meta property="og:image" content="<%= ogp_image_url %>">
 
     <%# Twitter Card — summary は正方形小サムネ。専用 1200x630 OGP 画像が用意でき次第 summary_large_image に格上げ。 %>
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="<%= page_title %>">
     <meta name="twitter:description" content="<%= page_description %>">
-    <meta name="twitter:image" content="https://weight-dialy.onrender.com/icon.png">
+    <meta name="twitter:image" content="<%= ogp_image_url %>">
 
     <%= yield :head %>
 
