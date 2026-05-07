@@ -28,6 +28,14 @@ RSpec.describe CalorieAdviceService do
         expect(result.button_label).to be_present
       end
 
+      it "Result 型 (= 通常時、ZeroKcalResult とは別 Struct)" do
+        expect(result).to be_a(CalorieAdviceService::Result)
+      end
+
+      it "zero_state? が false (= 通常ステート判定)" do
+        expect(result.zero_state?).to be false
+      end
+
       it "body が nil (= 通常ステートでは body は空ステート専用、回帰防止)" do
         expect(result.body).to be_nil
       end
@@ -46,6 +54,16 @@ RSpec.describe CalorieAdviceService do
     # しきい値未満 (= 30 kcal 未満) では AI / Static を呼ばず ZERO_HEADLINE + ZERO_BODY を返す。
     context "0 kcal (= ZERO_THRESHOLD 未満、空ステート)" do
       let(:kcal) { 0 }
+
+      # Issue Tier 2 #5: 通常時と空ステートで Result 型を分離 (= デッドフィールド問題解消)。
+      # 0 kcal 時は ZeroKcalResult、通常時は Result の構造分離が読者に意図を伝える。
+      it "ZeroKcalResult 型 (= 通常時 Result とは別 Struct、専用 Result クラス分割)" do
+        expect(result).to be_a(CalorieAdviceService::ZeroKcalResult)
+      end
+
+      it "zero_state? が true (= 状態判定 predicate)" do
+        expect(result.zero_state?).to be true
+      end
 
       it "items が空配列" do
         expect(result.items).to eq([])

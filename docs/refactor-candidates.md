@@ -49,14 +49,6 @@
 - **教材性**: ⭐⭐⭐ 「fat controller を Service にどう剥がすか」のお手本になる
 - **前提テスト**: `webhooks_controller_spec.rb` 充実度確認 (= 多分既にある、要 spec/ 確認)
 
-### 5. `CalorieAdviceService` の `body` フィールド整理
-- **場所**: `app/services/calorie_advice_service.rb` — Result Struct 定義 = 14 行 / `body` 使用箇所 = `zero_kcal_result` メソッド (58-60 行)
-- **現状**: 0kcal 専用ステートでだけ使う `body` フィールドが Result Struct に常時存在
-- **ゴール**: 専用 Result クラスに分割 or Null Object パターン
-- **見積**: 小
-- **前提テスト**: `spec/services/calorie_advice_service_spec.rb` の 0 kcal 経路カバレッジ確認
-- **教材性**: ⭐⭐ 「特殊ステートの表現方法 3 種比較」
-
 ---
 
 ## 🥉 Tier 3: 小物 (= 暇なときに)

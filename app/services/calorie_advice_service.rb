@@ -8,11 +8,38 @@
 # - 数値プレッシャー回避: AI 出力にも「強要表現禁止」をプロンプトで指示
 # - 詳細根拠: memory project_weight_dialy_three_step_philosophy.md
 class CalorieAdviceService
-  # ai_used: AI 経路で生成されたかのフラグ。dashboard で「Powered by Claude」バッジ表示の出し分けに使う (Issue #75)。
-  # body: 食品提案カード本文 (= 0 kcal 時専用、items が空の時に view が headline と一緒に表示する空ステート用テキスト)。
+  # 通常時 (= 食品提案あり、items 3 件) の Result。
+  # ai_used: AI 経路で生成されたかのフラグ。dashboard で「Powered by Claude」 バッジ表示の出し分けに使う (Issue #75)。
   # AI 成功時 true / Static フォールバック時 false。ユーザーには UI 出力にしか影響せず PII は含めない。
-  Result = Struct.new(:headline, :items, :button_label, :ai_used, :body, keyword_init: true)
-  Item   = Struct.new(:name, :kcal, :label, keyword_init: true)
+  #
+  # body / zero_state? は ZeroKcalResult との view 側 duck type 統一のため定義 (= 通常時は nil / false)。
+  Result = Struct.new(:headline, :items, :button_label, :ai_used, keyword_init: true) do
+    def body = nil
+    def zero_state? = false
+  end
+
+  Item = Struct.new(:name, :kcal, :label, keyword_init: true)
+
+  # 0 kcal 時 (= ZERO_THRESHOLD 未満、食品提案を出さない空ステート) の Result。
+  #
+  # 専用クラスに分離した理由 (= Issue Tier 2 #5、refactor-candidates.md 由来):
+  #   - 旧設計は単一 Result Struct に body フィールドを持ち、3/4 ケースで常に nil = デッドフィールド問題があった
+  #   - 「特殊ステート (= 0 kcal、食品提案なし)」 と「通常ステート (= 食品提案あり)」 はデータ shape が異なる
+  #     → 1 つの Struct で表現するより 2 つに分ける方が「body が nil なのは異常?正常?」 と
+  #       読者が迷わない (= 単一責任、構造から意図が読める)
+  #   - view 側互換性のため items / button_label / ai_used / body のデリゲートメソッドを生やす
+  #     (= view は items.any? で分岐 + advice.body 表示で動作中、書き換えなし)
+  #
+  # 「専用 Result クラス分割」 vs 「Null Object パターン」 vs 「現状維持」 の 3 案検討結果:
+  #   1. 専用 Result クラス分割 (= 採用) — 2 Struct で意図明確、view 側 duck type 互換
+  #   2. Null Object パターン — OOP 教科書的だが、Rails では Struct ベースの方が読みやすい
+  #   3. 現状維持 — body デッドフィールド問題が残る、新規読者の混乱源
+  ZeroKcalResult = Struct.new(:headline, :body, keyword_init: true) do
+    def items = []
+    def button_label = nil
+    def ai_used = false
+    def zero_state? = true
+  end
 
   # ヘッドラインは固定 (= AI 生成にせず一貫したブランドトーンを維持、レイテンシ短縮)。
   # 「今日の消費カロリーならこれ食べられるよ〜」 はユーザー判断 (Issue #42 設計議論) で確定したコピー。
@@ -42,21 +69,21 @@ class CalorieAdviceService
     if ai_available?
       items = Ai.call(estimated_kcal)
       Rails.logger.info("[CalorieAdviceService] AI suggestion ok (kcal=#{estimated_kcal}, items=#{items.size})")
-      Result.new(headline: HEADLINE, items: items, button_label: BUTTON_LABEL, ai_used: true, body: nil)
+      Result.new(headline: HEADLINE, items: items, button_label: BUTTON_LABEL, ai_used: true)
     else
       items = Static.call(estimated_kcal)
-      Result.new(headline: HEADLINE, items: items, button_label: BUTTON_LABEL, ai_used: false, body: nil)
+      Result.new(headline: HEADLINE, items: items, button_label: BUTTON_LABEL, ai_used: false)
     end
   rescue StandardError => e
     # API failure / timeout / rate limit / JSON parse error すべて広く受けてフォールバック。
     # 細粒度の制御 (= 例外別の retry 等) は polish フェーズで Issue 化して別途。
     Rails.logger.warn("[CalorieAdviceService] AI failed (#{e.class}: #{e.message.truncate(120)}), falling back to static")
     static_items = Static.call(estimated_kcal)
-    Result.new(headline: HEADLINE, items: static_items, button_label: BUTTON_LABEL, ai_used: false, body: nil)
+    Result.new(headline: HEADLINE, items: static_items, button_label: BUTTON_LABEL, ai_used: false)
   end
 
   def self.zero_kcal_result
-    Result.new(headline: ZERO_HEADLINE, items: [], button_label: nil, ai_used: false, body: ZERO_BODY)
+    ZeroKcalResult.new(headline: ZERO_HEADLINE, body: ZERO_BODY)
   end
   private_class_method :zero_kcal_result
 
