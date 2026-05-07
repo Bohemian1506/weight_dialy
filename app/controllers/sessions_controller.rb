@@ -29,10 +29,8 @@ class SessionsController < ApplicationController
                   allow_other_host: true
     else
       # 通常 Web 経由: 従来通り Rails session を直接張る
-      reset_session
-      session[:user_id] = user.id
       Rails.logger.info("OAuth login completed via web (user_id=#{user.id})")
-      redirect_to root_path, notice: "ログインしました"
+      establish_session_and_redirect_home(user.id)
     end
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error("OAuth login failed: #{e.message}")
@@ -48,9 +46,7 @@ class SessionsController < ApplicationController
       return redirect_to root_path, alert: "ログインの確認に失敗しました。もう一度お試しください"
     end
 
-    reset_session
-    session[:user_id] = token.user_id
-    redirect_to root_path, notice: "ログインしました"
+    establish_session_and_redirect_home(token.user_id)
   end
 
   def destroy
@@ -61,5 +57,24 @@ class SessionsController < ApplicationController
   def failure
     # OAuth フロー中断 (= ユーザーがキャンセル / Custom Tabs から戻った等) の専用文言
     redirect_to root_path, alert: "Google ログインがキャンセルされました。再度お試しください"
+  end
+
+  private
+
+  # 通常 Web 経由 OAuth (= sessions#create) と Capacitor token 消費 (= sessions#auto_login) の
+  # ログイン後 session 確立を共通化。session fixation 排除のため reset_session を必ず噛ませる。
+  #
+  # なぜ Concern でなく private method か (= Issue #228 教材ポイント):
+  #   - 共有相手は同一コントローラ内 2 箇所のみ → Concern (= 複数コントローラ間共有用) は過剰抽象化
+  #   - 重複は 3 行 × 2 箇所、private メソッド 1 個で十分解消可能
+  #   - CLAUDE.md「過剰な抽象化 / DRY (3 回出てから抽象化)」 にもまだ届かない (= 2 箇所)
+  #   - Rails 慣習: 同一コントローラ内重複は private、複数コントローラ間重複は Concern
+  #
+  # logger.info は呼び出し側に残置 (= 「OAuth web 経由」 と「Capacitor token 消費」 の文脈差を
+  # 各経路で明示するため、共通化すると経路が読めなくなる)。
+  def establish_session_and_redirect_home(user_id)
+    reset_session
+    session[:user_id] = user_id
+    redirect_to root_path, notice: "ログインしました"
   end
 end
