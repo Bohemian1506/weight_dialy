@@ -159,6 +159,17 @@ body {
   color: var(--ink-2); font-size: 13px; line-height: 1.4;
 }
 
+/* 注記ブロック (= 補足情報の視覚明示)。border-left で「ここは追加情報」 を一目で示す。
+   Issue #218 で確立 (= sketch-box 内の paper-2 背景だけだと外側 paper との contrast が 1.08:1 で区別不能、
+   border-left + paper-2 + line-height で「補足」 「警告」 のフラグ機能が働く)。 */
+.sketch-note {
+  border-left: 3px solid var(--ink-2);
+  background: var(--paper-2);
+  padding: 8px 12px;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
 /* status バッジ。border-radius + padding + 黒文字 (6.73:1 / 7:1+) で AA 確実。 */
 .sketch-status {
   display: inline-block; padding: 2px 8px; border: 1px solid var(--ink); border-radius: 4px;
