@@ -75,6 +75,13 @@ class WebhooksController < ActionController::API
   # Record audit log entry. Uses keyword argument `user:` so callers can
   # override with nil for unauthorized cases where @webhook_user is unreliable.
   # accepted_count: Issue #52 で追加。何件保存されたかを記録、success 時の中身が空ペイロードかを後追い分析可能にする。
+  #
+  # 監査ログを WebhookHealthDataIngestService に切り出さず controller に残した判断 (= Tier 2 #4 教材ポイント、学び 33):
+  #   - 状態依存: @raw_body (= read_raw_body で読んだ controller state) と @webhook_user (= 認証結果) に直接依存、
+  #     純粋関数化するには 2 引数追加が必要 = 切り出しコストに対する利益が薄い
+  #   - 経路共有: 認証失敗 (unauthorized) 経路で **service 通過前に** 呼ばれる必要がある (= ingest service と独立)
+  #   - 責務分類: 監査ログは「HTTP 経路ごとの出力」 = controller 責務の範疇 (= ingest = ドメイン責務とは分離軸が違う)
+  #   - 切り出し側 (= service 内 parse / upsert) との対比: あちらは引数だけで動く純粋ロジック、こちらは controller state 必須
   def record_delivery!(status:, accepted_count: nil, error_message: nil, user: @webhook_user)
     # Attempt to parse stored body as JSON for richer inspection in the audit log.
     # Falls back to { raw: <string> } when the body is not valid JSON.
