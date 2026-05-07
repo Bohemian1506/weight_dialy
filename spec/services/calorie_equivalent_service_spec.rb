@@ -8,15 +8,17 @@ RSpec.describe CalorieEquivalentService do
   # 新アルゴリズム (shuffle + 再抽選) での seed 別採用食品:
   #   - Foods::ALL.shuffle(random: rng) で並び順を確定し、1 <= count <= max_count(5) を
   #     満たす最初の食品を採用する。以下は today_kcal=1000, max_count=5 での結果。
+  #   - Issue #99 (= 食品 name 構造改善) で板チョコ 280kcal / 唐揚げ 80kcal に再設計。
+  #     旧データから期待値が変化した seed には ★ を付した。
   #   seed=0   → おにぎり   180 kcal (count=5)
   #   seed=1   → おにぎり   180 kcal (count=5)
-  #   seed=2   → 大福       170 kcal (count=5)
+  #   seed=2   → 板チョコ   280 kcal (count=3) ★ 旧: 大福 170 count=5
   #   seed=5   → 大福       170 kcal (count=5)
   #   seed=6   → どら焼き   200 kcal (count=5)
   #   seed=42  → 大福       170 kcal (count=5)
   #   seed=100 → どら焼き   200 kcal (count=5)
-  #   seed=123 → アイス     200 kcal (count=5)
-  #   seed=999 → 唐揚げ 3 個 250 kcal (count=4)
+  #   seed=123 → 板チョコ   280 kcal (count=3) ★ 旧: アイス 200 count=5
+  #   seed=999 → おにぎり   180 kcal (count=5) ★ 旧: 唐揚げ 3 個 250 count=4
 
   describe ".call" do
     # ─────────────────────────────────────────────────
@@ -34,9 +36,9 @@ RSpec.describe CalorieEquivalentService do
       end
     end
 
-    context "today_kcal = 89 のとき (最小食品 kcal の 1 未満)" do
+    context "today_kcal = 79 のとき (最小食品 kcal = 80 (唐揚げ) の 1 未満)" do
       it "nil を返す" do
-        expect(described_class.call(89, seed: 0)).to be_nil
+        expect(described_class.call(79, seed: 0)).to be_nil
       end
     end
 
@@ -177,11 +179,19 @@ RSpec.describe CalorieEquivalentService do
       end
     end
 
-    context "today_kcal = 1000 かつ seed=123 (アイス 200 kcal, count=5) のとき" do
+    context "today_kcal = 1000 かつ seed=123 (板チョコ 280 kcal, count=3) のとき" do
       subject(:result) { described_class.call(1000, seed: 123) }
 
-      it "count が 5 である (1000 / 200 = 5)" do
-        expect(result[:count]).to eq(5)
+      it "count が 3 である (1000 / 280 = 3)" do
+        expect(result[:count]).to eq(3)
+      end
+
+      it "name が「板チョコ」である" do
+        expect(result[:name]).to eq("板チョコ")
+      end
+
+      it "unit が「枚」である" do
+        expect(result[:unit]).to eq("枚")
       end
     end
 
@@ -197,15 +207,19 @@ RSpec.describe CalorieEquivalentService do
       end
     end
 
-    context "today_kcal = 1000 かつ seed=999 (唐揚げ 3 個 250 kcal, count=4) のとき" do
+    context "today_kcal = 1000 かつ seed=999 (おにぎり 180 kcal, count=5) のとき" do
       subject(:result) { described_class.call(1000, seed: 999) }
 
-      it "count が 4 である (1000 / 250 = 4)" do
-        expect(result[:count]).to eq(4)
+      it "count が 5 である (1000 / 180 = 5)" do
+        expect(result[:count]).to eq(5)
       end
 
-      it "unit が「皿」である" do
-        expect(result[:unit]).to eq("皿")
+      it "name が「おにぎり」である" do
+        expect(result[:name]).to eq("おにぎり")
+      end
+
+      it "unit が「個」である" do
+        expect(result[:unit]).to eq("個")
       end
     end
 
@@ -223,29 +237,30 @@ RSpec.describe CalorieEquivalentService do
         expect(result[:count]).to be <= 5
       end
 
-      it "フォールバックで唐揚げ 3 個 (最大 kcal 250) が返る" do
-        expect(result[:name]).to eq("唐揚げ 3 個")
+      it "フォールバックで板チョコ (最大 kcal 280) が返る" do
+        expect(result[:name]).to eq("板チョコ")
       end
 
-      it "count が 5 にキャップされている (5000 / 250 = 20 → cap)" do
+      it "count が 5 にキャップされている (5000 / 280 = 17 → cap)" do
         expect(result[:count]).to eq(5)
       end
     end
 
     context "max_count: 3 を指定したとき (today_kcal = 1000, seed=0)" do
-      # seed=0 では全食品で count > 3 → フォールバックで唐揚げ 3 個 (250 kcal) + cap
+      # 1000 / 280 = 3 で板チョコが [1, 3] に収まるため、フォールバックではなく通常マッチで採用される。
+      # (旧データでは全食品 count > 3 で唐揚げ 3 個フォールバック + cap 3 だった)
       subject(:result) { described_class.call(1000, seed: 0, max_count: 3) }
 
       it "count が 3 以下である" do
         expect(result[:count]).to be <= 3
       end
 
-      it "count が 3 にキャップされている (1000 / 250 = 4 → cap 3)" do
+      it "count が 3 である (1000 / 280 = 3、cap 不要で完全一致)" do
         expect(result[:count]).to eq(3)
       end
 
-      it "フォールバックで唐揚げ 3 個が返る" do
-        expect(result[:name]).to eq("唐揚げ 3 個")
+      it "板チョコが返る (= 通常マッチ、フォールバックではない)" do
+        expect(result[:name]).to eq("板チョコ")
       end
     end
 
@@ -276,10 +291,10 @@ RSpec.describe CalorieEquivalentService do
         expect(result_0[:name]).not_to eq(result_42[:name])
       end
 
-      it "seed=100 (どら焼き) と seed=999 (唐揚げ 3 個) では name が異なる" do
+      it "seed=100 (どら焼き) と seed=2 (板チョコ) では name が異なる" do
         result_100 = described_class.call(1000, seed: 100)
-        result_999 = described_class.call(1000, seed: 999)
-        expect(result_100[:name]).not_to eq(result_999[:name])
+        result_2   = described_class.call(1000, seed: 2)
+        expect(result_100[:name]).not_to eq(result_2[:name])
       end
     end
 
@@ -287,16 +302,17 @@ RSpec.describe CalorieEquivalentService do
     # unit の取り得る値 (実装の Item 定義参照)
     # ─────────────────────────────────────────────────
     context "unit の値" do
-      valid_units = %w[個 本 枚 杯 皿]
+      # Issue #99 で 唐揚げ "皿" が消滅し、現在の unit 集合は 4 種 (個 / 本 / 枚 / 杯)。
+      valid_units = %w[個 本 枚 杯]
 
-      # seed=0(おにぎり→個), seed=5(大福→個), seed=6(どら焼き→個), seed=7(大福→個),
-      # seed=42(大福→個), seed=999(唐揚げ→皿)
+      # seed 別 unit 期待値 (= 上記 seed 別採用食品テーブル参照)
       {
         0   => "個",  # おにぎり
+        2   => "枚",  # 板チョコ (Issue #99 で皿→枚にシフト)
         5   => "個",  # 大福
         6   => "個",  # どら焼き
         7   => "個",  # 大福
-        999 => "皿"  # 唐揚げ 3 個
+        999 => "個"  # おにぎり (Issue #99 で皿→個にシフト)
       }.each do |seed, expected_unit|
         it "seed=#{seed} のとき unit が「#{expected_unit}」である" do
           result = described_class.call(1000, seed: seed)
