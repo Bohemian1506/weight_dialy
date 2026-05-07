@@ -198,9 +198,11 @@
         <%# Issue #235: 「+X kcal **なら**…」 (= if 条件、未来への口実化リスク = 「これから食べていい」 と読み替えられる) を、
             「**今日 +X kcal 動いた** ぶん、たとえば…」 (= 過去肯定 + 換算例示) に再構成。
             3 ステップ思想 ① 「罪悪感を減らす」 = 過去への肯定 (= 「これだけ動いた」) を強調、
-            未来への口実化 (= 「ご褒美感」) を排除。 %>
+            未来への口実化 (= 「ご褒美感」) を排除。
+            「動いた」 に sketch-hl-yellow ハイライトで 2 点強調 (= +X kcal strong + 動いた yellow = 「数字 = 量」 + 「動詞 = 事実」)、
+            プロジェクタ大画面 3 秒テストでの達成カード認識性向上 (= design-reviewer 提案)。 %>
         <div class="sketch-small">
-          今日 <strong>+<%= today_kcal %> kcal</strong> 動いたぶん、たとえば…
+          今日 <strong>+<%= today_kcal %> kcal</strong> <span class="sketch-hl-yellow">動いた</span>ぶん、たとえば…
         </div>
         <ul style="margin: 8px 0 0 16px; padding: 0; list-style: disc;">
           <% advice.items.each do |item| %>
