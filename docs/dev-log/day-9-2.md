@@ -30,19 +30,23 @@
 
 ---
 
-## 🏆 達成したこと (= PR #244 + #248 マージ + Issue #242 / #218 close + 学び 34 確立 + Tier 3 更地化 + sketch-note クラス抽出 + Day 10 へ Tier 1 大物バトンタッチ準備完了)
+## 🏆 達成したこと (= PR #244 + #248 + #250 + #251 マージ + Issue #242 / #218 / #91 / #143 close + 学び 34 確立 + Tier 3 更地化 + sketch-note クラス抽出 + polish 連続着手 3 件達成 + Day 10 へ Tier 1 大物バトンタッチ準備完了)
 
-### マージ済み PR (= 2 本)
+### マージ済み PR (= 4 本)
 
 | PR | Issue | 内容 |
 |---|---|---|
 | #244 | #242 (= Tier 3 唯一の候補、PR #241 由来) | test: `WebhookHealthDataIngestService` の unit spec を新規追加 (22 examples / 6 context = 正常系 6 + InvalidPayload records 3 + recorded_on 5 + 数値 4 + AR 委譲 1 + トランザクション境界 3)。役割分担 = request spec (= HTTP 結合検証) + unit spec (= 純粋契約 + 境界値検証) を spec 冒頭で明示。3 者並列レビュー🟡🟢 全 5 件を本 PR 内吸収 (= 軽量 Issue ルール 3 例目)、特に **service 冒頭コメントを「unit spec 独立させなかった判断」 → 「unit spec の判断履歴」 に時系列書き換え** (= 学び 34 核心実例)。フル spec 607 examples 0 failures、rubocop 0 offenses、Tier 3 完走 → **Tier 2 + Tier 3 全更地化** |
 | #248 | #218 (= Day 8「19:00 以降緊急」 → Day 9 午後で着手、緊急扱い解除済) | polish: Settings の Capacitor 検知セクションに Health Connect データソース要件ガイダンスを追加 (= 局長実体験由来「同期成功 → 0 歩」 事故防止、二段構え誘導 = 同期前 (本 PR) + 同期後 PR #206 既実装)。3 者並列レビューで code🟡 + design🟡 3 + 🟢 2 + strategic🟢 3 を統合解決 → **`sketch-note` クラスを sketchy.css に新規抽出** (= CLAUDE.md「3 回出てから抽象化」 4 回目で抽象化適期、border-left + paper-2 背景で「補足 / 警告」 視覚明示、**新カテゴリ「DRY 化タイミング」 1 例目**: 道具選定シリーズの横展開 / 縦深堀りとは別軸で、Day 10 以降の同種事例 2 例目で学び 35 化検討)、コピーを「できる前提」 トーンに再構成 (= 3 ステップ思想 ① 罪悪感を減らす と整合)、line-height 1.5 含む。spec/requests/settings_spec.rb 50 examples 0 failures、影響 2 ファイル +16 行、別 Issue 起票候補 1 件 (= `native_health_controller.js:204` の文言統一) |
+| #250 | #91 (= privacy/terms 改訂履歴セクション構造化、PR #38 design-reviewer 指摘由来) | polish: privacy / terms の改訂履歴セクションを **`<h2>` + `<ul>`** 年表形式に構造化 + 「**10. 改訂履歴**」 (privacy) / 「**8. 改訂履歴**」 (terms) として番号付き条文に昇格 + sketch-box で包む = 他セクションと完全揃え。3 者並列レビューで「table vs ul の軸数判断ルール」 を **Issue #178 (= Google Play §1 マトリクス化、未着手) の本文に統合** (= 「table 使いたい衝動は件数でなく軸数で殺す」、1 軸→ul / 2 軸以上→table、`sketch-table` 新設は #178 着手時に YAGNI 原則で実施)、「Issue 本文 = 判断ログ」 運用パターン 6 例目。color: var(--ink-2) で法的文書信頼性確保、日付 strong 太字化、影響 2 ファイル +17/-13 行、spec/requests/legal_spec.rb 19 examples 0 failures |
+| #251 | #143 (= SNS 内蔵ブラウザ OAuth 詰まり、PR #142 design-reviewer 重大指摘由来) | polish: ゲストバナーに **SNS 内蔵ブラウザ OAuth 詰まり警告** を sketch-small 注記 1 行追加 (= LINE / X / Instagram の内蔵ブラウザは OAuth callback 破綻 → Safari / Chrome 誘導)。3 案検討 (A 全ゲスト常時表示 / B UA 判定 / C bypass 削除) で **A 採用** (= 1 行で完結、保守コスト 0)。3 者並列レビューで code Approve / design🟡 2 / strategic🟢 4 を統合 → **コピー肯定形転換** (= 「Safari / Chrome からアクセスすると Google ログインが使えます」 を先置き、否定形「ログインできません」 を主語にしない、3 ステップ思想 ① 罪悪感を減らす と整合) + **color: var(--muted)** で sketch-banner-text との階層差確保。**「ユーザー観察 → コードで予防」 改善ループ 2 例目** (= PR #248 が 1 例目、3 例目で memory `feedback_user_observation_to_code_prevention.md` 化判断)。影響 1 ファイル +8 行、spec/requests/home_spec.rb 44 examples 0 failures |
 
-### close した Issue (= 2 件)
+### close した Issue (= 4 件)
 
 - **#242** (= `WebhookHealthDataIngestService` の unit spec 追加、Day 9 セッション 6 で起票 → セッション 7 で着地) — PR #244 で close、PR #241 レビュー由来の派生 Issue を当日内に follow-up 着地させた **「軽量 Issue 1 PR ルール継承」** 運用検証成功例
-- **#218** (= Settings Capacitor 検知セクションのガイダンス、Day 8「19:00 以降緊急」 起票 → Day 9 午後で緊急解除後着手) — PR #248 で close、局長実体験由来の **「ユーザー観察 → コードで予防」** 改善ループ実証、`sketch-note` クラス新規抽出による sketch コンポーネント体系拡張も副次効果
+- **#218** (= Settings Capacitor 検知セクションのガイダンス、Day 8「19:00 以降緊急」 起票 → Day 9 午後で緊急解除後着手) — PR #248 で close、局長実体験由来の **「ユーザー観察 → コードで予防」** 改善ループ **1 例目**、`sketch-note` クラス新規抽出による sketch コンポーネント体系拡張も副次効果
+- **#91** (= privacy/terms 改訂履歴セクション構造化、PR #38 design-reviewer 指摘由来 → Day 9 セッション 8 polish 連続着手 2 件目で着手) — PR #250 で close、「table vs ul 軸数判断」 を Issue #178 本文統合 (= 「Issue 本文 = 判断ログ」 6 例目)
+- **#143** (= SNS 内蔵ブラウザ OAuth 案内、PR #142 design-reviewer 重大指摘由来 → Day 9 セッション 8 polish 連続着手 3 件目で着手) — PR #251 で close、**「ユーザー観察 → コードで予防」 改善ループ 2 例目** + 学び 32 横展開 5 例目候補「衝動を却下する構造軸は加算 / 減算の両方向に効く」
 
 ---
 
@@ -101,8 +105,8 @@ How to apply:
 
 ## 📊 統計 (= 午後の部、Day 9-2 分のみ)
 
-- マージした PR: **2 本** (= #244 Tier 3 完走 + 派生 Issue follow-up 当日着地 / #248 Day 8 緊急解除後ガイダンス追加 + sketch-note クラス抽出)
-- close した Issue: **2 件** (= #242 + #218)
+- マージした PR: **4 本** (= #244 Tier 3 完走 + 派生 Issue follow-up 当日着地 / #248 Day 8 緊急解除後ガイダンス追加 + sketch-note クラス抽出 / #250 privacy/terms 改訂履歴 ul 構造化 + Issue #178 統合 / #251 SNS 内蔵ブラウザ OAuth 詰まり警告 + 肯定形転換)
+- close した Issue: **4 件** (= #242 + #218 + #91 + #143)
 - 起票した Issue: **0 件** (= 午後分の新規起票なし、午前 day-9-1 の #242 を本日午後で消化)
 - ダッシュボード Tier 3: 開始時 1 件 (= #242) → **終了時 0 件 (= 完走、Tier 3 更地化)**
 - spec: **607 examples** (= 午前終了時 585 → 午後 +22 = 607、PR #244 で webhook ingest service unit spec 追加、PR #248 は spec 無修正)
@@ -114,13 +118,14 @@ How to apply:
 
 | 指標 | 午前 (day-9-1) | 午後 (day-9-2) | **Day 9 合計** |
 |---|---|---|---|
-| マージ PR | 6 本 | 2 本 | **8 本** |
-| close Issue | 4 件 | 2 件 | **6 件** |
+| マージ PR | 6 本 | 4 本 | **10 本** |
+| close Issue | 4 件 | 4 件 | **8 件** |
 | 起票 Issue | 6 件 | 0 件 | **6 件** (= 当日 close 3 [#225 + #228 + #242] + open 残 3 [#234 + #235 + #236]) |
 | 教訓 (学び) | 7 件 (27〜33) | 1 件 (34) | **8 件** |
 | spec | 557 → 585 (+28) | 585 → 607 (+22) | **+50** |
 | セッション | 6 | 2 | **8** |
 | ダッシュボード更地化 | Tier 2 全 3 件 | Tier 3 全 1 件 | **Tier 2 + Tier 3 全更地化** |
+| polish 完走 (= 18:00 までに 6 件目標) | (= 0 件) | 3 件 (#218 + #91 + #143) | **進行中、残 3 件目標** (= 18:00 まで) |
 
 → **Day 9 = MVP 後 polish 初日のベストプラクティス reference 日として完成**。Day 10 以降の polish 日のテンプレ価値を持つ。
 
@@ -148,7 +153,30 @@ How to apply:
 - **派生 Issue follow-up の当日内着地**: PR レビューで🟢 提案を別 Issue 起票したら、**できれば当日中に follow-up PR で消化** (= 軽量 Issue 1 PR ルール 3 例目、午前学び 31 継承)。Issue : PR = 1 : 1 の追跡しやすさを保つ
 - **判断の前提が変わったら判断を更新する**: コードコメントに「保留判断」 を書いた後で前倒し実装するときは、**コメントを「判断履歴」 に書き換える** (= 学び 34 核心実例、weight_dialy 教材性の最重要原則)
 - **道具選定シリーズの縦深堀りパターン**: シリーズの 1 軸を抜き出して別マトリクスで精緻化する場合、**学び番号を独立** させる (= 学び 33 のサブ項目 33-A にせず学び 34 を独立、タイミング軸が構造軸とは別の問いだから)
+- **「Issue 本文 = 判断ログ」 の dev-log 内実装**: 関連 Issue (= #178 のような未着手 Issue) に判断軸を本文統合する運用 (= memory 化を待たず即運用化、6 例目で実証 PR #250)
 - **Day 9-2 → day-9-3 (= 18:00 以降)**: 後続セッションがあれば day-9-3.md に分割記録 (= 1 ファイル肥大化を避ける、過去 Day 3 / Day 3-3 分割と同じ運用)
+
+### 学び 32 横展開 5 例目候補 (= 観察、3 例目で言語化判断)
+
+PR #251 strategic-reviewer 提唱: **「衝動を却下する構造軸は加算 / 減算の両方向に効く」**:
+
+- 学び 32 オリジナル: 「**道具を使いたい衝動**」 (= 加算) を構造軸で検証して却下する原則
+- 拡張観察 (= PR #251 で実証): 「**bypass 削除したい衝動**」 (= 減算) も同じ構造軸 (= 保険) で検証して却下できる
+- → **衝動の方向に関わらず、構造軸での機械的検証は有効** という拡張命題
+
+**保留メモ**: Day 9-2 時点で 1 例目観測。同種事例 2 例目以降が出たタイミングで **学び 32 拡張版** または **新規学び 36** として言語化判断 (= weight_dialy「3 回出てから抽象化」 ルール、学び 34「判断更新原則」 と整合)。
+
+### 「ユーザー観察 → コードで予防」 改善ループ (= 観察、3 例目で memory 化判断)
+
+PR #248 strategic-reviewer 提唱の運用知:
+
+| 例 | 出典 | 観察 → 予防内容 |
+|---|---|---|
+| 1 例目 | PR #248 (= Issue #218) | 局長実体験「同期 0 歩」 → Settings ガイダンス事前表示 |
+| 2 例目 | PR #251 (= Issue #143) | PR #142 design-reviewer 観察「SNS 内蔵ブラウザ OAuth 詰まり」 → ゲストバナー警告 |
+| 3 例目 | (= 待機中) | 観察次第、3 例目発生で memory 化判断 |
+
+**保留メモ**: 2 例観測完了。3 例目で memory `feedback_user_observation_to_code_prevention.md` 化判断 (= 「3 回出てから抽象化」、学び 34 整合)。Day 10 以降に同種事例が出たら確実に拾う。
 
 ---
 
