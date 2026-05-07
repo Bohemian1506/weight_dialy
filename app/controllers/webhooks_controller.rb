@@ -3,33 +3,24 @@ class WebhooksController < ActionController::API
   # ActionController::API 継承は Rails 標準の API-only パターンで、CSRF 保護 / browser check / cookie /
   # session を含まない (skip_forgery_protection 等の禁止 workaround とは別物 — そもそも入っていない)。
   # 認証は Bearer token (authenticate_webhook!) で行う。
-
-  # ペイロード形式違反 (recorded_on の形式不正など) を表す内部例外。
-  # JSON::ParserError や RecordInvalid と並列で 422 + 監査ログ経路に流すために導入。
-  # webhook 受信エンドポイントは「機械同士の契約」なので fail-fast (silent 正規化しない) 方針。
-  InvalidPayload = Class.new(StandardError)
+  #
+  # ドメインロジック (= ペイロード検証 + パース + 永続化) は WebhookHealthDataIngestService に切り出し済
+  # (= ダッシュボード Tier 2 #4、refactor-candidates.md 由来、fat controller 解消の教材ポイント)。
+  # controller は **HTTP の入出力 + 認証 + 監査ログ** に専念する。
 
   before_action :read_raw_body
   before_action :authenticate_webhook!
 
   def health_data
     parsed = JSON.parse(@raw_body)
-    records_data = parsed["records"]
-
-    unless records_data.is_a?(Array)
-      record_delivery!(status: "invalid", accepted_count: 0, error_message: I18n.t("webhook.errors.missing_records_array"))
-      render json: { error: "Invalid payload" }, status: :unprocessable_content
-      return
-    end
-
-    accepted = upsert_records(records_data)
+    accepted = WebhookHealthDataIngestService.call(records_data: parsed["records"], user: @webhook_user)
     record_delivery!(status: "success", accepted_count: accepted)
     render json: { accepted: accepted }, status: :ok
   rescue JSON::ParserError => e
     Rails.logger.warn("[WebhooksController] JSON parse error: #{e.message.truncate(120)}")
     record_delivery!(status: "invalid", accepted_count: 0, error_message: I18n.t("webhook.errors.json_parse_error"))
     render json: { error: "Invalid payload" }, status: :unprocessable_content
-  rescue InvalidPayload => e
+  rescue WebhookHealthDataIngestService::InvalidPayload => e
     record_delivery!(status: "invalid", accepted_count: 0, error_message: e.message.truncate(120))
     render json: { error: "Invalid payload" }, status: :unprocessable_content
   rescue ActiveRecord::RecordInvalid => e
@@ -81,82 +72,16 @@ class WebhooksController < ActionController::API
     request.headers["Authorization"]&.delete_prefix("Bearer ")&.strip
   end
 
-  # Strict ISO 8601 (yyyy-MM-dd) parser. 配布版 Apple Shortcut は yyyy-MM-dd zero-padded で送る契約のため、
-  # それ以外のフォーマット (yyyy/MM/dd, M/d/yyyy 米国式 vs 欧州式) を Date.parse で寛容に解釈すると
-  # 「同じ日のつもりが別日として保存」「2 月のデータが 5 月になる」事故を生むため reject する。
-  #
-  # NOTE: Date.strptime("%Y-%m-%d") は仕様上 zero padding 不足 ("2026-5-3") を許容してしまうため、
-  # 正規表現で「正確に 4-2-2 桁」を先に検査してから Date.strptime に渡す二段構え。
-  ISO_DATE_FORMAT = /\A\d{4}-\d{2}-\d{2}\z/
-
-  def parse_recorded_on(raw)
-    raise InvalidPayload, I18n.t("webhook.errors.recorded_on_required") if raw.blank?
-    raw_str = raw.to_s
-    unless raw_str.match?(ISO_DATE_FORMAT)
-      raise InvalidPayload, I18n.t("webhook.errors.recorded_on_invalid_format")
-    end
-    Date.strptime(raw_str, "%Y-%m-%d")
-  rescue Date::Error
-    # 月日の値域違反 (例: "2026-13-99")
-    raise InvalidPayload, I18n.t("webhook.errors.recorded_on_invalid_format")
-  end
-
-  # 数値フィールド (steps / distance_meters / flights_climbed) を厳格パースする (Issue #52)。
-  # nil は許容 (= partial-update セマンティクス維持) するが、Hash や String など Integer/Float でない型は reject。
-  # 防ぎたい事故: Apple HealthKit Sample object `{ value: 12345, unit: "count" }` が来た時に、
-  # AR の type cast で silent に 0 として保存される (= 「動いてるけど中身がゼロ」の見えないバグ温床)。
-  #
-  # Float は「整数値の Float」(例: 8000.0) のみ許容する。9999.9 のような小数は silent に切り捨てられて
-  # 1 歩ぶん失われる事故を防ぐため reject する (= Apple Shortcuts が JSON 数値を 8000.0 で送る可能性を残しつつ、
-  # 真の小数値は reject、code-reviewer 指摘 ⚠️)。
-  def parse_numeric(raw, field_name)
-    return nil if raw.nil?
-    case raw
-    when Integer
-      raw
-    when Float
-      raise InvalidPayload, I18n.t("webhook.errors.must_be_whole_number", field: I18n.t("webhook.fields.#{field_name}"), value: raw) unless raw == raw.to_i
-      raw.to_i
-    else
-      raise InvalidPayload, I18n.t("webhook.errors.must_be_number", field: I18n.t("webhook.fields.#{field_name}"), value: raw.to_s.truncate(40).gsub(/[[:cntrl:]]/, "?"), type: raw.class)
-    end
-  end
-
-  # Upsert each day's record, updating only the keys present in the payload.
-  # Keys absent from the payload are left unchanged (partial-update semantics).
-  # All-or-nothing: wrap in a transaction so that if any record fails validation
-  # the entire batch rolls back and the caller can safely retry the whole payload.
-  def upsert_records(records_data)
-    accepted = 0
-
-    StepRecord.transaction do
-      records_data.each do |entry|
-        recorded_on = parse_recorded_on(entry["recorded_on"])
-
-        record = StepRecord.find_or_initialize_by(user: @webhook_user, recorded_on: recorded_on)
-
-        # Slice only the keys the caller sent; compact removes nils so that
-        # missing keys do not overwrite existing values with nil/0.
-        # NOTE: we cannot distinguish "key absent" from "explicit 0" because both
-        # arrive as falsy in JSON; partial-update semantics treat absent ≠ 0.
-        updates = {
-          steps:           parse_numeric(entry["steps"], "steps"),
-          distance_meters: parse_numeric(entry["distance_meters"], "distance_meters"),
-          flights_climbed: parse_numeric(entry["flights_climbed"], "flights_climbed")
-        }.compact
-
-        record.assign_attributes(updates)
-        record.save!
-        accepted += 1
-      end
-    end
-
-    accepted
-  end
-
   # Record audit log entry. Uses keyword argument `user:` so callers can
   # override with nil for unauthorized cases where @webhook_user is unreliable.
   # accepted_count: Issue #52 で追加。何件保存されたかを記録、success 時の中身が空ペイロードかを後追い分析可能にする。
+  #
+  # 監査ログを WebhookHealthDataIngestService に切り出さず controller に残した判断 (= Tier 2 #4 教材ポイント、学び 33):
+  #   - 状態依存: @raw_body (= read_raw_body で読んだ controller state) と @webhook_user (= 認証結果) に直接依存、
+  #     純粋関数化するには 2 引数追加が必要 = 切り出しコストに対する利益が薄い
+  #   - 経路共有: 認証失敗 (unauthorized) 経路で **service 通過前に** 呼ばれる必要がある (= ingest service と独立)
+  #   - 責務分類: 監査ログは「HTTP 経路ごとの出力」 = controller 責務の範疇 (= ingest = ドメイン責務とは分離軸が違う)
+  #   - 切り出し側 (= service 内 parse / upsert) との対比: あちらは引数だけで動く純粋ロジック、こちらは controller state 必須
   def record_delivery!(status:, accepted_count: nil, error_message: nil, user: @webhook_user)
     # Attempt to parse stored body as JSON for richer inspection in the audit log.
     # Falls back to { raw: <string> } when the body is not valid JSON.

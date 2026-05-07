@@ -41,13 +41,7 @@
 
 ## 🥈 Tier 2: 中物 (= 単発 PR で済む粒度)
 
-### 4. `webhooks_controller.rb` の Service 切り出し
-- **場所**: `app/controllers/webhooks_controller.rb` (181 行)
-- **現状**: `parse_recorded_on` / `parse_numeric` / `upsert_records` / `record_delivery!` が Controller 直書き
-- **ゴール**: `WebhookHealthDataIngestService` 等への切り出しで Controller を 30〜40 行台に
-- **見積**: 小〜中
-- **教材性**: ⭐⭐⭐ 「fat controller を Service にどう剥がすか」のお手本になる
-- **前提テスト**: `webhooks_controller_spec.rb` 充実度確認 (= 多分既にある、要 spec/ 確認)
+(現状なし。Day 9 で全 3 件完走 = #4 webhooks_controller 切り出し / #5 旧 BuildHomeDashboardService state 命名 = Issue #161 / #6 → #5 繰上げ後 CalorieAdvice body 分離)
 
 ---
 
