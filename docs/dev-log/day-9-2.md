@@ -25,17 +25,19 @@
 
 ---
 
-## 🏆 達成したこと (= PR #244 マージ + Issue #242 close + 学び 34 確立 + Tier 3 更地化 + Day 10 へ Tier 1 大物バトンタッチ準備完了)
+## 🏆 達成したこと (= PR #244 + #248 マージ + Issue #242 / #218 close + 学び 34 確立 + Tier 3 更地化 + sketch-note クラス抽出 + Day 10 へ Tier 1 大物バトンタッチ準備完了)
 
-### マージ済み PR (= 1 本、午後分のみ)
+### マージ済み PR (= 2 本)
 
-| PR | Issue | 内容 (= 短縮版、詳細は学び 34 セクション参照) |
+| PR | Issue | 内容 |
 |---|---|---|
 | #244 | #242 (= Tier 3 唯一の候補、PR #241 由来) | test: `WebhookHealthDataIngestService` の unit spec を新規追加 (22 examples / 6 context = 正常系 6 + InvalidPayload records 3 + recorded_on 5 + 数値 4 + AR 委譲 1 + トランザクション境界 3)。役割分担 = request spec (= HTTP 結合検証) + unit spec (= 純粋契約 + 境界値検証) を spec 冒頭で明示。3 者並列レビュー🟡🟢 全 5 件を本 PR 内吸収 (= 軽量 Issue ルール 3 例目)、特に **service 冒頭コメントを「unit spec 独立させなかった判断」 → 「unit spec の判断履歴」 に時系列書き換え** (= 学び 34 核心実例)。フル spec 607 examples 0 failures、rubocop 0 offenses、Tier 3 完走 → **Tier 2 + Tier 3 全更地化** |
+| #248 | #218 (= Day 8「19:00 以降緊急」 → Day 9 午後で着手、緊急扱い解除済) | polish: Settings の Capacitor 検知セクションに Health Connect データソース要件ガイダンスを追加 (= 局長実体験由来「同期成功 → 0 歩」 事故防止、二段構え誘導 = 同期前 (本 PR) + 同期後 PR #206 既実装)。3 者並列レビューで code🟡 + design🟡 3 + 🟢 2 + strategic🟢 3 を統合解決 → **`sketch-note` クラスを sketchy.css に新規抽出** (= CLAUDE.md「3 回出てから抽象化」 4 回目で抽象化適期、border-left + paper-2 背景で「補足 / 警告」 視覚明示)、コピーを「できる前提」 トーンに再構成 (= 3 ステップ思想 ① 罪悪感を減らす と整合)、line-height 1.5 含む。spec/requests/settings_spec.rb 50 examples 0 failures、影響 2 ファイル +16 行、別 Issue 起票候補 1 件 (= `native_health_controller.js:204` の文言統一) |
 
-### close した Issue (= 1 件、午後分のみ)
+### close した Issue (= 2 件)
 
 - **#242** (= `WebhookHealthDataIngestService` の unit spec 追加、Day 9 セッション 6 で起票 → セッション 7 で着地) — PR #244 で close、PR #241 レビュー由来の派生 Issue を当日内に follow-up 着地させた **「軽量 Issue 1 PR ルール継承」** 運用検証成功例
+- **#218** (= Settings Capacitor 検知セクションのガイダンス、Day 8「19:00 以降緊急」 起票 → Day 9 午後で緊急解除後着手) — PR #248 で close、局長実体験由来の **「ユーザー観察 → コードで予防」** 改善ループ実証、`sketch-note` クラス新規抽出による sketch コンポーネント体系拡張も副次効果
 
 ---
 
@@ -94,8 +96,8 @@ How to apply:
 
 ## 📊 統計 (= 午後の部、Day 9-2 分のみ)
 
-- マージした PR: **1 本** (= #244 Tier 3 完走 + 派生 Issue follow-up 当日着地)
-- close した Issue: **1 件** (= #242)
+- マージした PR: **2 本** (= #244 Tier 3 完走 + 派生 Issue follow-up 当日着地 / #248 Day 8 緊急解除後ガイダンス追加 + sketch-note クラス抽出)
+- close した Issue: **2 件** (= #242 + #218)
 - 起票した Issue: **0 件** (= 午後分の新規起票なし、午前 day-9-1 の #242 を本日午後で消化)
 - ダッシュボード Tier 3: 開始時 1 件 (= #242) → **終了時 0 件 (= 完走、Tier 3 更地化)**
 - spec: **607 examples** (= 午前終了時 585 → 午後終了時 +22 = 607、PR #244 で webhook ingest service unit spec 追加)
