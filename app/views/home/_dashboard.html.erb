@@ -304,7 +304,16 @@
     <div class="sketch-label">🔥 消費</div>
     <div class="sketch-hh">+<%= today_kcal %> <span class="sketch-small">kcal</span></div>
     <% if food_equivalent %>
-      <div class="sketch-small sketch-food-equivalent">≒ <%= food_equivalent[:emoji] %> <%= food_equivalent[:name] %> <%= food_equivalent[:count] %> <%= food_equivalent[:unit] %>ぶん</div>
+      <%# Issue #236: 食品換算カードを 2 行構成 + 絵文字ハイライト化 (= プロジェクタ大画面 3 秒テストでのインパクト向上)。
+          階層: 大 = +X kcal (sketch-hh) / 中 = 絵文字 (sketch-h) / 小 = 食品名 + 数量 (sketch-small)。
+          常時適用 (= フォールバック判定は service 改修が必要、別 Issue 規模)。
+          line-height: 1.0 で絵文字行の縦余白を詰めて 3 階層バランス確保。 %>
+      <div class="sketch-h sketch-food-equivalent" style="text-align: center; margin-top: 6px; line-height: 1.0;">
+        <%= food_equivalent[:emoji] %>
+      </div>
+      <div class="sketch-small sketch-food-equivalent" style="text-align: center;">
+        ≒ <%= food_equivalent[:name] %> <%= food_equivalent[:count] %> <%= food_equivalent[:unit] %>ぶん
+      </div>
     <% else %>
       <div class="sketch-small">今日のプラスα</div>
     <% end %>
