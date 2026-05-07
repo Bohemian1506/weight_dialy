@@ -179,12 +179,43 @@ RSpec.describe BuildHomeDashboardService do
         expect(result.calorie_savings[:total]).to eq(360)
       end
 
-      it "advice が CalorieAdviceService::Result (= Struct)" do
+      it "advice が CalorieAdviceService::Result (= 9000 歩 → 360 kcal で ZERO_THRESHOLD 超え、通常ステート Result 型)" do
         expect(result.advice).to be_a(CalorieAdviceService::Result)
       end
 
       it "food_equivalent が Hash または nil" do
         expect(result.food_equivalent).to be_a(Hash).or be_nil
+      end
+    end
+
+    # ─────────────────────────────────────────────────
+    # 状態 :has_data かつ today_kcal < ZERO_THRESHOLD (= 0 歩 / 微歩数、ZeroKcalResult 経路)
+    # PR #239 で advice が Result / ZeroKcalResult の 2 種に分離されたため、両経路を spec で検証する。
+    # 通常ステート (= 9000 歩) は上の context で Result 型を検証済、本 context は ZeroKcalResult 経路の回帰防止。
+    # ─────────────────────────────────────────────────
+    context "state: :has_data + today_kcal < ZERO_THRESHOLD (= 0 歩、ZeroKcalResult 経路)" do
+      let(:user) { create(:user) }
+      let!(:step_record) { create(:step_record, user: user, recorded_on: Date.current, steps: 0) }
+      subject(:result) { described_class.call(user: user, request: build_request(ua: iphone_ua)) }
+
+      it "state が :has_data (= step_records.exists? が true なので通常 has_data 状態)" do
+        expect(result.state).to eq(:has_data)
+      end
+
+      it "advice が CalorieAdviceService::ZeroKcalResult (= 0 歩 → 0 kcal で ZERO_THRESHOLD 未満、空ステート)" do
+        expect(result.advice).to be_a(CalorieAdviceService::ZeroKcalResult)
+      end
+
+      it "advice.zero_state? が true (= 状態判定 predicate)" do
+        expect(result.advice.zero_state?).to be true
+      end
+
+      it "advice.items が空配列 (= 食品提案を出さない空ステート)" do
+        expect(result.advice.items).to eq([])
+      end
+
+      it "advice.body が ZERO_BODY (= view 側 else ブランチで表示する文言)" do
+        expect(result.advice.body).to eq("歩数が記録されると、食べていいものを提案するよ。")
       end
     end
 
