@@ -195,8 +195,12 @@
         <h3 class="sketch-h" style="flex: 1; margin: 0;"><%= advice.headline %></h3>
       </div>
       <% if advice.items.any? %>
+        <%# Issue #235: 「+X kcal **なら**…」 (= if 条件、未来への口実化リスク = 「これから食べていい」 と読み替えられる) を、
+            「**今日 +X kcal 動いた** ぶん、たとえば…」 (= 過去肯定 + 換算例示) に再構成。
+            3 ステップ思想 ① 「罪悪感を減らす」 = 過去への肯定 (= 「これだけ動いた」) を強調、
+            未来への口実化 (= 「ご褒美感」) を排除。 %>
         <div class="sketch-small">
-          きょうのプラスα消費 <strong>+<%= today_kcal %> kcal</strong> なら…
+          今日 <strong>+<%= today_kcal %> kcal</strong> 動いたぶん、たとえば…
         </div>
         <ul style="margin: 8px 0 0 16px; padding: 0; list-style: disc;">
           <% advice.items.each do |item| %>
