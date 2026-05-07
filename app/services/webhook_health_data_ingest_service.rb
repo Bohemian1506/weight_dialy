@@ -14,11 +14,13 @@
 #
 # 旧 controller の `WebhooksController::InvalidPayload` は本 service に昇格 (= 例外の発生源と service が同じ場所にある方が読みやすい)。
 #
-# unit spec を独立させなかった判断 (= Tier 2 #4 教材ポイント、学び 33 テスタビリティ軸):
-#   - 既存 `spec/requests/webhooks_spec.rb` (= 110 examples) が controller + service 統合テストとして異常系含め網羅
-#   - 切り出し前後で挙動完全保持 (= 旧 controller の private method を service に移しただけ) のため、回帰テスト網は維持
-#   - 将来 service が webhook 以外の経路 (= 例: Strava ingest / batch 取込) から呼ばれるようになったら独立 unit spec を追加検討
-#   - 「Service 切り出し = 即 unit spec 追加」 を機械的に適用しない (= 既存 spec の網羅性で代替可能なら過剰)
+# unit spec の判断履歴 (= Tier 2 #4 教材ポイント、学び 33 テスタビリティ軸):
+#   - PR #241 (切り出し時): 既存 `spec/requests/webhooks_spec.rb` (= 110 examples) が controller + service 統合テストとして
+#     異常系含め網羅 / 切り出し前後で挙動完全保持のため、unit spec は **将来別経路 (= Strava ingest 等) 追加時に検討** と判断
+#   - PR #244 (= Issue #242 で起票、本日 follow-up 着地): **「契約のドキュメント化」 教材性向上 + 他 service との一貫性**
+#     を主動機に、別経路追加待たず unit spec 前倒し追加 (= `spec/services/webhook_health_data_ingest_service_spec.rb`、22 examples)
+#   - 教材ポイント: 「Service 切り出し = 即 unit spec 追加」 を機械的に適用せず、判定軸 4 つ (= 学び 33) で都度判断する。
+#     **判断の前提が変わったら判断を更新する** (= PR #241 → #244 で teaching moment、weight_dialy の判断ログ運用と一致)。
 class WebhookHealthDataIngestService
   # ペイロード形式違反を表す内部例外。controller の rescue ladder で捕まえて 422 + 監査ログ経路へ。
   # JSON::ParserError や RecordInvalid と並列で 422 経路に流すために導入 (= webhook 受信エンドポイントは

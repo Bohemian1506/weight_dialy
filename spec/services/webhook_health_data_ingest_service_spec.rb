@@ -9,6 +9,12 @@ require "rails_helper"
 # 役割分担:
 #   - request spec (= webhooks_spec): HTTP 入出力 + 認証 + 監査ログ + ステータスコード等の controller 結合検証
 #   - unit spec (= 本 spec): `.call` の引数 → 戻り値 / 例外 の純粋契約、private parse_* の境界値検証
+#
+# 本 spec で **検証しない** もの (= 逆引き、後輩教材として境界明示):
+#   - HTTP ヘッダ / 認証トークン / ステータスコード (401 / 422 / 200) → webhooks_spec 担当
+#   - WebhookDelivery 監査ログの内容 → webhooks_spec 担当
+#   - I18n.t() の翻訳結果 (= 文面そのもの) → 翻訳変更で壊れない bilingual 耐性のため、
+#     キー名のキーワード一致 regex (= `/must_be_number|数値|number/i`) で意図検証する
 RSpec.describe WebhookHealthDataIngestService do
   let(:user) { create(:user) }
 
@@ -151,6 +157,11 @@ RSpec.describe WebhookHealthDataIngestService do
     # ─────────────────────────────────────────────────
     # 異常系: 数値フィールド型不正 → InvalidPayload raise (= 旧 parse_numeric の境界値)
     # Apple HealthKit Sample object `{ value: 12345, unit: "count" }` のような silent 0 化を防ぐ
+    #
+    # NOTE: 以下の regex assertion は **I18n キー名のキーワード一致** で検証する設計 (= `/must_be_number/` や `/whole_number/`)。
+    # 翻訳文面 (= ja.yml の値) に depend させないことで、文言改善 / 英語 fallback / 多言語化に耐える。
+    # 「I18n.t() で完全一致」 では補間引数 (%{field} / %{value}) の都合で展開が不安定、
+    # 「実展開文字列を regex」 では翻訳変更で簡単に壊れる、という両極を避けた中庸として採用。
     # ─────────────────────────────────────────────────
     context "InvalidPayload raise (= 数値フィールド型不正)" do
       it "steps が Hash (= HealthKit Sample object 風) → raise (= silent 0 化防止)" do
@@ -183,6 +194,7 @@ RSpec.describe WebhookHealthDataIngestService do
           described_class.call(records_data: records, user: user)
         }.not_to raise_error
         expect(StepRecord.last.distance_meters).to eq(5000)
+        expect(StepRecord.last.steps).to eq(0) # = schema default、コードコメントの主張を assertion で証明
       end
     end
 
@@ -202,6 +214,10 @@ RSpec.describe WebhookHealthDataIngestService do
     # ─────────────────────────────────────────────────
     # トランザクション境界: 1 件失敗で全件ロールバック (= all-or-nothing)
     # 「リトライ時に同じペイロードを安全に再送できる」 セマンティクスを保証
+    #
+    # NOTE: rails_helper の `use_transactional_fixtures = true` 配下では各 example が SAVEPOINT でラップされ
+    # テスト後に自動ロールバックされる。service 内 `StepRecord.transaction` は SAVEPOINT をネストする形になり、
+    # Rails のデフォルト動作で内側 SAVEPOINT が ROLLBACK TO SAVEPOINT され期待通りに動作する。
     # ─────────────────────────────────────────────────
     context "トランザクション境界 (= 1 件失敗で全件ロールバック)" do
       it "2 件中 2 件目が AR バリデーション違反 → 1 件目もロールバック (= StepRecord 0 件)" do
