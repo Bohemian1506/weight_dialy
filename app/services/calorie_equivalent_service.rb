@@ -47,7 +47,7 @@ class CalorieEquivalentService
     # フォールバック: 全食品で 1 <= count <= max_count を満たさない場合 (= today_kcal が
     # 非常に高い)、最大 kcal 食品で [count, max_count].min にキャップして返す。
     # count == 0 (today_kcal < food.kcal) の経路も理論上ここに到達するが、現状の Foods::ALL は
-    # MIN_KCAL = 90 のため today_kcal >= 90 なら必ず 1 食品以上 count >= 1 になり、count == 0
+    # MIN_KCAL = 80 のため today_kcal >= 80 なら必ず 1 食品以上 count >= 1 になり、count == 0
     # 経路は発生しない。
     largest = Foods::ALL.max_by(&:kcal)
     count = today_kcal / largest.kcal

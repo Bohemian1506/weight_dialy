@@ -22,7 +22,7 @@ RSpec.describe CalorieEquivalentService do
 
   describe ".call" do
     # ─────────────────────────────────────────────────
-    # nil 返却: today_kcal < 90 (最小食品 kcal 未満)
+    # nil 返却: today_kcal < 80 (最小食品 kcal = 80、唐揚げ 1 個ぶん未満)
     # ─────────────────────────────────────────────────
     context "today_kcal = 0 のとき" do
       it "nil を返す" do
@@ -43,7 +43,7 @@ RSpec.describe CalorieEquivalentService do
     end
 
     # ─────────────────────────────────────────────────
-    # 境界値: today_kcal = 90 (最小食品 kcal と同値)
+    # 90 kcal 食品の境界: today_kcal = 90 (= バナナ / カップヨーグルトの 1 個ぶん境界)
     # ─────────────────────────────────────────────────
     context "today_kcal = 90 かつ seed=2 (shuffle後の最初の 90 kcal 食品: バナナ) のとき" do
       subject(:result) { described_class.call(90, seed: 2) }
