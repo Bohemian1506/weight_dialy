@@ -23,6 +23,8 @@ class SessionsController < ApplicationController
       # Capacitor 由来: Custom Tabs cookie storage に session を作っても WebView 側からは読めないため、
       # one-time token を発行 → custom URL scheme で Capacitor アプリへ転送 → WebView 側 /auto_login で消費して session 確立、というブリッジを組む。
       ott = OneTimeLoginToken.issue!(user: user)
+      # NOTE: ここでは establish_session_and_redirect_home を呼ばない (= session を張って root_path に飛ばすメソッドのため、
+      # Capacitor 経路では session 確立せず custom URL scheme へ転送する必要があり、共通化すると壊れる)。
       reset_session # Custom Tabs 側 session に残骸を残さない (= ブリッジ完了後は WebView 側 session のみが正)
       Rails.logger.info("OAuth login completed via Capacitor bridge (user_id=#{user.id})")
       redirect_to "com.weightdialy.app://oauth_callback?token=#{ott.token}",
@@ -46,6 +48,7 @@ class SessionsController < ApplicationController
       return redirect_to root_path, alert: "ログインの確認に失敗しました。もう一度お試しください"
     end
 
+    Rails.logger.info("auto_login completed via Capacitor WebView (user_id=#{token.user_id})")
     establish_session_and_redirect_home(token.user_id)
   end
 
@@ -64,11 +67,14 @@ class SessionsController < ApplicationController
   # 通常 Web 経由 OAuth (= sessions#create) と Capacitor token 消費 (= sessions#auto_login) の
   # ログイン後 session 確立を共通化。session fixation 排除のため reset_session を必ず噛ませる。
   #
-  # なぜ Concern でなく private method か (= Issue #228 教材ポイント):
-  #   - 共有相手は同一コントローラ内 2 箇所のみ → Concern (= 複数コントローラ間共有用) は過剰抽象化
-  #   - 重複は 3 行 × 2 箇所、private メソッド 1 個で十分解消可能
-  #   - CLAUDE.md「過剰な抽象化 / DRY (3 回出てから抽象化)」 にもまだ届かない (= 2 箇所)
-  #   - Rails 慣習: 同一コントローラ内重複は private、複数コントローラ間重複は Concern
+  # なぜ Concern でなく private method か (= Issue #228 教材ポイント、4 観点で機械的に判定):
+  #   1. 共有相手: 同一コントローラ内 2 箇所のみ → Concern (= 複数コントローラ間共有用) は過剰抽象化
+  #   2. 重複粒度: 3 行 × 2 箇所、private メソッド 1 個で十分解消可能
+  #   3. CLAUDE.md「過剰な抽象化 / DRY (3 回出てから抽象化)」 の適用粒度:
+  #      ここでの「抽象化」 は Concern / 基底クラス / DSL 等の **構造的分離** に対する制約。
+  #      同一クラス内 private 抽出は「整理」 に該当するため 2 箇所でも抽出可。
+  #   4. テスタビリティ: 3 行 / redirect のみ → request spec で十分カバー、独立 unit test 不要 → Concern にする動機なし
+  #   → Rails 慣習: 同一コントローラ内重複は private、複数コントローラ間重複は Concern
   #
   # logger.info は呼び出し側に残置 (= 「OAuth web 経由」 と「Capacitor token 消費」 の文脈差を
   # 各経路で明示するため、共通化すると経路が読めなくなる)。
