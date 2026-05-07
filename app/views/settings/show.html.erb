@@ -114,11 +114,11 @@
     </p>
 
     <%# Issue #218: 同期前事前ガイダンス。Health Connect 自体にデータが届いていないと同期成功 (= 200 OK)
-        でも 0 歩で保存される事故 (= 局長実体験由来、PR #206 で同期後警告と二段構え) を未然に防ぐ。 %>
-    <p class="sketch-small"
-       style="background: var(--paper-2); padding: 8px 12px; border-radius: 4px; margin-bottom: 12px;">
-      ※ Health Connect に <strong>Google Fit / Samsung Health 等の書き込み許可</strong>が必要です。
-      同期して 0 歩のままの場合は、<strong>Health Connect → データとアクセス</strong> で書き込みアプリの設定をご確認ください。
+        でも 0 歩で保存される事故 (= 局長実体験由来、PR #206 で同期後警告と二段構え) を未然に防ぐ。
+        sketch-note クラス (= sketchy.css、border-left + paper-2 背景) で「補足」 視覚明示。 %>
+    <p class="sketch-small sketch-note" style="margin-bottom: 12px;">
+      ※ 歩数アプリ (<strong>Google Fit</strong> や <strong>Samsung Health</strong> など) から Health Connect へデータが渡る設定になっているとスムーズに同期できます。
+      0 歩のままの場合は、Health Connect アプリの「<strong>データとアクセス</strong>」 で書き込み設定をご確認ください。
     </p>
 
     <p data-native-health-target="status" class="sketch-body-text" style="margin-bottom: 16px;">
