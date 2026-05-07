@@ -307,15 +307,17 @@
       <%# Issue #236: 食品換算カードを 2 行構成 + 絵文字ハイライト化 (= プロジェクタ大画面 3 秒テストでのインパクト向上)。
           階層: 大 = +X kcal (sketch-hh) / 中 = 絵文字 (sketch-h) / 小 = 食品名 + 数量 (sketch-small)。
           常時適用 (= フォールバック判定は service 改修が必要、別 Issue 規模)。
-          line-height: 1.0 で絵文字行の縦余白を詰めて 3 階層バランス確保。 %>
-      <div class="sketch-h sketch-food-equivalent" style="text-align: center; margin-top: 6px; line-height: 1.0;">
+          絵文字行に sketch-food-equivalent (= white-space: nowrap + overflow: hidden + ellipsis) は付けない:
+          このクラスは旧 1 行構成で長い食品名の折り返し防止用、絵文字 1 文字には不要かつ clip リスク
+          (= code-reviewer 指摘)。文言行のみ sketch-food-equivalent を保持。 %>
+      <div class="sketch-h" style="text-align: center; margin-top: 6px;">
         <%= food_equivalent[:emoji] %>
       </div>
       <div class="sketch-small sketch-food-equivalent" style="text-align: center;">
         ≒ <%= food_equivalent[:name] %> <%= food_equivalent[:count] %> <%= food_equivalent[:unit] %>ぶん
       </div>
     <% else %>
-      <div class="sketch-small">今日のプラスα</div>
+      <div class="sketch-small">今日はまだ記録なし</div>
     <% end %>
   </div>
 
