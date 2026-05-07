@@ -68,8 +68,16 @@
     </p>
   </div>
 
-  <p class="sketch-small" style="color: var(--muted); margin-top: 8px;">
-    改訂履歴: 2026-05-05 初版公開 / 2026-05-05 事業者表示追加・消費者契約法対応
-  </p>
+  <%# 改訂履歴セクション (= Issue #91): 1 行詰込から `<h2>` + `<ul>` 構造化に。
+      table でなく ul を選んだ理由 = 1 軸 (= 時系列のみ) なので何件あっても ul が筋、軸数 ≥ 2 で初めて table 検討
+      (= 「table 使いたい衝動は件数でなく軸数で殺す」、Issue #178 本文に判断ルール追記済)。
+      他セクションと整合させるため「8. 改訂履歴」 として番号付き昇格 + sketch-box 包み。 %>
+  <div class="sketch-box" style="margin-bottom: 20px;">
+    <h2 class="sketch-h" style="margin-bottom: 8px;">8. 改訂履歴</h2>
+    <ul class="sketch-small" style="color: var(--ink-2); margin: 0; padding-left: 1.2em; line-height: 1.6;">
+      <li><strong>2026-05-05</strong> — 初版公開</li>
+      <li><strong>2026-05-05</strong> — 事業者表示追加・消費者契約法対応</li>
+    </ul>
+  </div>
 
 </div>
