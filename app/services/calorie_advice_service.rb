@@ -13,6 +13,7 @@ class CalorieAdviceService
   # AI 成功時 true / Static フォールバック時 false。ユーザーには UI 出力にしか影響せず PII は含めない。
   #
   # body / zero_state? は ZeroKcalResult との view 側 duck type 統一のため定義 (= 通常時は nil / false)。
+  # ZeroKcalResult との「特殊ステート分離」 設計の根拠は ZeroKcalResult 直前のコメント参照 (= 4 案比較表)。
   Result = Struct.new(:headline, :items, :button_label, :ai_used, keyword_init: true) do
     def body = nil
     def zero_state? = false
@@ -30,10 +31,20 @@ class CalorieAdviceService
   #   - view 側互換性のため items / button_label / ai_used / body のデリゲートメソッドを生やす
   #     (= view は items.any? で分岐 + advice.body 表示で動作中、書き換えなし)
   #
-  # 「専用 Result クラス分割」 vs 「Null Object パターン」 vs 「現状維持」 の 3 案検討結果:
-  #   1. 専用 Result クラス分割 (= 採用) — 2 Struct で意図明確、view 側 duck type 互換
-  #   2. Null Object パターン — OOP 教科書的だが、Rails では Struct ベースの方が読みやすい
-  #   3. 現状維持 — body デッドフィールド問題が残る、新規読者の混乱源
+  # 4 案検討結果 (= 最大 / 中間 / 最小 / 撤退 のグラデーション、Day 9 学び 30 と同型の道具選定):
+  #   1. 単一 Struct + factory method (= 最小)         — body field 残る、デッドフィールド問題未解消で却下
+  #   2. 専用 Result クラス分割 (= 中間、採用)         — 2 Struct で意図明確、view 側 duck type 互換
+  #   3. Null Object パターン (= 最大)                 — OOP 教科書的だが、Rails では Struct ベースの方が読みやすい
+  #   4. 現状維持 (= 撤退)                             — body デッドフィールド問題が残る、新規読者の混乱源
+  # → 採用根拠: データ shape が違う (= デッドフィールド) ことが本質、案 1 では解消しない / 案 3 は behavior 多態が不要なので過剰
+  #
+  # sibling 構造 (= ZeroKcalResult を Result の subclass にしない) を選んだ理由:
+  #   - Struct 継承は Ruby ではアンチパターン気味 (= 子で Struct.new を再定義するとフィールド消える等の挙動が直感に反する)
+  #   - view 側は duck type で完結、is_a?(Result) で両者まとめるユースケースは現状なし
+  #   - 型分離自体が spec 要件 (= 通常時 → Result / 0 kcal 時 → ZeroKcalResult を明示的に検証したい)
+  #
+  # zero_state? predicate は両 Struct に提供しているが、view 側 (= _dashboard.html.erb) はまだ items.any? で分岐中。
+  # interface 提供のみで並行運用、view 側書き換えは別 Issue / Tier 3 候補として残置 (= 本 PR スコープ守るため意図的に未着手)。
   ZeroKcalResult = Struct.new(:headline, :body, keyword_init: true) do
     def items = []
     def button_label = nil
