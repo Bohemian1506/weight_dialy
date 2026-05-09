@@ -140,11 +140,12 @@
       📡 同期する
     </button>
 
-    <%# Issue #138: Webhook POST が 401 (= token 無効) で失敗したときのみ JS 側で表示。
-        他 status の復帰導線は本 PR スコープ外、必要になったら別 Issue で recoveryButton を 2 mode 化検討。
+    <%# Issue #273 で 2 mode 化 (settings / retry)。401 時は settings 誘導、5xx 時は再試行。
+        初期値は data-mode="settings" (= 401 用)、JS 側が retry 時に textContent + data-mode を上書きする。
         ボタン文言は STATUS_MESSAGES の 401 文言と「トークン再生成」 キーワードで揃える。 %>
-    <button data-action="click->native-health#openSettings"
+    <button data-action="click->native-health#recoveryAction"
             data-native-health-target="recoveryButton"
+            data-mode="settings"
             class="sketch-btn"
             style="display: none; margin-top: 12px;">
       設定ページでトークンを再生成 →

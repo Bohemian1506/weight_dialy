@@ -8,7 +8,15 @@ const HEALTH_READ_TYPES = ["steps", "distance", "flightsClimbed"]
 // HTTP status 別の日本語フォールバック (Issue #138)。
 // カジュアル層に「HTTP 422」 「Unauthorized」 が伝わらないため、想定 status 6 種に日本語を当てる。
 // 想定外 status (= 404 / 429 等) は呼び出し側で `HTTP ${status}` に fallback。
-// 401 のみ recoveryButton で「設定ページでトークン再生成」 への動線を提供 (= キーワード「トークン再生成」 を文言・ボタン文言・誘導先で統一)。
+// 401 / 5xx の 2 mode で recoveryButton 提供 (= settings / retry)。401 → Settings 誘導、5xx → retry。キーワード「トークン再生成」 を文言・ボタン文言・誘導先で統一。
+// Issue #273: recoveryButton の 2 mode 化。mode → ボタン文言マップ。
+// 401 (= token 無効) → settings 誘導 / 5xx (= サーバー側一過性) → retry。
+// 4xx 一般 (= 413/422) は復帰導線が一意に決まらないため文言のみ運用 (= mode なし)。
+const RECOVERY_LABELS = {
+  settings: "設定ページでトークンを再生成 →",
+  retry: "もう一度試す →"
+}
+
 const STATUS_MESSAGES = {
   401: "トークンが無効です。設定ページでトークンを再生成してください",
   413: "送信データが多すぎます。しばらく待ってから再試行してください",
@@ -286,10 +294,13 @@ export default class extends Controller {
           ? `❌ ${friendlyMessage}`
           : `❌ 送信失敗 (HTTP ${response.status}): ${bodyMessage}`
         this.showStatus(display)
-        // 401 (= token 無効) のときのみ Settings 誘導ボタンを表示 (= 復帰導線が一意に決まる status のため)。
-        // 他 status (= 5xx の retry 系等) の復帰導線は本 PR スコープ外、必要になったら別 Issue で recoveryButton を 2 mode 化検討。
-        if (response.status === 401 && this.hasRecoveryButtonTarget) {
-          this.recoveryButtonTarget.style.display = ""
+        // Issue #273: status に応じて recoveryButton を 2 mode で出し分け。
+        // 401 → settings 誘導 / 5xx → retry / その他 (= 413/422) → 文言のみ。
+        // Issue #273 で 2 mode 化済、settings (401) と retry (5xx) で共用。
+        if (response.status === 401) {
+          this.showRecoveryButton("settings")
+        } else if ([500, 502, 503].includes(response.status)) {
+          this.showRecoveryButton("retry")
         }
         return
       }
@@ -311,13 +322,29 @@ export default class extends Controller {
     }
   }
 
-  // 401 検出時に表示される Settings 誘導ボタンの遷移ハンドラ (Issue #138)。
-  // Turbo がロード済なら Turbo.visit、そうでなければ window.location で /settings へ遷移。
-  openSettings() {
-    if (typeof Turbo !== "undefined") {
-      Turbo.visit("/settings")
-    } else {
-      window.location.assign("/settings")
+  // Issue #273: recoveryButton を mode 切替で表示。data-mode 属性 + 文言を JS で揃える。
+  // view 側初期 HTML は data-mode="settings" + 401 用文言を持つので、settings mode 表示時は文言再代入も同値で安全。
+  showRecoveryButton(mode) {
+    if (!this.hasRecoveryButtonTarget) return
+    const label = RECOVERY_LABELS[mode]
+    if (!label) return
+    this.recoveryButtonTarget.dataset.mode = mode
+    this.recoveryButtonTarget.textContent = label
+    this.recoveryButtonTarget.style.display = ""
+  }
+
+  // Issue #273: 401 (= settings 誘導) と 5xx (= retry) で同じボタンを 2 mode 共用。
+  // dataset.mode で分岐、想定外 mode は安全側 (= 何もしない) に倒す。
+  recoveryAction(event) {
+    const mode = event.currentTarget?.dataset?.mode
+    if (mode === "settings") {
+      if (typeof Turbo !== "undefined") {
+        Turbo.visit("/settings")
+      } else {
+        window.location.assign("/settings")
+      }
+    } else if (mode === "retry") {
+      this.sync()
     }
   }
 }
