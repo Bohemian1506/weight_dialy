@@ -5,8 +5,20 @@ import { Controller } from "@hotwired/stimulus"
 // 旧コードでは "floorsClimbed" と書かれており permission チェックで "Unsupported data type" エラーになっていた (2026-05-06 実機検証で発覚)。
 const HEALTH_READ_TYPES = ["steps", "distance", "flightsClimbed"]
 
+// HTTP status 別の日本語フォールバック (Issue #138)。
+// カジュアル層に「HTTP 422」 「Unauthorized」 が伝わらないため、想定 status 6 種に日本語を当てる。
+// 想定外 status (= 404 / 429 等) は呼び出し側で `HTTP ${status}` に fallback。
+const STATUS_MESSAGES = {
+  401: "ログインし直してください (= token が無効です)",
+  413: "データサイズが大きすぎます",
+  422: "データの形式に問題があります",
+  500: "サーバー側のエラーです。しばらく待ってから再試行してください",
+  502: "サーバーが応答しません。ネットワーク接続を確認してください",
+  503: "サーバーが混み合っています。しばらく待ってから再試行してください"
+}
+
 export default class extends Controller {
-  static targets = ["status", "requestButton", "syncButton"]
+  static targets = ["status", "requestButton", "syncButton", "recoveryButton"]
   static values = { webhookToken: String }
 
   connect() {
@@ -259,9 +271,20 @@ export default class extends Controller {
         const errorBody = await response.text()
         // サーバーは {error: "..."} JSON で 4xx を返す設計、JSON parse 成功時は error を抜粋。
         // パース失敗時は生 body の先頭 80 字でフォールバック。
-        let message = errorBody.slice(0, 80)
-        try { message = JSON.parse(errorBody).error ?? message } catch (_) {}
-        this.showStatus(`❌ 送信失敗 (HTTP ${response.status}): ${message}`)
+        let bodyMessage = errorBody.slice(0, 80)
+        try { bodyMessage = JSON.parse(errorBody).error ?? bodyMessage } catch (_) {}
+        // HTTP status 別の日本語フォールバック (Issue #138)。STATUS_MESSAGES にあれば優先、
+        // なければ従来通り `HTTP ${status}: ${body 抜粋}` で開発者 dogfood 互換。
+        const friendlyMessage = STATUS_MESSAGES[response.status]
+        const display = friendlyMessage
+          ? `❌ ${friendlyMessage}`
+          : `❌ 送信失敗 (HTTP ${response.status}): ${bodyMessage}`
+        this.showStatus(display)
+        // 401 (= token 無効) のときのみ Settings 誘導ボタンを表示。
+        // 他 status は文言のみで運用 (= 復帰導線が status ごとに異なるため Issue #138 では 401 のみ実装)。
+        if (response.status === 401 && this.hasRecoveryButtonTarget) {
+          this.recoveryButtonTarget.style.display = ""
+        }
         return
       }
 
@@ -279,6 +302,16 @@ export default class extends Controller {
       this.showStatus(`❌ 送信エラー: ${this.errorMessage(error)}`)
     } finally {
       this.syncButtonTarget.disabled = false
+    }
+  }
+
+  // 401 検出時に表示される Settings 誘導ボタンの遷移ハンドラ (Issue #138)。
+  // Turbo がロード済なら Turbo.visit、そうでなければ window.location で /settings へ遷移。
+  openSettings() {
+    if (typeof Turbo !== "undefined") {
+      Turbo.visit("/settings")
+    } else {
+      window.location.assign("/settings")
     }
   }
 }
