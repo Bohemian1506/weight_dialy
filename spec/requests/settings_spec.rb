@@ -116,6 +116,10 @@ RSpec.describe "Settings", type: :request do
         expect(response.body).to include('data-controller="native-health"')
         # Issue #138: 401 失敗時の Settings 誘導ボタンが Stimulus target として登録されている。
         expect(response.body).to include('data-native-health-target="recoveryButton"')
+        # Issue #273: 2 mode 化された recoveryAction action と data-mode="settings" 初期値。
+        # **本 PR は 2 mode で確定 (= 3 種類目 mode は v1.2 以降の検討)**、3 mode 化時は本 assertion に該当 data-mode を追記する想定。
+        expect(response.body).to include('data-action="click->native-health#recoveryAction"')
+        expect(response.body).to include('data-mode="settings"')
       end
 
       it "Web 版では display: none で初期表示する (= Capacitor 検知時のみ表示に切り替わる)" do

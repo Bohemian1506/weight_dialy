@@ -5,17 +5,27 @@ import { Controller } from "@hotwired/stimulus"
 // 旧コードでは "floorsClimbed" と書かれており permission チェックで "Unsupported data type" エラーになっていた (2026-05-06 実機検証で発覚)。
 const HEALTH_READ_TYPES = ["steps", "distance", "flightsClimbed"]
 
-// HTTP status 別の日本語フォールバック (Issue #138)。
-// カジュアル層に「HTTP 422」 「Unauthorized」 が伝わらないため、想定 status 6 種に日本語を当てる。
+// Issue #138 / #273: HTTP status 別の日本語フォールバック + recoveryButton 2 mode (= settings / retry)。
+// 401 (= token 無効) → settings 誘導 / 5xx (= サーバー側一過性) → retry / 4xx 一般 (= 413/422) → 文言のみ (= 復帰導線が一意に決まらない)。
 // 想定外 status (= 404 / 429 等) は呼び出し側で `HTTP ${status}` に fallback。
-// 401 のみ recoveryButton で「設定ページでトークン再生成」 への動線を提供 (= キーワード「トークン再生成」 を文言・ボタン文言・誘導先で統一)。
+// **本 PR は 2 mode で確定 (= 3 種類目 mode は v1.2 以降の検討、必要時は `RECOVERY_ACTIONS` マップへ昇格検討)**。
+// retry 文言の「しばらく待ってから」 は連打抑制を兼ねる (= 学び `feedback_one_change_two_bugs.md` 1 修正 2 不具合の前提通り、
+// 5xx 連続失敗時のボタン非表示誘導は別 Issue #276 で対応、本 PR はカウンタ無し)。
+const RECOVERY_LABELS = {
+  settings: "設定ページでトークンを再生成 →",
+  retry: "しばらく待ってからもう一度試す →"
+}
+
+// 5xx 系の文言は **ボタン文言「しばらく待ってからもう一度試す →」 と冗長になるため文末「再試行してください」 を削った** (= Issue #273 design-reviewer C-1)。
+// 1 つの UI イベント (= 5xx) に「待ってから」 表現が status 文言とボタン文言で 2 回出ると視覚的にうるさい。
+// status 文言は「何が起きたか」、ボタン文言は「次にやること」 の役割分担を明示。
 const STATUS_MESSAGES = {
   401: "トークンが無効です。設定ページでトークンを再生成してください",
   413: "送信データが多すぎます。しばらく待ってから再試行してください",
   422: "データの形式に問題があります",
-  500: "サーバー側のエラーです。しばらく待ってから再試行してください",
+  500: "サーバー側のエラーです",
   502: "サーバーが応答しません。ネットワーク接続を確認してください",
-  503: "サーバーが混み合っています。しばらく待ってから再試行してください"
+  503: "サーバーが混み合っています"
 }
 
 export default class extends Controller {
@@ -286,10 +296,12 @@ export default class extends Controller {
           ? `❌ ${friendlyMessage}`
           : `❌ 送信失敗 (HTTP ${response.status}): ${bodyMessage}`
         this.showStatus(display)
-        // 401 (= token 無効) のときのみ Settings 誘導ボタンを表示 (= 復帰導線が一意に決まる status のため)。
-        // 他 status (= 5xx の retry 系等) の復帰導線は本 PR スコープ外、必要になったら別 Issue で recoveryButton を 2 mode 化検討。
-        if (response.status === 401 && this.hasRecoveryButtonTarget) {
-          this.recoveryButtonTarget.style.display = ""
+        // Issue #273: status に応じて recoveryButton を 2 mode で出し分け (= 同一ボタン DOM を mode で切り替えて共用)。
+        // 401 → settings 誘導 / 5xx → retry / その他 (= 413/422) → 文言のみ (= 復帰導線が一意に決まらない)。
+        if (response.status === 401) {
+          this.showRecoveryButton("settings")
+        } else if ([500, 502, 503].includes(response.status)) {
+          this.showRecoveryButton("retry")
         }
         return
       }
@@ -311,13 +323,31 @@ export default class extends Controller {
     }
   }
 
-  // 401 検出時に表示される Settings 誘導ボタンの遷移ハンドラ (Issue #138)。
-  // Turbo がロード済なら Turbo.visit、そうでなければ window.location で /settings へ遷移。
-  openSettings() {
-    if (typeof Turbo !== "undefined") {
-      Turbo.visit("/settings")
-    } else {
-      window.location.assign("/settings")
+  // Issue #273: recoveryButton を mode 切替で表示。data-mode 属性 + 文言を JS で揃える。
+  // **文言の SSOT は `RECOVERY_LABELS`、view 側初期 HTML (= settings mode 用) は SSR 用ダミー** (= JS が常に textContent を上書きするため)。
+  // 将来 `RECOVERY_LABELS.settings` を変えると view 側の初期文言と乖離するが、ユーザー視認は JS 通過後なので実害なし。
+  showRecoveryButton(mode) {
+    if (!this.hasRecoveryButtonTarget) return
+    const label = RECOVERY_LABELS[mode]
+    if (!label) return
+    this.recoveryButtonTarget.dataset.mode = mode
+    this.recoveryButtonTarget.textContent = label
+    this.recoveryButtonTarget.style.display = ""
+  }
+
+  // Issue #273: 401 (= settings 誘導) と 5xx (= retry) で同じボタンを 2 mode 共用。dataset.mode で分岐、想定外 mode は安全側 (= 何もしない) に倒す。
+  // **本 PR は 2 mode で確定 (= 3 種類目 mode は v1.2 以降の検討、3 mode 追加時に `RECOVERY_ACTIONS` (= mode → callback) マップへ昇格検討)**。
+  // 2 mode 限定では if-else で十分 (= YAGNI、3 回ルール待ち) = `feedback_explain_choices_to_beginner.md` の「3 回出てから抽象化」 と一致。
+  recoveryAction(event) {
+    const mode = event.currentTarget?.dataset?.mode
+    if (mode === "settings") {
+      if (typeof Turbo !== "undefined") {
+        Turbo.visit("/settings")
+      } else {
+        window.location.assign("/settings")
+      }
+    } else if (mode === "retry") {
+      this.sync()
     }
   }
 }
