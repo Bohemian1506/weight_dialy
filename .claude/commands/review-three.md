@@ -12,9 +12,13 @@ memory `feedback_always_three_reviewers.md` の「PR 規模に関わらず必ず
 
 対象: $ARGUMENTS
 
+引数は **3 パターンのみ** (= YAGNI、観測ゼロのケースは載せない):
+
 - **空**: 現在のブランチ diff (`git diff main..HEAD`) を対象
 - **整数のみ** (例: `255`): PR 番号として扱う (= `gh pr view 255`)
-- **その他文字列** (例: `security` / `mobile` / `scope`): 重点観点として 3 Agent に伝える
+- **その他文字列** (例: `security` / `mobile` / `scope`): 重点観点として 3 Agent に伝える、対象は現在ブランチ diff
+
+「PR 番号 + 観点」 のような複合指定は **本 Command では未対応**。必要シーンが 2 回以上観測されたら別 PR で拡張する。
 
 ## フロー
 
@@ -30,7 +34,7 @@ git log main..HEAD --oneline
 
 # 整数 (PR 番号) → PR を対象
 gh pr view <N> --json title,body,files,headRefName,additions,deletions
-gh pr diff <N> --name-only
+gh pr view <N> --json files --jq '.files[].path'  # 変更ファイル一覧
 ```
 
 ブランチ名や PR title から **関連 Issue 番号** を抽出 (例: `feature/review-three-command` → Issue #259、コミットメッセージの `(#NNN)` パターン)。抽出できなければ「関連 Issue 不明」 で進めて OK。
@@ -77,9 +81,9 @@ PR 番号 / ブランチ名: <Step 1 で取得>
 
 ### Step 4: 末尾に統合サマリを再分類
 
-3 Agent の指摘を **🚨 Blocker / 🟡 軽微 / 🟢 提案** の 3 段階に Command 側で再分類して提示。
+各 Agent の出力フォーマット (= code: 🚨/⚠️/💡、strategic / design: 🟢/🟡/🔴) が異なるため、横断比較しやすいように **Command 側で 🚨 Blocker / 🟡 軽微 / 🟢 提案 の 3 段階に再分類** して提示。
 
-#### 再分類マッピング
+#### 再分類マッピング (= 全 Agent × 全判定の網羅表)
 
 | Agent 元の表記 | 統合分類 |
 |---|---|
@@ -87,10 +91,14 @@ PR 番号 / ブランチ名: <Step 1 で取得>
 | strategic: 🔴 スコープ切り直し | 🚨 Blocker |
 | design: 🔴 デモに出せない | 🚨 Blocker |
 | code: ⚠️ Should fix | 🟡 軽微 |
-| strategic: 🟡 設計見直し | 🟡 軽微 |
+| strategic: 🟡 設計を見直す | 🟡 軽微 |
 | design: 🟡 修正後 OK | 🟡 軽微 |
 | code: 💡 Nit | 🟢 提案 |
+| strategic: 🟢 進めてよい (= 指摘なし) | 🟢 提案 (or 省略) |
+| design: 🟢 デモで出せる (= 指摘なし) | 🟢 提案 (or 省略) |
 | strategic / design の追加アイデア・将来送り提案 | 🟢 提案 |
+
+「指摘なし」 の場合は統合サマリでも省略してよい (= 0 件の冗長表示を避ける)。
 
 #### 統合サマリ出力フォーマット
 
@@ -111,8 +119,10 @@ PR 番号 / ブランチ名: <Step 1 で取得>
 - [strategic] <内容>
 - [code] <内容> (file:line)
 
-総合判定: <🚨 Blocker あり = マージ前修正必須 / 🟡 のみ = 修正推奨 / 🟢 のみ = approve OK>
+**総合判定: 🚨 マージ前修正必須 ([code] N 件)** / **🟡 修正推奨 ([strategic] M 件)** / **🟢 Approve OK**
 ```
+
+総合判定行は **太字 + 発火元タグ** で「どの Agent がブロッカーを出したか」 を流し読みでも拾えるようにする (= Agent 別セクションを飛ばして判定だけ見るユーザー向け)。
 
 ## 引数別の挙動例
 
@@ -140,23 +150,27 @@ PR 番号 / ブランチ名: <Step 1 で取得>
 → 重点観点: security (= 各 Agent に明示的に伝える)
 ```
 
-### PR 番号 + 観点 (= スペース区切り、両方渡す)
-
-```
-/review-three 255 security
-→ PR 255 を対象、重点観点: security
-```
-
 引数解釈の優先順位:
-1. 1 トークン目が整数 → PR 番号
-2. 残りトークン (or 全トークン) → 観点キーワードとして連結
+1. トークンが 1 個でかつ整数 (`/^\d+$/`) → PR 番号として扱う
+2. それ以外 → 全体を観点キーワードとして連結
+
+## この Command を Skill にしなかった理由
+
+memory `project_plan_issue_skill_consideration.md` の判断軸 (= Command vs Skill のトレードオフ) を踏まえて、本 Command は **Skill 自動発火ではなく明示打ち** にした。理由:
+
+1. **コスト高**: 3 Agent 並列 = 大量 token、自動発火で意図せず実行されるとコスト無駄
+2. **意図的レビューの教材性**: 明示打ちの方が「このタイミングでレビューを通す」 という意思が記録される
+3. **止めにくさ回避**: Skill 自動発火だと「今回は要らない」 場面で止め方が明示的でない
+4. **memory の例外定義との整合**: 例外 (= 1 行 typo / CI 機械的再 push / dev-log 数字 1-2 箇所補正) に該当する PR で **誤発火させない** ためには明示打ちが安全
+
+`/dev-log-merge` Skill (= 漏らしたら困る + 発火条件明確) との対比で、本 Command は **「止めたい場面がある」 → Command 形式** という第一群 4 連発で確立した使い分け軸の代表例。
 
 ## 注意事項
 
 - **3 Agent 並列起動が必須** (= 直列起動はコスト・時間で損)。1 メッセージに 3 つの Agent tool call を並べる
 - **Agent はファイル編集しない** (= Read/Bash/Grep のみ)、指摘を受けて Claude 本体が修正コミットを作る
 - **再レビュー時** は修正コミット SHA + 反映ロジックを Agent に渡す (= 各 Agent の依頼例参照)
-- **軽微 PR (= Dependabot / typo / spec 数値更新のみ) で発火させたくない場面** はユーザー判断、本 Command は明示打ち専用 (= Skill 自動発火しない)
+- **発火スキップ条件は memory `feedback_always_three_reviewers.md` を Single Source of Truth とする**。例外 = 1 行 typo / CI 失敗修正の機械的な再 push / dev-log の数字 1-2 箇所のみの補正、の 3 種限定。本 Command の文言と memory がズレた場合は **memory が正**
 - レビュー実行はコスト高 (= 3 Agent 並列で大量 token)、無闇に連発しない
 
 ## 関連
