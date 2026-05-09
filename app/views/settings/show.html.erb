@@ -87,6 +87,9 @@
     </p>
   <% end %>
 
+  <%# 見出し命名ルール (= Issue #134 由来、本ファイル全 sketch-h に適用):
+      装飾絵文字なし (= ポリシー / Step 1 / Step 2 / トークン再生成と揃える)。
+      機能絵文字 (= 📡 同期する / 🎉 完了 / ⚠️ 警告) は意味付きアイコンとして残置可。 %>
   <%# Web 版 Android user 向け案内 (Issue #184)。Capacitor 検知時はサーバ側で web_android? = false になり非表示、
       かつ既存の native-health セクション (下記) が JS で代替表示される。UX ループ解消が目的。 %>
   <% if @show_android_app_promo %>
@@ -110,7 +113,7 @@
        style="display: none; margin-bottom: 24px;">
     <h2 class="sketch-h" style="margin-bottom: 8px;">Android Health Connect 連携</h2>
     <p class="sketch-small" style="margin-bottom: 12px;">
-      Android アプリ版で Health Connect から歩数 / 距離 / 階段を取得 → サーバーへ自動同期します。
+      Android アプリ版で Health Connect 経由で歩数 / 距離 / 階段を自動同期します。
     </p>
 
     <%# Issue #218: 同期前事前ガイダンス。Health Connect 自体にデータが届いていないと同期成功 (= 200 OK)
@@ -128,7 +131,7 @@
             data-native-health-target="requestButton"
             class="sketch-btn"
             style="display: none; margin-right: 8px;">
-      歩数を取得する
+      歩数を取得する →
     </button>
     <button data-action="click->native-health#sync"
             data-native-health-target="syncButton"

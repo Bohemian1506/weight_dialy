@@ -110,6 +110,8 @@ RSpec.describe "Settings", type: :request do
       end
 
       it "Android Health Connect 連携セクションを含む (= Stimulus controller 経由でレンダリング)" do
+        # PR #270 で見出しから絵文字 📱 を削除したが、`include` は部分文字列マッチのため、
+        # 絵文字あり/なし両対応で本アサーションはそのまま通過する。
         expect(response.body).to include("Android Health Connect 連携")
         expect(response.body).to include('data-controller="native-health"')
       end
