@@ -316,6 +316,10 @@
       <div class="sketch-small sketch-food-equivalent" style="text-align: center;">
         ≒ <%= food_equivalent[:name] %> <%= food_equivalent[:count] %> <%= food_equivalent[:unit] %>ぶん
       </div>
+      <%# Issue #234: 3 ステップ思想 ① (= 罪悪感を減らす) を補強する短いコピー。
+          「食べた予定」ではなく「動いた過去」への肯定として読ませる過去形語尾。
+          sketch-food-equivalent は付けない (= 固定短文で ellipsis 不要、行 310-312 と同じ判断)。 %>
+      <div class="sketch-small" style="text-align: center; margin-top: 4px;">食べても帳消し！</div>
     <% else %>
       <div class="sketch-small">今日はまだ記録なし</div>
     <% end %>
