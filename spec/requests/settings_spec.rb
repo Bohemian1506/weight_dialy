@@ -110,6 +110,8 @@ RSpec.describe "Settings", type: :request do
       end
 
       it "Android Health Connect 連携セクションを含む (= Stimulus controller 経由でレンダリング)" do
+        # PR #270 で見出しから絵文字 📱 を削除したが、`include` は部分文字列マッチのため、
+        # 絵文字あり/なし両対応で本アサーションはそのまま通過する。
         expect(response.body).to include("Android Health Connect 連携")
         expect(response.body).to include('data-controller="native-health"')
       end
@@ -293,7 +295,7 @@ RSpec.describe "Settings", type: :request do
         end
 
         it "「インストール手順を準備中」セクションを表示する (= Web Android user 向け新セクション、Issue #184)" do
-          # 新セクションのタイトル (= 「📱 Android Health Connect 連携」) は既存の Capacitor 検知時セクションと
+          # 新セクションのタイトル (= 「Android Health Connect 連携」) は既存の Capacitor 検知時セクションと
           # 同一文字列のため、新セクション固有の本文「インストール手順を準備中」で識別する。
           expect(response.body).to include("インストール手順を準備中")
         end
