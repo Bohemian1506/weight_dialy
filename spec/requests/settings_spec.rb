@@ -293,7 +293,7 @@ RSpec.describe "Settings", type: :request do
         end
 
         it "「インストール手順を準備中」セクションを表示する (= Web Android user 向け新セクション、Issue #184)" do
-          # 新セクションのタイトル (= 「📱 Android Health Connect 連携」) は既存の Capacitor 検知時セクションと
+          # 新セクションのタイトル (= 「Android Health Connect 連携」) は既存の Capacitor 検知時セクションと
           # 同一文字列のため、新セクション固有の本文「インストール手順を準備中」で識別する。
           expect(response.body).to include("インストール手順を準備中")
         end
