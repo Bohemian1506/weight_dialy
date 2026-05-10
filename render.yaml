@@ -28,10 +28,17 @@ services:
         fromDatabase:
           name: weight-dialy-db
           property: connectionString
-      # Free Tier 512MB RAM では worker 1 が安全 (worker 2 + threads 3 = 6 スレッドで OOM リスク)。
-      # Connection pool 合計 (worker 1 × 4 database × 3 threads = 12) も Free Postgres の 97 接続上限内に収まる。
+      # [5/10 OOM 対策 #280] Puma を single mode (= workers=0) に変更。
+      #
+      # 動機: 5/10 09:12 JST に本番インスタンスが OOM (= Free Tier 512MB 超過) でクラッシュ。
+      # 原因: workers=1 の cluster mode は master + worker の二重起動になり、Puma 自身が
+      #       起動ログで single mode への切り替えを推奨していた (= 警告原文は Issue #280 参照)。
+      # 解決: workers=0 (single mode) で master プロセス分のメモリを削減、worker 1 つのみで起動。
+      # 安全: 並列性は threads (RAILS_MAX_THREADS=3、puma.rb のデフォルト) で維持されるため性能影響なし。
+      #       Connection pool 合計 = 1 process × 3 threads × 4 DB config (= primary/cache/queue/cable)
+      #       = max 12 で、Free Postgres の 97 接続上限に余裕で収まる。
       - key: WEB_CONCURRENCY
-        value: "1"
+        value: "0"
       # Solid Queue を Puma プロセス内に同居させる (= 別 worker service を契約しない、Free Tier 制約)。
       # config/puma.rb の `plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]` を有効化する。
       - key: SOLID_QUEUE_IN_PUMA
