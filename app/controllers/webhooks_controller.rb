@@ -17,16 +17,21 @@ class WebhooksController < ActionController::API
     record_delivery!(status: "success", accepted_count: accepted)
     render json: { accepted: accepted }, status: :ok
   rescue JSON::ParserError => e
-    Rails.logger.warn("[WebhooksController] JSON parse error: #{e.message.truncate(120)}")
+    # truncate(2000): 真因即発見のための余裕値。詳細根拠は #288 / app/services/calorie_advice_service.rb 参照。
+    Rails.logger.warn("[WebhooksController] JSON parse error: #{e.message.truncate(2000)}")
     record_delivery!(status: "invalid", accepted_count: 0, error_message: I18n.t("webhook.errors.json_parse_error"))
     render json: { error: "Invalid payload" }, status: :unprocessable_content
   rescue WebhookHealthDataIngestService::InvalidPayload => e
+    # truncate(120): 本箇所は DB の WebhookDelivery#error_message column に保存する用途
+    # (= ログ出力でなく管理画面表示用) のため、ログ用 truncate(2000) ルール (= #288) は非適用。
+    # column のサイズ制約 + 表示行長を考慮した既存値を維持。
     record_delivery!(status: "invalid", accepted_count: 0, error_message: e.message.truncate(120))
     render json: { error: "Invalid payload" }, status: :unprocessable_content
   rescue ActiveRecord::RecordInvalid => e
     # 個々のレコードのバリデーション違反 (負数 / 不正な日付等) を 500 ではなく 422 + 監査ログで返す。
     # rails-implementer の意図 (全体失敗方式) を実装まで貫徹するため。
-    Rails.logger.warn("[WebhooksController] RecordInvalid: #{e.message.truncate(120)}")
+    # truncate(2000): 真因即発見のための余裕値。詳細根拠は #288 / app/services/calorie_advice_service.rb 参照。
+    Rails.logger.warn("[WebhooksController] RecordInvalid: #{e.message.truncate(2000)}")
     record_delivery!(status: "invalid", accepted_count: 0, error_message: I18n.t("webhook.errors.record_invalid"))
     render json: { error: "Invalid payload" }, status: :unprocessable_content
   end

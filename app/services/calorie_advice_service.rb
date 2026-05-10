@@ -88,7 +88,25 @@ class CalorieAdviceService
   rescue StandardError => e
     # API failure / timeout / rate limit / JSON parse error すべて広く受けてフォールバック。
     # 細粒度の制御 (= 例外別の retry 等) は polish フェーズで Issue 化して別途。
-    Rails.logger.warn("[CalorieAdviceService] AI failed (#{e.class}: #{e.message.truncate(120)}), falling back to static")
+    #
+    # [#288 truncate 上限を 2000 に引き上げ]
+    # 旧 truncate(120) は短すぎて真因が `invalid_request_erro...` で切れて見えず
+    # (= Issue #282 で truncate(120) で切れた実際のログ出力)、API クレジット枯渇時の
+    # "Your credit balance is too low..." を見逃して原因特定が遅れた教訓を反映。
+    #
+    # 値選定根拠 (= 2000 バイト):
+    # e.message は anthropic gem の APIStatusError#initialize で `{url:, status:, body:}.to_s`
+    # として展開される (= JSON 文字列ではなく Hash の to_s、errors.rb:159 参照)。url 約 40
+    # バイト + status 3 バイト + body 通常 200-500 バイト (= Issue #282 のログ実測 約 280
+    # バイト) = 合計 250-550 バイト程度。2000 はその 4 倍弱の余裕を持ちつつ、1 行ログとして
+    # grep / less で読める経験則の上限内。巨大 body が返ってきた場合 (= 想定外) のログ
+    # 肥大化ガードも兼ねる。
+    #
+    # セキュリティ注意:
+    # Anthropic API の body は通常エラー文 (`{type: "error", error: {type, message}}`) で
+    # API key や PII を含まない仕様。ただし gem アップグレード時は anthropic gem の
+    # errors.rb#initialize の body 展開ロジックを再確認すること (= 認証情報混入リスク)。
+    Rails.logger.warn("[CalorieAdviceService] AI failed (#{e.class}: #{e.message.truncate(2000)}), falling back to static")
     static_items = Static.call(estimated_kcal)
     Result.new(headline: HEADLINE, items: static_items, button_label: BUTTON_LABEL, ai_used: false)
   end
