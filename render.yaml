@@ -39,10 +39,27 @@ services:
       #       = max 12 で、Free Postgres の 97 接続上限に余裕で収まる。
       - key: WEB_CONCURRENCY
         value: "0"
-      # Solid Queue を Puma プロセス内に同居させる (= 別 worker service を契約しない、Free Tier 制約)。
-      # config/puma.rb の `plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]` を有効化する。
+      # [5/10 OOM 対策 #281 follow-up] SolidQueue Worker 群を停止 (= 4 プロセス分のメモリ削減)。
+      #
+      # 動機: Issue #281 の棚卸し調査で weight_dialy は SolidQueue を実質未使用と判明。
+      # 原因: app/jobs/ 独自 Job ゼロ + perform_later/perform_now/deliver_later 呼び出し 0 件
+      #       + recurring.yml は SolidQueue 自身の自己掃除 job 1 件のみ
+      #       (= 4 プロセス常駐が「掃除すべき空テーブルを掃除する」 ためだけの過剰起動)。
+      # 解決: "false" に変更して config/puma.rb の `plugin :solid_queue` を無効化し、
+      #       SolidQueue 内部プロセス群 (Supervisor / Worker / Dispatcher / Scheduler) の
+      #       4 プロセス常駐を停止。puma.rb 側の判定式は `== "true"` 値比較に修正済 (= Issue #284
+      #       で「if ENV["X"] は truthy 判定で値による OFF が効かない」 罠回避)。
+      # 安全: queue_adapter = :solid_queue は production.rb で残置するため、将来 enqueue が混入
+      #       した場合は DB に滞留 (= worker がいないので処理されない) して検知可能。
+      #       現状 enqueue ゼロのため、停止する自己掃除 job (= clear_solid_queue_finished_jobs)
+      #       にも掃除対象がなく実害なし。
+      # 復活: 将来 Job 機能が必要になったら以下 3 ステップ:
+      #       (1) 本値を "true" に戻して再デプロイ
+      #       (2) `SolidQueue::Job.count` で滞留 job を確認 (= 混入分が積まれていれば初回掃除負荷)
+      #       (3) `bin/rails db:migrate` で SolidQueue 関連の追加 migration がないか確認
+      #       (= gem / migration / db テーブルは残置なので「ENV 1 行で完結」 が基本)。
       - key: SOLID_QUEUE_IN_PUMA
-        value: "true"
+        value: "false"
 
 databases:
   - name: weight-dialy-db
