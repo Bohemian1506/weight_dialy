@@ -3,20 +3,20 @@
     {
       "warning_type": "Redirect",
       "warning_code": 18,
-      "fingerprint": "1fcbfcaa1a07bfb1209b6fa283ee1a78a4975670e6a9c02c46e6f46849f7b422",
+      "fingerprint": "9e6bfa71e38cf63b43a95ef212171609c4cd6562e697431703d2e3223a8df8e4",
       "check_name": "Redirect",
       "message": "Possible unprotected redirect",
       "file": "app/controllers/sessions_controller.rb",
-      "line": 28,
+      "line": 89,
       "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
-      "code": "redirect_to(\"com.weightdialy.app://oauth_callback?token=#{OneTimeLoginToken.issue!(:user => User.from_omniauth(request.env[\"omniauth.auth\"])).token}\", :allow_other_host => true)",
+      "code": "redirect_to(\"com.weightdialy.app://oauth_callback?token=#{OneTimeLoginToken.issue!(:user => user).token}\", :allow_other_host => true)",
       "render_path": null,
       "location": {
         "type": "method",
         "class": "SessionsController",
-        "method": "create"
+        "method": "bridge_to_capacitor"
       },
-      "user_input": "OneTimeLoginToken.issue!(:user => User.from_omniauth(request.env[\"omniauth.auth\"])).token",
+      "user_input": "OneTimeLoginToken.issue!(:user => user).token",
       "confidence": "Weak",
       "cwe_id": [
         601
