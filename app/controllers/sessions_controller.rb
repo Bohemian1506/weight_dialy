@@ -20,17 +20,8 @@ class SessionsController < ApplicationController
     capacitor_oauth = session.delete(:capacitor_oauth)
 
     if capacitor_oauth
-      # Capacitor 由来: Custom Tabs cookie storage に session を作っても WebView 側からは読めないため、
-      # one-time token を発行 → custom URL scheme で Capacitor アプリへ転送 → WebView 側 /auto_login で消費して session 確立、というブリッジを組む。
-      ott = OneTimeLoginToken.issue!(user: user)
-      # NOTE: ここでは establish_session_and_redirect_home を呼ばない (= session を張って root_path に飛ばすメソッドのため、
-      # Capacitor 経路では session 確立せず custom URL scheme へ転送する必要があり、共通化すると壊れる)。
-      reset_session # Custom Tabs 側 session に残骸を残さない (= ブリッジ完了後は WebView 側 session のみが正)
-      Rails.logger.info("OAuth login completed via Capacitor bridge (user_id=#{user.id})")
-      redirect_to "com.weightdialy.app://oauth_callback?token=#{ott.token}",
-                  allow_other_host: true
+      bridge_to_capacitor(user)
     else
-      # 通常 Web 経由: 従来通り Rails session を直接張る
       Rails.logger.info("OAuth login completed via web (user_id=#{user.id})")
       establish_session_and_redirect_home(user.id)
     end
@@ -82,5 +73,20 @@ class SessionsController < ApplicationController
     reset_session
     session[:user_id] = user_id
     redirect_to root_path, notice: "ログインしました"
+  end
+
+  # Capacitor 由来 OAuth callback の処理を create から切り出した private。
+  # Custom Tabs cookie storage は WebView 側から読めないため、one-time token を発行 → custom URL scheme で
+  # Capacitor アプリへ転送 → WebView 側 /auto_login で消費して session 確立、というブリッジを組む。
+  #
+  # ここでは establish_session_and_redirect_home を呼ばない (= session を張って root_path に飛ばすメソッドのため、
+  # Capacitor 経路では session 確立せず custom URL scheme へ転送する必要があり、共通化すると壊れる)。
+  # reset_session で Custom Tabs 側 session に残骸を残さない (= ブリッジ完了後は WebView 側 session のみが正)。
+  def bridge_to_capacitor(user)
+    ott = OneTimeLoginToken.issue!(user: user)
+    reset_session
+    Rails.logger.info("OAuth login completed via Capacitor bridge (user_id=#{user.id})")
+    redirect_to "com.weightdialy.app://oauth_callback?token=#{ott.token}",
+                allow_other_host: true
   end
 end
