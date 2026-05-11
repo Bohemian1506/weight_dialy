@@ -9,12 +9,15 @@ const HEALTH_READ_TYPES = ["steps", "distance", "flightsClimbed"]
 // 401 (= token 無効) → settings 誘導 / 5xx (= サーバー側一過性) → retry / 4xx 一般 (= 413/422) → 文言のみ (= 復帰導線が一意に決まらない)。
 // 想定外 status (= 404 / 429 等) は呼び出し側で `HTTP ${status}` に fallback。
 // **本 PR は 2 mode で確定 (= 3 種類目 mode は v1.2 以降の検討、必要時は `RECOVERY_ACTIONS` マップへ昇格検討)**。
-// retry 文言の「しばらく待ってから」 は連打抑制を兼ねる (= 学び `feedback_one_change_two_bugs.md` 1 修正 2 不具合の前提通り、
-// 5xx 連続失敗時のボタン非表示誘導は別 Issue #276 で対応、本 PR はカウンタ無し)。
 const RECOVERY_LABELS = {
   settings: "設定ページでトークンを再生成 →",
   retry: "しばらく待ってからもう一度試す →"
 }
+
+// Issue #276: 5xx 連続 2 回目以降の待機誘導文言 (= retry ボタン非表示 + 「待つ」 への正しい誘導)。
+// 1 回目 retry は通常の status 文言 + retry ボタン、2 回目以降は連打抑制のため本文言で確定上書き + ボタン非表示。
+const RETRY_EXHAUSTED_STATUS = "❌ サーバーが引き続き応答していません。しばらくしてから再度お試しください"
+const RETRY_THRESHOLD = 2
 
 // 5xx 系の文言は **ボタン文言「しばらく待ってからもう一度試す →」 と冗長になるため文末「再試行してください」 を削った** (= Issue #273 design-reviewer C-1)。
 // 1 つの UI イベント (= 5xx) に「待ってから」 表現が status 文言とボタン文言で 2 回出ると視覚的にうるさい。
@@ -33,6 +36,8 @@ export default class extends Controller {
   static values = { webhookToken: String }
 
   connect() {
+    // Issue #276: connect 時に retry カウンタを 0 リセット (= turbo navigation 跨ぎでも初期化される)。
+    this.retryCount = 0
     if (!this.isCapacitorNative()) {
       return
     }
@@ -289,6 +294,22 @@ export default class extends Controller {
         // パース失敗時は生 body の先頭 80 字でフォールバック。
         let bodyMessage = errorBody.slice(0, 80)
         try { bodyMessage = JSON.parse(errorBody).error ?? bodyMessage } catch (_) {}
+
+        const is5xx = [500, 502, 503].includes(response.status)
+
+        // Issue #276: 5xx 連続失敗時はカウンタを上げて 2 回目以降を「待つ」 誘導に切替。
+        // 4xx 系は単発で復帰導線が決まる (= 401/413/422) ためカウンタ対象外。
+        if (is5xx) {
+          this.retryCount++
+          if (this.retryCount >= RETRY_THRESHOLD) {
+            this.showStatus(RETRY_EXHAUSTED_STATUS)
+            if (this.hasRecoveryButtonTarget) {
+              this.recoveryButtonTarget.style.display = "none"
+            }
+            return
+          }
+        }
+
         // HTTP status 別の日本語フォールバック (Issue #138)。STATUS_MESSAGES にあれば優先、
         // なければ従来通り `HTTP ${status}: ${body 抜粋}` で開発者 dogfood 互換。
         const friendlyMessage = STATUS_MESSAGES[response.status]
@@ -300,13 +321,15 @@ export default class extends Controller {
         // 401 → settings 誘導 / 5xx → retry / その他 (= 413/422) → 文言のみ (= 復帰導線が一意に決まらない)。
         if (response.status === 401) {
           this.showRecoveryButton("settings")
-        } else if ([500, 502, 503].includes(response.status)) {
+        } else if (is5xx) {
           this.showRecoveryButton("retry")
         }
         return
       }
 
       const result = await response.json()
+      // Issue #276: 送信成功時に retry カウンタをリセット (= 次の 5xx で 1 回目挙動から再スタート)。
+      this.retryCount = 0
       this.showStatus(`✅ 送信完了 — ${result.accepted ?? 0} 件保存。ホームを更新します...`)
       // Turbo で home 画面を再描画して、保存されたデータを反映
       setTimeout(() => {
@@ -341,6 +364,8 @@ export default class extends Controller {
   recoveryAction(event) {
     const mode = event.currentTarget?.dataset?.mode
     if (mode === "settings") {
+      // Issue #276: settings 遷移時は retry カウンタをリセット (= token 再生成で文脈が変わるため新規セッション扱い)。
+      this.retryCount = 0
       if (typeof Turbo !== "undefined") {
         Turbo.visit("/settings")
       } else {
