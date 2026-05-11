@@ -16,7 +16,11 @@ const RECOVERY_LABELS = {
 
 // Issue #276: 5xx 連続 2 回目以降の待機誘導文言 (= retry ボタン非表示 + 「待つ」 への正しい誘導)。
 // 1 回目 retry は通常の status 文言 + retry ボタン、2 回目以降は連打抑制のため本文言で確定上書き + ボタン非表示。
-const RETRY_EXHAUSTED_STATUS = "❌ サーバーが引き続き応答していません。しばらくしてから再度お試しください"
+// 「数分後」: カジュアル層は「しばらく」 を 10 秒〜1 時間まで読み取り幅広い (= design-reviewer C-1)、目安を明示。
+// 「画面を下に引っ張ると再読込」: ボタン非表示後の代替導線を文言に統合 (= design-reviewer I-1、Capacitor アプリの Pull-to-Refresh 前提)。
+const RETRY_EXHAUSTED_STATUS = "❌ サーバーが応答できていません。数分後にもう一度お試しください（画面を下に引っ張ると再読込できます）"
+// RETRY_THRESHOLD = 2 の根拠: 連打 1 回まで許容 (= 一過性 5xx で 1 retry は妥当)、3 回以上は server 復旧待ちが筋。
+// **数値は仮置き、Day 14+ 実運用で再評価候補** (= 自己提唱の言い切り回避、memory `feedback_self_proposal_relativization.md` 集計慣習「仮置き明示」 慣行に従う)。
 const RETRY_THRESHOLD = 2
 
 // 5xx 系の文言は **ボタン文言「しばらく待ってからもう一度試す →」 と冗長になるため文末「再試行してください」 を削った** (= Issue #273 design-reviewer C-1)。
