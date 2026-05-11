@@ -22,12 +22,11 @@
 - **見積**: 中 (= Capacitor 周りの再現環境とハイブリッド OAuth 知識必須)
 - **前提テスト**: OAuth 流入経路の system spec が必要
 
-### 2. Capacitor OAuth ブリッジ整理 (`sessions_controller.rb`)
-- **場所**: `app/controllers/sessions_controller.rb` (= 65 行、`capacitor_start` + `auto_login` で肥大)
-- **現状**: Web OAuth と Capacitor OAuth で別経路、後者は one-time token で WebView に session を渡す
-- **ゴール**: 共通化 + 命名整理 (= `sessions#create` の入口を 1 本化)
-- **見積**: 中
-- **関連メモリ**: `feedback_hybrid_app_oauth_pattern.md` (= 設計確立経緯)
+### 2. ~~Capacitor OAuth ブリッジ整理 (`sessions_controller.rb`)~~ ✅ Day 13-4 完了
+- **場所**: `app/controllers/sessions_controller.rb`
+- **完了内容**: Day 13-4 で `bridge_to_capacitor(user)` private 抽出により `create` メソッド 30 行 → 19 行に縮小
+- **発見**: 起票時 (= Day 7-8) の「ゴール」 95% は Issue #228 等で達成済、残余地は限定的だった (= 学び 36 自己完結型サブカテゴリ時間軸越し応用観測)
+- **見送り判断**: logger メッセージ統一は line 78-80 の既存コメント「経路差を明示するため共通化しない」 と矛盾 → 同セッション内自己発火で格下げ
 
 ### 3. daisyUI → sketch-* 全置換
 - **場所**: `app/views/**/*.html.erb` 全般 (+ partials)
