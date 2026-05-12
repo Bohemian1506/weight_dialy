@@ -52,10 +52,9 @@
     <%# Includes all stylesheet files in app/assets/stylesheets (sketchy.css も含む) %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
 
-    <%# sketchy テーマで使う手書き風フォント。display=swap で FOUC を最小化 %>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <%# sketchy テーマで使う手書き風フォント (= Patrick Hand / Caveat / Kalam) は
+        public/fonts/ に woff2 同梱、sketchy.css の @font-face で local 配信 (= Issue #145 で完走)。
+        Capacitor アプリ初回起動時 FOUT 対策 + Web 版でもネットワーク待ち削減 + CSP font-src 'self' 化に向けた前提整理。 %>
 
     <%# JS 無効環境フォールバック: flash の opacity-0 を強制解除して永続不可視を防ぐ。
         HTML5 仕様上 <noscript><style> は <head> 内に置くのが正 (body 内は実装依存)。 %>
