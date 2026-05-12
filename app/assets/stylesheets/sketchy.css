@@ -394,3 +394,19 @@ body {
   .sketch-navbar-right { margin-top: 6px; }
 }
 
+
+/* Issue #314: 同期ボタン上の最終同期時刻表示 (= 「最終同期: N 時間前」)。
+   data-warning="true" (= 24h 以上未同期) で ⚠️ アイコン + 赤色強調。
+   data-warning="false" (= 24h 未満 / 未同期) は muted 色で目立たせない。
+   JS 側 (native_health_controller#updateLastSyncDisplay) が dataset.warning を更新する SSOT。 */
+.sketch-last-sync {
+  color: var(--muted);
+}
+.sketch-last-sync[data-warning="true"] {
+  color: var(--danger);
+  font-weight: 700;
+}
+.sketch-last-sync[data-warning="true"]::before {
+  content: "⚠️ ";
+  margin-right: 4px;
+}

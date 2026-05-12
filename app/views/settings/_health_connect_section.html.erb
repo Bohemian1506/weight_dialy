@@ -18,6 +18,15 @@
     0 歩のままの場合は、Health Connect アプリの「<strong>データとアクセス</strong>」 で書き込み設定をご確認ください。
   </p>
 
+  <%# Issue #314: 最終同期時刻表示 (= 「最終同期: N 時間前」)。24h 以上未同期で data-warning="true"
+      → sketchy.css で ⚠️ ヒント + 赤色強調。JS 側 updateLastSyncDisplay で localStorage 値を読んで textContent + dataset 更新。 %>
+  <p data-native-health-target="lastSyncDisplay"
+     data-warning="false"
+     class="sketch-small sketch-last-sync"
+     style="margin-bottom: 8px;">
+    最終同期: 未同期
+  </p>
+
   <p data-native-health-target="status" class="sketch-body-text" style="margin-bottom: 16px;">
     確認中...
   </p>
