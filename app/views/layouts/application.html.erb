@@ -82,7 +82,7 @@
     </header>
 
     <%# flash はトースト風に画面上部 fixed で重ねる (document flow から外れるため、表示/非表示で下のコンテンツがズレない)。
-        top offset は CSS 変数 --navbar-height (= 64px) + 余白 16px で計算 (= Issue #174 B)。
+        top offset は CSS 変数 --navbar-height (= 基準 64px、iPhone PWA は env(safe-area-inset-top) 連動で拡大) + 余白 16px で計算 (= Issue #174 B / #190)。
         --navbar-height は :root で定義済み (sketchy.css)。参照側のみ変数を使い、navbar 自体の高さは
         padding/content/border で決まる (= slim 化挙動を壊さないため変数を navbar 本体には適用しない)。
         FOUC 対策: 初期 opacity-0 + Stimulus connect() で fade-in。JS 無効フォールバックは <head> の <noscript><style> 参照。

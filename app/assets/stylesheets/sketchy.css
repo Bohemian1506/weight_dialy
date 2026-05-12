@@ -27,7 +27,7 @@
      navbar 高さを変更した際に参照箇所を一括更新できる (= Issue #174 B)。
      基準値 64px = padding 8px×2 + ボタン約 46px + border-bottom 2px (= Issue #49 slim 化後の実測値)。
      iPhone PWA 端末では env(safe-area-inset-top) が 8px を超える分だけ追加で拡大 (= Issue #190)。 */
-  --navbar-height: calc(64px + max(0px, env(safe-area-inset-top) - 8px));
+  --navbar-height: calc(64px + max(0px, env(safe-area-inset-top, 0px) - 8px));
 }
 
 /* body 全体を紙質背景に。layout から bg-base-200 は外す前提。
@@ -56,8 +56,10 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   /* iPhone PWA / Dynamic Island 端末で padding-top を env(safe-area-inset-top) に拡大、ノッチ侵入回避 (= Issue #190)。
      Android Chrome / Desktop は env = 0px のため max(8px, 0px) = 8px で従来挙動維持。
+     env(..., 0px) 第 2 引数は古い Chrome (< 69) / IE 等の未サポート環境向け fallback。
+     padding-bottom 8px は固定 (= 画面下端の safe-area-inset-bottom は navbar の下端には発生しない)。
      --navbar-height も連動して env 値ぶん拡大するため、flash toast の top-offset も追従する。 */
-  padding: max(8px, env(safe-area-inset-top)) 20px 8px; gap: 12px;
+  padding: max(8px, env(safe-area-inset-top, 0px)) 20px 8px; gap: 12px;
   border-bottom: 2px solid var(--ink);
   background: var(--paper);
   position: sticky; top: 0; z-index: 30;
