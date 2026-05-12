@@ -154,6 +154,8 @@ RSpec.describe "Sessions", type: :request do
         expect(flash[:notice]).to eq("ログインしました")
       end
 
+      # auto_login は成功時 302 redirect を返すため、302 自体のキャッシュ防止ではなく
+      # 「万一ブラウザが URL をキャッシュした場合の token 消費予防」 が意図。
       it "sets Cache-Control: no-store to prevent token URL caching" do
         get auto_login_path(token: token_record.token)
         expect(response.headers["Cache-Control"]).to eq("no-store")

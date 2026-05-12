@@ -15,4 +15,4 @@ production:
     schedule: every hour at minute 12
   cleanup_one_time_login_tokens:
     class: CleanupOneTimeLoginTokensJob
-    schedule: every day at 4am
+    schedule: at 4am every day

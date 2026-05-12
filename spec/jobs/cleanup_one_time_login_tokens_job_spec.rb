@@ -1,12 +1,13 @@
 require "rails_helper"
 
 RSpec.describe CleanupOneTimeLoginTokensJob, type: :job do
-  subject(:job) { described_class.new }
+  let(:job) { described_class.new }
 
   # GC 閾値: expires_at < 1.day.ago のレコードを削除する。
   # 未使用 / 使用済みは問わない (= 期限が 1 日以上前なら保持不要)。
 
   describe "#perform" do
+    around { |example| freeze_time { example.run } }
     let(:user) { create(:user) }
 
     context "when expires_at is older than 1 day ago (= GC 対象)" do
