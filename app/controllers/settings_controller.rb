@@ -13,6 +13,7 @@ class SettingsController < ApplicationController
                                       .order(received_at: :desc)
                                       .limit(WEBHOOK_HISTORY_LIMIT)
     @show_android_app_promo = PlatformDetectorService.web_android?(request)
+    @is_capacitor = PlatformDetectorService.capacitor?(request)
   end
 
   def regenerate_token

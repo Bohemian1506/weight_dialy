@@ -17,4 +17,10 @@ class PlatformDetectorService
     ua = request.user_agent.to_s
     ua.match?(/Android/) && !ua.match?(/WeightDialyCapacitor/)
   end
+
+  # Capacitor アプリ起動の判定 (= overrideUserAgent に "WeightDialyCapacitor" 付与済)。
+  # Issue #144 (= Settings の Health Connect セクションを Capacitor 時のみ最上部に出し分け) で使用。
+  def self.capacitor?(request)
+    request.user_agent.to_s.match?(/WeightDialyCapacitor/)
+  end
 end

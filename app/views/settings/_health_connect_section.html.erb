@@ -1,0 +1,49 @@
+<%# Health Connect 連携 (Android のみ、Capacitor 検知で動的表示。Web 版では非表示のまま)。
+    Issue #144 で本 partial を抽出 → Capacitor 検知時は settings/show.html.erb 冒頭に、
+    非 Capacitor (= Web 版 / iOS) では従来位置 (= ポリシーリンクの直前) に出し分ける。 %>
+<div data-controller="native-health"
+     data-native-health-webhook-token-value="<%= current_user.webhook_token %>"
+     class="sketch-box"
+     style="display: none; margin-bottom: 24px;">
+  <h2 class="sketch-h" style="margin-bottom: 8px;">Android Health Connect 連携</h2>
+  <p class="sketch-small" style="margin-bottom: 12px;">
+    Android アプリ版で Health Connect 経由で歩数 / 距離 / 階段を自動同期します。
+  </p>
+
+  <%# Issue #218: 同期前事前ガイダンス。Health Connect 自体にデータが届いていないと同期成功 (= 200 OK)
+      でも 0 歩で保存される事故 (= 局長実体験由来、PR #206 で同期後警告と二段構え) を未然に防ぐ。
+      sketch-note クラス (= sketchy.css、border-left + paper-2 背景) で「補足」 視覚明示。 %>
+  <p class="sketch-small sketch-note" style="margin-bottom: 12px;">
+    ※ 歩数アプリ (<strong>Google Fit</strong> や <strong>Samsung Health</strong> など) から Health Connect へデータが渡る設定になっているとスムーズに同期できます。
+    0 歩のままの場合は、Health Connect アプリの「<strong>データとアクセス</strong>」 で書き込み設定をご確認ください。
+  </p>
+
+  <p data-native-health-target="status" class="sketch-body-text" style="margin-bottom: 16px;">
+    確認中...
+  </p>
+  <button data-action="click->native-health#requestPermission"
+          data-native-health-target="requestButton"
+          class="sketch-btn"
+          style="display: none; margin-right: 8px;">
+    歩数を取得する →
+  </button>
+  <button data-action="click->native-health#sync"
+          data-native-health-target="syncButton"
+          class="sketch-btn"
+          style="display: none;">
+    📡 同期する
+  </button>
+
+  <%# Issue #273 で 2 mode 化 (settings / retry)。401 → settings 誘導、5xx → retry。
+      **本 PR は 2 mode で確定 (= 3 種類目 mode は v1.2 以降の検討)**。
+      初期値は data-mode="settings" (= 401 用)、JS 側が retry 時に textContent + data-mode を上書きする (= 文言 SSOT は JS の RECOVERY_LABELS、本 HTML は SSR 用ダミー)。
+      連打抑制: sync() 冒頭の display:none 戻し処理で 1 クリック目に消えるため、recoveryButton 自体の disabled 制御は不要。
+      2 回目以降の連続失敗は JS 側 retryCount + RETRY_THRESHOLD で本ボタンを非表示に切り替える (= Issue #276)。 %>
+  <button data-action="click->native-health#recoveryAction"
+          data-native-health-target="recoveryButton"
+          data-mode="settings"
+          class="sketch-btn"
+          style="display: none; margin-top: 12px;">
+    設定ページでトークンを再生成 →
+  </button>
+</div>
