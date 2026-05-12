@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- weight_dialy ブランドカラー (= sketchy theme との一貫性、Web 版 CSS 変数 --paper と完全に同色)。
-         splash screen 背景に使用、Capacitor デフォルトの「Android ロボット + 水色背景」を置き換える (= Issue #128)。 -->
+    <!-- weight_dialy ブランドカラー (= sketchy theme との一貫性、Web 版 CSS 変数 paper と完全に同色)。
+         splash screen 背景に使用、Capacitor デフォルトの「Android ロボット + 水色背景」を置き換える (= Issue #128)。
+         注: XML コメント仕様で "double dash" 文字列は禁止のため CSS の "--" プレフィックスは記述から除外している。 -->
     <color name="colorSplashBackground">#fbf8f1</color>
 </resources>
