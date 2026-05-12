@@ -4,9 +4,47 @@
  * 大枠のみ提供 (テーマ変数 / body / navbar / box / btn / toast / 文字サイズ)。
  * 個別画面 (ダッシュボードチャート等) のクラスは、機能実装時にこのファイルへ追記する。
  *
- * フォント (Patrick Hand / Caveat / Kalam) は layout の <head> で <link> 読込済み前提。
- * → 将来 CSP を有効化する場合は font-src に fonts.gstatic.com、style-src に fonts.googleapis.com を許可リスト追加が必要。
+ * フォント (Patrick Hand / Caveat / Kalam) は public/fonts/ に woff2 同梱、
+ * 下記 @font-face で local 配信 (= Issue #145 Capacitor 初回起動時 FOUT 対策、
+ * かつ Web 版でもネットワーク待ち削減)。
+ * → CSP を有効化する場合は font-src 'self' のみで足り、fonts.gstatic.com の許可は不要。
  */
+
+/* ローカル同梱フォント (= Google Fonts latin subset 相当)。日本語は system-ui fallback。
+   Caveat は variable font (= 単一 woff2 で 500/700 両対応)、Kalam は static (= weight 別)、
+   Patrick Hand は 400 のみ。unicode-range は Google Fonts 配信の latin subset と同一範囲。 */
+@font-face {
+  font-family: 'Caveat';
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url('/fonts/caveat-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Kalam';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/kalam-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Kalam';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/kalam-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Patrick Hand';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/patrick-hand-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 :root {
   --ink: #1a1a1a;
