@@ -2,7 +2,7 @@
 
 > 元は README.md の 12 章だったが、Health Connect 周辺の前提条件・トラブルシューティング・教材性メモが揃って約 130 行になったため `docs/android-install.md` に分離 (= deploy-render.md と同じ方針、必要な人だけ参照する技術詳細書)。
 
-> **配布状況**: v1.0 = `v0.1.0` 以降の APK を [GitHub Releases (最新)](https://github.com/Bohemian1506/weight_dialy/releases/latest) から sideload 配布中 (= Issue #126 完走、2026-05-12 開始)。**debug 署名** + dogfood 用途のため、初回インストール時は Play Protect の「未確認のアプリ」警告 + 「不明な提供元のアプリ」許可ダイアログが出ます (= 詳細は §3 Step 2)。
+> **配布状況**: v1.0 = `v0.1.0` 以降の APK を [GitHub Releases (最新)](https://github.com/Bohemian1506/weight_dialy/releases/latest) から sideload 配布中 (= Issue #126 完走、2026-05-12 開始)。**debug 署名** + dogfood 用途のため、初回インストール時は Play Protect の「未確認のアプリ」警告 + 提供元を許可するダイアログが出ます (= 詳細は [§3 Step 2](#step-2-weight-daily-アプリのインストール))。
 
 ## 1. 全体像 (= データの流れ)
 
@@ -41,8 +41,9 @@
 ### Step 2: weight daily アプリのインストール
 
 1. [GitHub Releases (最新)](https://github.com/Bohemian1506/weight_dialy/releases/latest) を Android 端末のブラウザで開き、Assets 内の `weight-dialy-v*-debug.apk` をタップしてダウンロード (= PC で DL → USB / Google Drive 経由でも可)
-2. Android 設定 → セキュリティ → **「不明な提供元のアプリ」許可** (= ダウンロードしたブラウザに対して許可するダイアログが出る、機種により「特別なアプリアクセス」配下)
-3. APK をタップしてインストール → Play Protect の「未確認のアプリ」警告は **「許可」** をタップ (= debug 署名のため警告は正常、悪意のあるアプリではない)
+2. APK をタップしてインストール → **「このアプリのインストールを許可しますか」 ダイアログ** が出たら「設定」 → **「この提供元を許可」 をオン** (= Android 8 以降の大半の機種、ダウンロードに使ったブラウザに対して許可)
+   - ダイアログが出ない場合: Android 設定 → セキュリティ → **「不明なアプリのインストール」** または **「不明なソース」** → ダウンロードに使ったブラウザを許可 (= 機種により「特別なアプリアクセス」配下、表記は Android バージョン依存)
+3. インストール画面に戻る → Play Protect の **「未確認のアプリ」 警告** は **「許可」** をタップ (= debug 署名のため警告は正常、悪意のあるアプリではない)
 
 ### Step 3: weight daily アプリで Google ログイン + Health Connect 連携
 
