@@ -48,3 +48,6 @@
 # Node (npm install output)
 /node_modules
 npm-debug.log*
+
+# Claude Code ローカル状態管理ファイル (= PR #314 で混入を機に追加)
+.claude/scheduled_tasks.lock
