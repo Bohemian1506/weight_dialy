@@ -37,6 +37,20 @@ RSpec.describe "Sessions", type: :request do
     end
   end
 
+  describe "Set-Cookie ヘッダの属性 (= session_store.rb の expire_after 反映確認)" do
+    # Rails の session_store 設定 (= config/initializers/session_store.rb) が
+    # 実際に Set-Cookie ヘッダに反映されることを担保する regression spec。
+    # 将来 expire_after が誤って削除された場合に検知する (= Issue #320 由来)。
+    before { mock_google_oauth2(uid: "uid_1", email: "a@example.com", name: "A") }
+
+    it "issues a persistent cookie with Max-Age or Expires (= ブラウザセッション cookie でないことを確認)" do
+      get auth_callback_path(provider: "google_oauth2")
+      set_cookie = response.headers["Set-Cookie"]
+      expect(set_cookie).to include("_weight_dialy_session")
+      expect(set_cookie).to match(/max-age=|expires=/i)
+    end
+  end
+
   describe "DELETE /logout" do
     # session を直接 set するために logged-in 状態を作る
     let(:user) { create(:user) }
