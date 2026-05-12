@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
   #
   # /auth/ パス + /auto_login は早期リターンで modern check 完全スキップ (= OAuth Custom Tabs 経路 + Phase 3 token 経路の保険)。
   #
-  # 旧「保険 2: Mobile Chrome bypass」は PR #175 で削除 (= Phase 3 deep link 完成で OAuth Custom Tabs から戻った後の遷移問題が解消、
+  # 旧「保険 2: Mobile Chrome bypass」は PR #175 で削除 (= Phase 3 deep link 完成 = PR #149-#154 で custom URL scheme + one-time token 完成 → OAuth Custom Tabs から戻った後の遷移問題が解消、
   # Web 版モバイル Chrome を bypass しない本来挙動に復帰)。
   allow_browser versions: :modern,
                 if: -> {

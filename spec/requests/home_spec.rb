@@ -327,8 +327,7 @@ RSpec.describe "Home", type: :request do
       end
     end
 
-    # Mobile Chrome は allow_browser :modern を通常経路で通過する (= Chrome 120 は :modern 要件を満たす)
-    # 旧「保険 2 bypass」は PR #175 で削除済み。このテストは通常の modern check 経路を確認する。
+    # 旧「保険 2: Mobile Chrome bypass」は PR #175 で削除済 → Chrome 120 は :modern 要件を満たすため通常通過。
     context "Mobile Chrome UA (= Android Chrome 経由)" do
       let(:mobile_chrome_ua) do
         "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 " \
