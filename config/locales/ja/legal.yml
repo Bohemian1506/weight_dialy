@@ -1,6 +1,12 @@
 # legal 画面 (= privacy + terms) の i18n 抽出 (= Issue #325 パイロット PR)。
-# key 命名規約 = <view dir>.<view file>.<section_key>.<item> 形式。
-# section_key は番号ではなく意味的キー (= data_collection / purpose / ...) で命名、view 側で見出しに "1. " 等を含めて表示。
+#
+# key 命名規約 (= 4-5 階層可変、後続テンプレ):
+#   - 基本 4 階層: <view dir>.<view file>.<key>.<item>
+#   - 章立て構造あり (= 番号付き本文セクション群) は 5 階層: <view dir>.<view file>.sections.<section_key>.<item>
+#     → 章メタ (= title / h1 / intro / last_updated) と本文セクション (= sections.xxx) を概念分離するため中間ノード sections: を挟む
+#   - section_key は意味的キー (= data_collection / purpose / ...) で命名、番号ではない
+#   - 番号 ("1. ") は yml 値側に含める (= view 側で番号付与する案も後続検討候補、3 者レビュー strategic 論点 2)
+#     → 規約系画面は順序変更めったに起きないため案 A (= yml 値側) で十分、後続 home / settings で章立て出てきた時に再判断
 ja:
   legal:
     privacy:

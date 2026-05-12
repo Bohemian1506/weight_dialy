@@ -106,6 +106,7 @@
   <div class="sketch-box" style="margin-bottom: 20px;">
     <h2 class="sketch-h" style="margin-bottom: 8px;"><%= t(".sections.revision_history.title") %></h2>
     <ul class="sketch-small" style="color: var(--ink-2); margin: 0; padding-left: 1.2em; line-height: 1.6;">
+      <%# Rails i18n は yml の hash キーを Symbol で返すため item[:date] / item[:description] でアクセス (= YAML.safe_load の String キー挙動と異なる、後続実装者向けメモ)。 %>
       <% t(".sections.revision_history.items").each do |item| %>
         <li><strong><%= item[:date] %></strong> — <%= item[:description] %></li>
       <% end %>

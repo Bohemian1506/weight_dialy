@@ -42,9 +42,8 @@ module App
     # 将来海外展開時は per-user locale 切替を検討、まずは MVP として ja 固定。
     config.i18n.default_locale = :ja
 
-    # config/locales/ 配下を階層含めて自動読み込み (= Issue #325、i18n 抽出パイロット PR で導入)。
-    # view ディレクトリ単位で yml を分割する規約 (= config/locales/ja/<view_dir>.yml) を採用するための前提設定。
-    config.i18n.load_path += Dir[Rails.root.join("config/locales/**/*.yml")]
+    # i18n の階層下 yml 自動読み込みは Rails 8 デフォルト (= Engine config の paths.add "config/locales", glob: "**/*.{rb,yml}")
+    # で既に config/locales/**/*.yml を読み込んでいるため、明示的な load_path 追加は不要 (= 重複ロード回避、Issue #325 PR #326 検証却下経緯)。
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Don't generate system test files.

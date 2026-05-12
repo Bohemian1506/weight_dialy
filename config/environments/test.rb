@@ -43,7 +43,9 @@ Rails.application.configure do
   config.active_support.deprecation = :stderr
 
   # Raises error for missing translations.
-  # config.i18n.raise_on_missing_translations = true
+  # i18n 抽出パイロット PR (= Issue #325 PR #326) 以降、t('.xxx') の typo / key 欠落を spec で
+  # 即検出する体制にする (= 後続 PR で about / settings / home を i18n 化する際の typo regression 防止)。
+  config.i18n.raise_on_missing_translations = true
 
   # Annotate rendered view with file names.
   # config.action_view.annotate_rendered_view_with_filenames = true
