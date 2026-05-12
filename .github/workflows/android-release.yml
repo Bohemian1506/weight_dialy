@@ -31,6 +31,9 @@ jobs:
       - name: Install npm dependencies (= Capacitor / @capgo plugins)
         run: npm ci
 
+      - name: Sync Capacitor Android (= node_modules → android/ プロジェクト同期、capacitor.settings.gradle が解決可能になる)
+        run: npx cap sync android
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -74,12 +77,14 @@ jobs:
           body: |
             ## weight_dialy ${{ steps.tag.outputs.name }} — Android sideload APK
 
-            ⚠️ **debug 署名 + sideload 配布**。Google Play 経由ではないため、初回インストール時は「不明なアプリのインストール」許可が必要です。
+            ⚠️ **debug 署名 + sideload 配布**。Google Play 経由ではないため、初回インストール時は「提供元不明のアプリ」許可ダイアログ + Play Protect 警告が出ます。
+
+            > **インストールが難しい / Android 以外の方**: [Web 版](https://weight-dialy.onrender.com) からも全機能をお試しいただけます。
 
             ### インストール手順
-            1. 下の Assets から `weight-dialy-${{ steps.tag.outputs.name }}-debug.apk` をダウンロード
-            2. 端末の 設定 → アプリと通知 → 特別なアプリアクセス → 「不明なアプリのインストール」で利用ブラウザに許可
-            3. APK タップ → インストール (= Play Protect の「未確認のアプリ」警告は「許可」)
+            1. 下の Assets から `weight-dialy-${{ steps.tag.outputs.name }}-debug.apk` をダウンロード (例: `weight-dialy-v0.1.0-debug.apk`)
+            2. ダウンロードした APK をタップ → 「このアプリの提供元を許可しますか?」ダイアログが出たら **「許可」** をタップ (= ダイアログが出ない機種は 設定 → アプリ → 特別なアプリアクセス → 提供元不明のアプリ → 利用したブラウザを許可)
+            3. インストール → Play Protect の「未確認のアプリ」警告は **「許可」** をタップ (= debug 署名のため正常、スクール公開用の dogfood 版です)
             4. 初回起動 → Health Connect の権限ダイアログを許可
             5. アプリ内 Settings から Webhook トークンを設定 (= [Web 版](https://weight-dialy.onrender.com) で取得)
 
