@@ -33,6 +33,7 @@ class SessionsController < ApplicationController
   # Capacitor WebView 側の入口。custom scheme で受け取った one-time token を消費し、WebView cookie storage に session を確立する。
   # token は単独で完結し外部から漏れても 30 秒 + 1 回限りで失効するが、念のため reset_session で session fixation を排除。
   def auto_login
+    response.cache_control[:no_store] = true # Turbo Drive prefetch 予防 (= 将来 link_to が増えた時に token を意図せず消費されないように)
     token = OneTimeLoginToken.consume!(token: params[:token].to_s)
     if token.nil?
       Rails.logger.warn("auto_login rejected: invalid/expired/used token")
