@@ -153,6 +153,11 @@ RSpec.describe "Sessions", type: :request do
         get auto_login_path(token: token_record.token)
         expect(flash[:notice]).to eq("ログインしました")
       end
+
+      it "sets Cache-Control: no-store to prevent token URL caching" do
+        get auto_login_path(token: token_record.token)
+        expect(response.headers["Cache-Control"]).to eq("no-store")
+      end
     end
 
     context "with an expired token" do
