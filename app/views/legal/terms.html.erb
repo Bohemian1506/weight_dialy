@@ -1,67 +1,66 @@
-<% content_for :title, "利用規約 — weight daily." %>
+<% content_for :title, t(".title") %>
 
 <div class="sketch-page-narrow" style="max-width: 40rem; padding-left: 16px; padding-right: 16px;">
 
-  <h1 class="sketch-hh" style="margin-bottom: 4px;">利用規約</h1>
-  <p class="sketch-small" style="margin-bottom: 16px;">最終更新: 2026年5月5日</p>
+  <h1 class="sketch-hh" style="margin-bottom: 4px;"><%= t(".h1") %></h1>
+  <p class="sketch-small" style="margin-bottom: 16px;"><%= t(".last_updated") %></p>
 
   <p class="sketch-body-text" style="margin-bottom: 24px;">
-    本利用規約 (以下「本規約」) は、weight daily (以下「本サービス」) の利用条件を定めるものです。本サービスを利用する場合、本規約に同意したものとみなします。
+    <%= t(".intro") %>
   </p>
 
   <div class="sketch-box" style="margin-bottom: 20px;">
-    <h2 class="sketch-h" style="margin-bottom: 8px;">1. サービス概要</h2>
+    <h2 class="sketch-h" style="margin-bottom: 8px;"><%= t(".sections.overview.title") %></h2>
     <p class="sketch-body-text">
-      本サービスは、ユーザーが日常生活で行う身体活動 (歩く、階段を選ぶなど) を可視化し、行動継続を支援する個人開発の Web アプリケーションです。
+      <%= t(".sections.overview.body") %>
     </p>
   </div>
 
   <div class="sketch-box" style="margin-bottom: 20px;">
-    <h2 class="sketch-h" style="margin-bottom: 8px;">2. 禁止事項</h2>
-    <p class="sketch-body-text" style="margin-bottom: 8px;">ユーザーは、本サービスの利用にあたり、以下の行為を行ってはなりません。</p>
+    <h2 class="sketch-h" style="margin-bottom: 8px;"><%= t(".sections.prohibitions.title") %></h2>
+    <p class="sketch-body-text" style="margin-bottom: 8px;"><%= t(".sections.prohibitions.lead") %></p>
     <ul class="sketch-body-text" style="padding-left: 1.5em;">
-      <li>他人のアカウントへの不正アクセスまたはなりすまし</li>
-      <li>歩数等のデータを偽装する目的での不正な API リクエスト</li>
-      <li>法令または公序良俗に反する行為</li>
-      <li>本サービスの運営を妨害する行為</li>
+      <% t(".sections.prohibitions.items").each do |item| %>
+        <li><%= item %></li>
+      <% end %>
     </ul>
   </div>
 
   <div class="sketch-box" style="margin-bottom: 20px;">
-    <h2 class="sketch-h" style="margin-bottom: 8px;">3. 免責事項</h2>
+    <h2 class="sketch-h" style="margin-bottom: 8px;"><%= t(".sections.disclaimer.title") %></h2>
     <p class="sketch-body-text" style="margin-bottom: 8px;">
-      本サービスは、健康増進および行動の可視化を目的とした参考情報を提供するものであり、医療的助言、診断、治療を提供するものではありません。健康に関する判断は、必ず医療従事者にご相談ください。
+      <%= t(".sections.disclaimer.body_a") %>
     </p>
     <p class="sketch-body-text">
-      本サービスの利用によって生じたいかなる損害についても、運営者は責任を負いません。ただし、運営者の故意又は重過失による場合を除きます。
-    </p>
-  </div>
-
-  <div class="sketch-box" style="margin-bottom: 20px;">
-    <h2 class="sketch-h" style="margin-bottom: 8px;">4. サービス変更・終了</h2>
-    <p class="sketch-body-text">
-      本サービスは個人によって運営されており、予告なく機能の変更、停止、または終了を行う場合があります。
+      <%= t(".sections.disclaimer.body_b") %>
     </p>
   </div>
 
   <div class="sketch-box" style="margin-bottom: 20px;">
-    <h2 class="sketch-h" style="margin-bottom: 8px;">5. 規約の変更</h2>
+    <h2 class="sketch-h" style="margin-bottom: 8px;"><%= t(".sections.change_termination.title") %></h2>
     <p class="sketch-body-text">
-      本規約の内容を変更する場合があります。変更後の規約は、本ページに掲載した時点から効力を生じます。
+      <%= t(".sections.change_termination.body") %>
     </p>
   </div>
 
   <div class="sketch-box" style="margin-bottom: 20px;">
-    <h2 class="sketch-h" style="margin-bottom: 8px;">6. 準拠法</h2>
+    <h2 class="sketch-h" style="margin-bottom: 8px;"><%= t(".sections.amendment.title") %></h2>
     <p class="sketch-body-text">
-      本規約の解釈および適用は、日本法に準拠します。
+      <%= t(".sections.amendment.body") %>
     </p>
   </div>
 
   <div class="sketch-box" style="margin-bottom: 20px;">
-    <h2 class="sketch-h" style="margin-bottom: 8px;">7. お問い合わせ</h2>
+    <h2 class="sketch-h" style="margin-bottom: 8px;"><%= t(".sections.governing_law.title") %></h2>
     <p class="sketch-body-text">
-      本規約に関するお問い合わせは、以下のメールアドレスまでご連絡ください。
+      <%= t(".sections.governing_law.body") %>
+    </p>
+  </div>
+
+  <div class="sketch-box" style="margin-bottom: 20px;">
+    <h2 class="sketch-h" style="margin-bottom: 8px;"><%= t(".sections.contact.title") %></h2>
+    <p class="sketch-body-text">
+      <%= t(".sections.contact.body") %>
     </p>
     <p class="sketch-body-text" style="margin-top: 8px;">
       <%= mail_to "weightdaily3@gmail.com", "weightdaily3@gmail.com", style: "color: var(--ink); text-decoration: underline;" %>
@@ -73,10 +72,11 @@
       (= 「table 使いたい衝動は件数でなく軸数で殺す」、Issue #178 本文に判断ルール追記済)。
       他セクションと整合させるため「8. 改訂履歴」 として番号付き昇格 + sketch-box 包み。 %>
   <div class="sketch-box" style="margin-bottom: 20px;">
-    <h2 class="sketch-h" style="margin-bottom: 8px;">8. 改訂履歴</h2>
+    <h2 class="sketch-h" style="margin-bottom: 8px;"><%= t(".sections.revision_history.title") %></h2>
     <ul class="sketch-small" style="color: var(--ink-2); margin: 0; padding-left: 1.2em; line-height: 1.6;">
-      <li><strong>2026-05-05</strong> — 初版公開</li>
-      <li><strong>2026-05-05</strong> — 事業者表示追加・消費者契約法対応</li>
+      <% t(".sections.revision_history.items").each do |item| %>
+        <li><strong><%= item[:date] %></strong> — <%= item[:description] %></li>
+      <% end %>
     </ul>
   </div>
 

@@ -41,6 +41,10 @@ module App
     # 主な効果: time_ago_in_words が「約 5 分」表記に / number_with_delimiter のロケール対応 / I18n.t の :ja 翻訳。
     # 将来海外展開時は per-user locale 切替を検討、まずは MVP として ja 固定。
     config.i18n.default_locale = :ja
+
+    # config/locales/ 配下を階層含めて自動読み込み (= Issue #325、i18n 抽出パイロット PR で導入)。
+    # view ディレクトリ単位で yml を分割する規約 (= config/locales/ja/<view_dir>.yml) を採用するための前提設定。
+    config.i18n.load_path += Dir[Rails.root.join("config/locales/**/*.yml")]
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Don't generate system test files.
