@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: read  # gh pr list で What's Changed 生成に必要
 
     steps:
       - name: Checkout code
@@ -60,16 +61,17 @@ jobs:
             echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Generate "What's Changed" (= 最新 5 PR、自動 changelog の長大化を防ぐ)
+      - name: Generate "What's Changed" (= 最新 PR、自動 changelog の長大化を防ぐ)
         id: changelog
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_LIMIT: '5'  # 件数調整はここで (= 後輩がワンタッチで件数変更できるよう抽出)
         run: |
           {
             echo 'changelog<<CHANGELOG_EOF'
-            gh pr list --state merged --base main --limit 5 \
-              --json number,title,author \
-              --jq '.[] | "* \(.title) by @\(.author.login) in #\(.number)"'
+            gh pr list --state merged --base main --limit "$PR_LIMIT" \
+              --json number,title \
+              --jq '.[] | "* \(.title) (#\(.number))"'
             echo 'CHANGELOG_EOF'
           } >> "$GITHUB_OUTPUT"
 
@@ -102,7 +104,7 @@ jobs:
 
             詳細手順は README の Android sideload セクションを参照してください。
 
-            ## What's Changed (= 最新 5 PR)
+            ## What's Changed (= 最新 PR、デフォルト 5 件、workflow yaml `PR_LIMIT` で調整可)
 
             ${{ steps.changelog.outputs.changelog }}
 
