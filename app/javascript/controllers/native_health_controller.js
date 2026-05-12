@@ -307,8 +307,13 @@ export default class extends Controller {
   // 2. permission 取得済 (= syncButton 表示中 = checkAuthorization 成功の証拠)
   // 3. webhook token 設定済
   // 4. localStorage 最終同期から AUTO_SYNC_THRESHOLD_HOURS 以上経過 (or 未同期)
+  // v1.2 で WorkManager 本実装 (= Kotlin Worker) を導入する場合は、本メソッド冒頭で
+  // `Capacitor.isNativeAvailable("WorkManagerSync")` 相当の gating を入れて JS / Native の二重発火を防ぐ。
+  // (= strategic-reviewer Should Fix、将来の自分への置き手紙)
   shouldAutoSync() {
     if (this.isAutoSyncing) return false
+    // Issue #314 code-reviewer 指摘: Turbo navigation 跨ぎで target が一時的に切れている可能性に備えて has check。
+    if (!this.hasSyncButtonTarget) return false
     if (this.syncButtonTarget.disabled) return false
     if (this.syncButtonTarget.style.display === "none") return false  // permission 未取得
     if (!this.webhookTokenValue) return false
@@ -322,6 +327,12 @@ export default class extends Controller {
   // ただし UI 表記は控えめに + home 遷移は抑制 (= 現在のページを邪魔しない、sync() 内 isAutoSyncing 分岐)。
   async autoSync() {
     this.isAutoSyncing = true
+    // Issue #314 code-reviewer race window 指摘: refreshData 実行中に手動 sync ボタン押下で
+    // 二重実行が起きる可能性 → autoSync 冒頭で syncButton を disabled、finally で復帰。
+    // shouldAutoSync 側の `syncButton.disabled` チェックと併せ自動同期の再入を物理防止。
+    if (this.hasSyncButtonTarget) {
+      this.syncButtonTarget.disabled = true
+    }
     try {
       this.showStatus("⏳ 自動同期中...")
       await this.refreshData()
@@ -329,6 +340,9 @@ export default class extends Controller {
       await this.sync()
     } finally {
       this.isAutoSyncing = false
+      if (this.hasSyncButtonTarget) {
+        this.syncButtonTarget.disabled = false
+      }
     }
   }
 
@@ -361,7 +375,10 @@ export default class extends Controller {
     if (!this.hasLastSyncDisplayTarget) return
     const lastSync = this.readLastSync()
     if (!lastSync) {
-      this.lastSyncDisplayTarget.textContent = "最終同期: 未同期"
+      // Issue #314 design-reviewer 指摘: 「未同期」 は責めるトーン (= 3 ステップ思想と齟齬)、
+      // 「まだ同期されていません」 で中立 + データ未送信状態を明示。warning は出さない
+      // (= ボタン押下を促す導線は既存 syncButton で十分、非対称はカジュアル層には筋良い)。
+      this.lastSyncDisplayTarget.textContent = "まだ同期されていません"
       this.lastSyncDisplayTarget.dataset.warning = "false"
       return
     }
@@ -374,6 +391,7 @@ export default class extends Controller {
   // 秒数を「N 秒前 / N 分前 / N 時間前 / N 日前」 に整形 (= relative time)。
   // Intl.RelativeTimeFormat はカジュアル層には冗長な英語混じり表示になりがちなので自前整形。
   formatRelativeTime(elapsedSec) {
+    if (elapsedSec < 10) return "たった今"  // Issue #314 code-reviewer 🟢: 0 秒ジャストの体感を救済
     if (elapsedSec < 60) return "数秒前"
     if (elapsedSec < 3600) return `${Math.floor(elapsedSec / 60)} 分前`
     if (elapsedSec < 86400) return `${Math.floor(elapsedSec / 3600)} 時間前`
@@ -456,6 +474,10 @@ export default class extends Controller {
           ? `❌ ${friendlyMessage}`
           : `❌ 送信失敗 (HTTP ${response.status}): ${bodyMessage}`
         this.showStatus(display)
+        // Issue #314 code-reviewer 指摘: 自動同期失敗時は recoveryButton 表示を抑止
+        // (= ユーザーが別画面を見ている時に突然 /settings 誘導が現れる UX 不快感を回避)。
+        // 手動 sync 時のみ recovery 提示 (= ユーザーの明示操作 = 復帰導線を見せる文脈)。
+        if (this.isAutoSyncing) return
         // Issue #273: status に応じて recoveryButton を 2 mode で出し分け (= 同一ボタン DOM を mode で切り替えて共用)。
         // 401 → settings 誘導 / 5xx → retry / その他 (= 413/422) → 文言のみ (= 復帰導線が一意に決まらない)。
         if (response.status === 401) {
