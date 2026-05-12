@@ -60,6 +60,19 @@ jobs:
             echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Generate "What's Changed" (= 最新 5 PR、自動 changelog の長大化を防ぐ)
+        id: changelog
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo 'changelog<<CHANGELOG_EOF'
+            gh pr list --state merged --base main --limit 5 \
+              --json number,title,author \
+              --jq '.[] | "* \(.title) by @\(.author.login) in #\(.number)"'
+            echo 'CHANGELOG_EOF'
+          } >> "$GITHUB_OUTPUT"
+
       - name: Rename APK with tag suffix
         run: |
           mkdir -p artifacts
@@ -71,7 +84,6 @@ jobs:
         with:
           tag_name: ${{ steps.tag.outputs.name }}
           name: weight_dialy ${{ steps.tag.outputs.name }}
-          generate_release_notes: true
           files: artifacts/weight-dialy-${{ steps.tag.outputs.name }}-debug.apk
           fail_on_unmatched_files: true
           body: |
@@ -89,3 +101,9 @@ jobs:
             5. アプリ内 Settings から Webhook トークンを設定 (= [Web 版](https://weight-dialy.onrender.com) で取得)
 
             詳細手順は README の Android sideload セクションを参照してください。
+
+            ## What's Changed (= 最新 5 PR)
+
+            ${{ steps.changelog.outputs.changelog }}
+
+            **Full Changelog**: https://github.com/${{ github.repository }}/commits/${{ steps.tag.outputs.name }}
