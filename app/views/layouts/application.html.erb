@@ -54,7 +54,11 @@
 
     <%# sketchy テーマで使う手書き風フォント (= Patrick Hand / Caveat / Kalam) は
         public/fonts/ に woff2 同梱、sketchy.css の @font-face で local 配信 (= Issue #145 で完走)。
-        Capacitor アプリ初回起動時 FOUT 対策 + Web 版でもネットワーク待ち削減 + CSP font-src 'self' 化に向けた前提整理。 %>
+        Capacitor アプリ初回起動時 FOUT 対策 + Web 版でもネットワーク待ち削減 + CSP font-src 'self' 化に向けた前提整理。
+        body 基本フォント (= Patrick Hand) と navbar タイトル (= Caveat) のみ <link rel="preload"> で
+        スタイルシート解析前に DL 開始 (= プロジェクタ映写の瞬間 = 第一印象を即座にスケッチ風で出す、design-reviewer 提案)。 %>
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/patrick-hand-latin.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/caveat-latin.woff2">
 
     <%# JS 無効環境フォールバック: flash の opacity-0 を強制解除して永続不可視を防ぐ。
         HTML5 仕様上 <noscript><style> は <head> 内に置くのが正 (body 内は実装依存)。 %>
