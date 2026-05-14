@@ -11,30 +11,30 @@
        data-action="click->welcome-modal#backdropClose">
     <div class="sketch-box" style="width: min(94vw, 28rem); background: var(--paper); position: relative; max-height: 90vh; overflow-y: auto;">
 
-      <h2 id="welcome-modal-title" class="sketch-h" style="margin-bottom: 12px;">👋 weight daily へようこそ</h2>
+      <h2 id="welcome-modal-title" class="sketch-h" style="margin-bottom: 12px;"><%= t('.title') %></h2>
 
       <p class="sketch-body-text" style="margin-bottom: 16px;">
-        通勤通学で歩く・階段を選ぶ等の<strong>日常の小さな前向きな選択</strong>を、自動で拾って褒めてくれる Web アプリです。
+        <%= t('.lead_html') %>
       </p>
 
       <%# iPhone ユーザー向け案内 %>
       <div class="sketch-box filled" style="margin-bottom: 12px; padding: 12px; box-shadow: none;">
-        <p class="sketch-h" style="margin-bottom: 8px; font-size: 18px;">📱 iPhone をお使いの方</p>
+        <p class="sketch-h" style="margin-bottom: 8px; font-size: 18px;"><%= t('.iphone.heading') %></p>
         <p class="sketch-body-text" style="margin-bottom: 8px;">
-          Apple Shortcuts で歩数を自動連携できます:
+          <%= t('.iphone.intro') %>
         </p>
         <ol class="sketch-body-text" style="padding-left: 20px; margin: 0; line-height: 1.7;">
-          <li>Google でログイン</li>
-          <li>Settings から Shortcut をインストール</li>
-          <li>1 日 1 回自動で歩数が記録されます</li>
+          <% t('.iphone.steps').each do |step| %>
+            <li><%= step %></li>
+          <% end %>
         </ol>
       </div>
 
       <%# Android ユーザー向け案内 %>
       <div class="sketch-box filled" style="margin-bottom: 16px; padding: 12px; box-shadow: none;">
-        <p class="sketch-h" style="margin-bottom: 8px; font-size: 18px;">🤖 Android をお使いの方</p>
+        <p class="sketch-h" style="margin-bottom: 8px; font-size: 18px;"><%= t('.android.heading') %></p>
         <p class="sketch-body-text" style="margin: 0;">
-          Android アプリ版は <strong>近日公開予定</strong>です。それまでは <strong>サンプルデータ</strong>でダッシュボードの機能をお試しください (ログイン不要)。
+          <%= t('.android.body_html') %>
         </p>
       </div>
 
@@ -44,14 +44,14 @@
         <input type="checkbox"
                data-welcome-modal-target="dontShowAgain"
                style="width: 16px; height: 16px; cursor: pointer;">
-        以降表示しない
+        <%= t('.dont_show_again') %>
       </label>
 
       <button type="button"
               class="sketch-btn sketch-btn-primary"
               style="width: 100%;"
               data-action="click->welcome-modal#close">
-        確認しました
+        <%= t('.close_button') %>
       </button>
     </div>
   </div>

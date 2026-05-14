@@ -4,12 +4,11 @@
     <span class="sketch-banner-icon">👋</span>
     <div>
       <p class="sketch-banner-text">
-        ようこそ！ <strong>iPhone の無料アプリ「ショートカット」</strong>(Apple Shortcuts) を設定すると、あなたの実データがここに表示されます。
-        下は完成イメージのサンプルデータです。
+        <%= t('.body_html') %>
       </p>
     </div>
   </div>
   <div class="sketch-banner-action">
-    <%= link_to "設定する →", settings_path, class: "sketch-btn sketch-btn-primary" %>
+    <%= link_to t('.cta'), settings_path, class: "sketch-btn sketch-btn-primary" %>
   </div>
 </div>

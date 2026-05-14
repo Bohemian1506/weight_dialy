@@ -16,7 +16,7 @@
     has_data 状態ではバナーも非表示なので、表示中の dashboard が完全に「自分のデータ」になる。 %>
 <% if @dashboard_state != :has_data %>
   <div class="sketch-small" style="text-align: right; margin: 8px 0 -4px; padding: 0 4px; color: var(--muted);">
-    ※ 表示中の数値はサンプルデータです
+    <%= t('.sample_data_note') %>
   </div>
 <% end %>
 
@@ -43,8 +43,8 @@
 <%# ポリシーフッター (= 未ログインでも到達できる経路) %>
 <div style="margin-top: 2rem; padding: 1rem; text-align: center;">
   <p class="sketch-small" style="color: var(--ink-2)">
-    <%= link_to "プライバシーポリシー", privacy_path, style: "color: var(--ink-2); text-decoration: underline;" %>
+    <%= link_to t('.policy_links.privacy'), privacy_path, style: "color: var(--ink-2); text-decoration: underline;" %>
     /
-    <%= link_to "利用規約", terms_path, style: "color: var(--ink-2); text-decoration: underline;" %>
+    <%= link_to t('.policy_links.terms'), terms_path, style: "color: var(--ink-2); text-decoration: underline;" %>
   </p>
 </div>

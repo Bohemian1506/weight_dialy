@@ -6,12 +6,11 @@
     <span class="sketch-banner-icon">🤖</span>
     <div>
       <p class="sketch-banner-text">
-        Android スマホから Health Connect 経由で歩数を自動送信できます。
-        ログイン不要で、いまはサンプルデータで雰囲気を見てみてください。
+        <%= t('.body') %>
       </p>
     </div>
   </div>
   <div class="sketch-banner-action">
-    <%= link_to "設定を見る", settings_path, class: "sketch-btn sketch-btn-primary" %>
+    <%= link_to t('.cta'), settings_path, class: "sketch-btn sketch-btn-primary" %>
   </div>
 </div>
