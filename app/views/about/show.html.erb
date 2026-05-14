@@ -1,4 +1,4 @@
-<% content_for :title, "weight_dialy について" %>
+<% content_for :title, t('.title') %>
 
 <%# min-h は 100vh から navbar 62px (= Issue #49 slim 化後) + <main> の mt-4 (16px) ≈ 78px を引いた高さ。
     5rem (80px) で近似 (= 余裕 2px は min-h なので下方向マージン化、視覚影響なし)。
@@ -6,18 +6,18 @@
 <div class="min-h-[calc(100vh-5rem)] flex items-center justify-center">
   <div class="sketch-page-narrow w-full">
     <div class="sketch-box" style="text-align: center;">
-      <h1 class="sketch-hh" style="margin-bottom: 12px;">weight <span class="sketch-swoosh">daily.</span> について</h1>
+      <h1 class="sketch-hh" style="margin-bottom: 12px;"><%= t('.h1_prefix') %><span class="sketch-swoosh"><%= t('.h1_brand') %></span><%= t('.h1_suffix') %></h1>
       <p class="sketch-body-text">
-        通勤通学のついで歩きや、エスカレーターの代わりに階段。<br>
-        日常の小さな前向きな選択を自動で拾って褒める Web アプリです。
+        <%= t('.lead_first') %><br>
+        <%= t('.lead_second') %>
       </p>
       <div style="margin-top: 16px;">
-        <%= link_to "ホームへ戻る", root_path, class: "sketch-btn sketch-btn-primary" %>
+        <%= link_to t('.home_button'), root_path, class: "sketch-btn sketch-btn-primary" %>
       </div>
       <p class="sketch-small" style="margin-top: 20px; color: var(--ink-2);">
-        <%= link_to "プライバシーポリシー", privacy_path, style: "color: var(--ink-2); text-decoration: underline;" %>
+        <%= link_to t('.policy_links.privacy'), privacy_path, style: "color: var(--ink-2); text-decoration: underline;" %>
         /
-        <%= link_to "利用規約", terms_path, style: "color: var(--ink-2); text-decoration: underline;" %>
+        <%= link_to t('.policy_links.terms'), terms_path, style: "color: var(--ink-2); text-decoration: underline;" %>
       </p>
     </div>
   </div>
