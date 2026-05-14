@@ -1,4 +1,4 @@
-# Day 15 開発ログ (2026-05-14、/insights レポート起点 + canon-check 仕組み化 案 A 完走 (= Issue #331 + PR #332))
+# Day 15 開発ログ (2026-05-14、/insights レポート起点 + canon-check 仕組み化 案 A 完走 + i18n 抽出 2 例目完走 (= Issue #331 + PR #332 + #333 + #334))
 
 > **⚠️ 連番補足 — 今回の対処**: 本来 day-15 = 2026-05-13 (= 連番計算上の対応日) だが、2026-05-13 は作業なしのため day-15 を **2026-05-14 分に充当**する (= 連番優先 / 日付 1 日ズレ)。
 >
@@ -6,7 +6,7 @@
 
 day-14-2 (= v1.0 Android 配布完走 + #314 + #317 + #320 session 永続化 + #325 i18n legal パイロット) からバトンタッチ。本セッションは局長操作の `/insights` レポートを起点に Claude tooling 第二群の着手判断 → **canon-check 仕組み化 案 A** (= memory・CLAUDE.md の設計規範を設計判断前に確認する自発検証手順) を完走。
 
-**Day 15 達成サマリ**: 1 PR (#332) マージ + 1 Issue (#331) close + 1 Issue (#331) 起票 (= 同セッション完走型 **4 例目候補、確定は 5 例目観測後**) + 3 者並列レビュー 🟡 4 件 + 🟢 3 件吸収 + 試運用判断基準 3 軸 (= 自発発火率 / 矛盾発見回数 / 抜け漏れ) 定量化 + CLAUDE.md 規範化と memory 化の **撤回コスト軸分離 (= memory 化と規範化を撤回コスト高低で別ルール適用する判断軸)** 1 例目観測 (= 教訓 1 候補)。案 B (= `/canon-check` Skill) は試運用 2-3 セッション後判断。
+**Day 15 達成サマリ**: 3 PR (#332 + #333 + #334) マージ + 2 Issue (#331 + #328) close + 2 Issue (#331 + #335) 起票 (= 同セッション完走型 **4 例目候補 #331、確定は 5 例目観測後**) + 3 者並列レビュー **4 回起動 (= 12 agent 実行)** + canon-check 仕組み化 案 A 完走 + **i18n 抽出 2 例目完走 (= settings 画面、規約弾力性テスト、規約進化 4 点の判断ログ確定)** + 試運用判断基準 3 軸 (= 自発発火率 / 矛盾発見回数 / 抜け漏れ) 定量化 + CLAUDE.md 規範化と memory 化の **撤回コスト軸分離 (= memory 化と規範化を撤回コスト高低で別ルール適用する判断軸)** 1 例目観測 (= 教訓 1 候補) + **規約進化判断ログ表 1 例目観測 (= PR #334 description フォーマット、How to apply 5 で追跡)**。案 B (= `/canon-check` Skill) は試運用 2-3 セッション後判断。
 
 ---
 
@@ -16,6 +16,10 @@ day-14-2 (= v1.0 Android 配布完走 + #314 + #317 + #320 session 永続化 + #
 - [x] canon-check 仕組み化の A → B → C 段階導入路線確立
 - [x] 案 A (= CLAUDE.md 規範化) 完走
 - [x] dev-log 連番ルールの CLAUDE.md 同梱更新 (= 教訓 1 候補の実演)
+- [x] i18n 抽出 2 例目 (= settings 画面) 完走 (= 規約弾力性テスト、規約進化 4 点判断ログ確定)
+- [ ] i18n 抽出 3 例目 (= about 画面 #329、規約安定性検証) (= 持ち越し)
+- [ ] i18n 抽出 4 例目 (= home 画面 #330、規約完成度テスト + 動的補間) (= 持ち越し)
+- [ ] JS 側 RECOVERY_LABELS の i18n 化 (= #335、本日起票済) (= 持ち越し)
 - [ ] 案 B (= `/canon-check` Skill) は試運用 2-3 セッション後の別 Issue で起票 (= 持ち越し)
 
 ---
@@ -27,7 +31,9 @@ day-14-2 (= v1.0 Android 配布完走 + #314 + #317 + #320 session 永続化 + #
 | PR | タイトル | Issue | 種別 |
 |---|---|---|---|
 | #332 | docs: canon-check 標準手順を CLAUDE.md に追記 (= /insights 案 A、#331) | #331 | docs |
-| #333 (= 本 PR) | docs: day-15 開発ログ追加 + CLAUDE.md 連番ルール更新 | — | docs |
+| #333 | docs: day-15 開発ログ追加 + CLAUDE.md 連番ルール更新 | — | docs |
+| #334 | feat(i18n): settings 画面を ja.yml に抽出 (= 2 例目、規約弾力性テスト) | #328 | feat |
+| 本 PR | docs: day-15 に PR #334 + Issue #335 反映 | — | docs |
 
 > ※ PR テーブル列定義は day-1/2 の 4 列 (= PR / Issue / 内容 / コミット SHA) から派生し、day-14-2 以降は「PR / Issue / 内容」 3 列、本 day-15 は「PR / タイトル / Issue / 種別」 形式。後輩追跡時の列差分注記。
 
@@ -36,6 +42,8 @@ day-14-2 (= v1.0 Android 配布完走 + #314 + #317 + #320 session 永続化 + #
 | Issue | タイトル | 状態 |
 |---|---|---|
 | #331 | docs: canon-check 標準手順を CLAUDE.md に追記 (= /insights 摩擦解消 案 A) | 起票 + 同 PR で close |
+| #328 | feat(i18n): settings 画面を ja.yml に抽出 (= 2 例目、規約弾力性テスト) | close (= PR #334) |
+| #335 | refactor(i18n): JS 側 RECOVERY_LABELS の i18n 化 (= PR #334 strategic 論点 3 由来) | 起票 (= 持ち越し) |
 
 ### CLAUDE.md 追記内容 (= PR #332 で 32 行 + PR #333 で連番ルール数行)
 
@@ -43,6 +51,16 @@ day-14-2 (= v1.0 Android 配布完走 + #314 + #317 + #320 session 永続化 + #
 - 配置: 「📓 dev-log 運用フロー」 と 「⚠️ やってはいけないこと」 の間
 - 4 ステップ (= 列挙 / 引用 / 矛盾チェック / ドラフト or 相談) + 適用範囲 4 種類 ✅ + 除外 3 種類 ❌ + 出力フォーマット例 (= 衝突なし 3 行 + 衝突あり 1 行)
 - dev-log 運用フロー内「N の判定」 ルールを「作業セッション回数の連番」 形式に更新 (= PR #333)
+
+### i18n 抽出シリーズ進捗 (= PR #334 完走)
+
+| 段階 | 画面 | PR / Issue | 検証目的 | 状態 |
+|---|---|---|---|---|
+| 1 例目 (パイロット) | legal (privacy + terms) | PR #326 | 命名規約確立 (= 4-5 階層、`sections:` 中間ノード) | ✅ 完走 |
+| **2 例目 (弾力性)** | **settings (form 中心 318 行)** | **PR #334 / Issue #328** | **規約進化 4 点判断ログ確定 (= form helper / partial 階層 / shared.yml / sections: 不採用)** | **✅ 完走 (本日)** |
+| 3 例目 (安定性) | about (24 行軽量) | Issue #329 | 軽量画面で規約安定性検証 | ⏳ 持ち越し |
+| 4 例目 (完成度) | home (502 行 + 動的補間 + pluralize) | Issue #330 | 動的補間 / 章立て再評価 (= `sections:` 再採用候補) | ⏳ 持ち越し |
+| 派生 | JS 側 RECOVERY_LABELS | Issue #335 (= 本日起票) | JS i18n 化アプローチ確立 | ⏳ 持ち越し |
 
 ---
 
@@ -89,35 +107,46 @@ day-14-2 (= v1.0 Android 配布完走 + #314 + #317 + #320 session 永続化 + #
 
 ## 📊 Day 15 終了時点の状態
 
-- **PR マージ**: 1 (= #332)、+ 本 PR (#333) でマージ予定
-- **Issue close**: 1 (= #331)
-- **Issue 起票**: 1 (= #331、同 PR で close)
-- **3 者並列レビュー**: 3 名 (= code + strategic + design) × 2 PR (= #332 + #333)
+- **PR マージ**: 3 (= #332 + #333 + #334)、+ 本 PR (= day-15 追記) でマージ予定
+- **Issue close**: 2 (= #331 + #328)
+- **Issue 起票**: 2 (= #331 + #335)
+- **3 者並列レビュー**: 3 名 (= code + strategic + design) × 4 PR (= #332 + #333 + #334 + 本 PR) = **計 12 agent 実行 (= 本日多発、code-reviewer 1 件 retry あり)**
 - **🟡 推奨指摘吸収 (= PR #332)**: 4 件 (= 見出し重複 + 用語説明 + 試運用基準 3 軸 + 規範化判断)
 - **🟢 提案採用 (= PR #332)**: 3 件 (= 表注釈・サンプル / Issue リンク / 末尾参照集約)
 - **🔴 必須指摘吸収 (= PR #333)**: 2 件 (= 達成したこと見出し統一 + 教訓 1 仮説段階表記)
 - **🟡 推奨指摘吸収 (= PR #333)**: 5 件 (= 数値統一 + 見出し標準揃え + 7-12 削除 + 連番補足 2 文分割 + 教訓 2 累計位置付け)
 - **🟢 提案採用 (= PR #333)**: 3 件 (= 専門用語注釈 / file:// 削除 + 4 例目明示 / 軽量一貫性)
+- **🟡 推奨指摘吸収 (= PR #334)**: 3 件 (= `label_html` 命名誤用 / shared.yml 発火条件追記 / JS Issue 起票)
+- **🟢 提案採用 (= PR #334)**: 3 件 (= 冗長 `.html_safe` 削除 / `time_unit_ago` rename / sections: 不採用コメント)
 - **CLAUDE.md 追加分量**: 32 行 (= 案 A、PR #332) + 数行 (= 連番ルール、PR #333)
+- **i18n 抽出進捗**: 2/4 完走 (= legal + settings)、残 about + home + 派生 JS
 
 ---
 
 ## 次セッション以降への持ち越し観点 (How to apply)
 
-1. **canon-check 自発検証の実運用ログ**: 4 種類分岐点 (= 新機能 / UI / memory 化 / リファクタ) ごとに発火率 N/M を観測。次 2-3 セッションで 70% 未満なら案 B (= Skill) 起動判断。
+1. **canon-check 自発検証の実運用ログ**: 4 種類分岐点 (= 新機能 / UI / memory 化 / リファクタ) ごとに発火率 N/M を観測。次 2-3 セッションで 70% 未満なら案 B (= Skill) 起動判断。**本日 PR #334 着手時に canon-check 初発火 (= 1/1 = 100%) を観測**。
 2. **案 B 起票判断材料の集約先**: (a) 自発発火率 (b) ユーザー矛盾発見回数 (c) 案 A で吸収できなかった抜け漏れ — の 3 軸を Issue #331 にコメント追記の形で集約。
 3. **教訓 1 候補の確定/反証観測**: 撤回コスト軸分離が memory 化と別軸で運用できるか、2-3 例目を待って確定判断。memory `feedback_self_proposal_relativization.md` の補強候補。
 4. **dev-log 連番ルールの実運用**: 本 PR で CLAUDE.md「N の判定」 ルールを「作業セッション回数の連番」 に更新。5/15 以降の運用で実証 (= 規範と実運用の整合確認)。
+5. **規約進化判断ログ表の観測**: PR #334 description で「規約進化 4 点の判断ログ表」 を採用 (= 1 例目)。2-3 例目 (= PR #329 about / PR #330 home) で再観測できれば memory `feedback_issue_as_decision_log` の **PR 版補強候補** に発展可能 (= 3 回観測ルール準拠)。
+6. **i18n 抽出シリーズ完走**: 残り 2 PR (= #329 about + #330 home)。完走で memory `project_phase_1_1_refactoring.md` 保留事項「i18n 規約 docs/ 化 = 全画面抽出完了後に再検討」 の前提条件が満たされる。
+7. **JS 側 i18n 化アプローチ確立**: Issue #335 着手時に `window.I18n` bridge vs Stimulus action data-* 経由 vs 現状維持の 3 案比較。weight_dialy の Hotwire ファースト方針に合致する案 B 推奨。
 
 ---
 
 ## 関連リソース
 
 - `/insights` レポート (= 2026-05-14、ローカル生成ファイル / 環境依存パス省略)
-- PR #332 (= 本セッションの主成果、canon-check 案 A)
-- PR #333 (= 本 dev-log + CLAUDE.md 連番ルール更新)
+- PR #332 (= 本セッション主成果 1、canon-check 案 A)
+- PR #333 (= day-15 dev-log + CLAUDE.md 連番ルール更新)
+- PR #334 (= 本セッション主成果 2、settings i18n 抽出 2 例目)
 - Issue #331 (= 判断ログ + レビュー反映補強コメント)
+- Issue #328 (= settings i18n 抽出、PR #334 で close)
+- Issue #335 (= JS RECOVERY_LABELS i18n 化、PR #334 strategic 論点 3 由来、本日起票)
 - memory `feedback_self_proposal_relativization.md` (= 3 回観測ルール、本 PR で別軸適用)
-- memory `feedback_light_issue_one_pr_completion.md` (= 軽量 Issue 1 PR ルール、PR #332 で適用)
-- memory `feedback_always_three_reviewers.md` (= 3 者並列レビュー必須)
+- memory `feedback_light_issue_one_pr_completion.md` (= 軽量 Issue 1 PR ルール、PR #332 / #334 で適用)
+- memory `feedback_always_three_reviewers.md` (= 3 者並列レビュー必須、本日 4 回起動)
+- memory `feedback_issue_as_decision_log.md` (= PR 版補強候補、PR #334 が 1 例目観測)
+- memory `project_phase_1_1_refactoring.md` (= 1.1 改修フェーズ、i18n 抽出 2/4 完走)
 - memory `project_claude_tooling_roadmap.md` (= 本セッションで第二群に着手)
