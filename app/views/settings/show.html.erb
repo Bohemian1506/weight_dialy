@@ -1,13 +1,13 @@
-<% content_for :title, "設定 — weight daily." %>
+<% content_for :title, t('.title') %>
 
 <div class="sketch-page-narrow" style="max-width: 36rem;">
 
   <%# ヘッダー (= データ連携の入口、iPhone Shortcuts / Android Health Connect 両方を内包する。
        元は「Apple Shortcuts 連携」固定だったが、Android Chrome 評価者が「自分には関係ない設定ページ」と
        感じる UX 課題が公開前 design レビューで判明 → 中立タイトルに変更し、リード文で対応端末を明示。) %>
-  <h1 class="sketch-hh" style="margin-bottom: 6px;">データ連携の設定</h1>
+  <h1 class="sketch-hh" style="margin-bottom: 6px;"><%= t('.h1') %></h1>
   <p class="sketch-body-text" style="margin-bottom: 24px;">
-    iPhone は Apple Shortcuts、Android は Health Connect から、毎日の歩数を自動で取り込みます。
+    <%= t('.lead') %>
   </p>
 
   <%# Capacitor アプリ時のみ Health Connect セクションを最上部に出す (Issue #144、design レビュー指摘:
@@ -18,9 +18,9 @@
   <% end %>
 
   <%# Step 1: Webhook トークン %>
-  <p class="sketch-label" style="margin-bottom: 6px;">Step 1</p>
+  <p class="sketch-label" style="margin-bottom: 6px;"><%= t('.step1.label') %></p>
   <div class="sketch-box" style="margin-bottom: 20px;">
-    <p class="sketch-label" style="margin-bottom: 8px;">あなた専用のトークン（秘密にしてください）</p>
+    <p class="sketch-label" style="margin-bottom: 8px;"><%= t('.step1.token_caption') %></p>
 
     <div data-controller="copy" data-copy-text-value="<%= @webhook_token %>">
       <code style="display: block; font-size: 20px; word-break: break-all; background: var(--paper-2); border: 1px solid var(--ink); border-radius: 4px; padding: 10px 12px; margin-bottom: 12px; font-family: monospace; line-height: 1.4;">
@@ -30,15 +30,15 @@
               class="sketch-btn sketch-btn-primary"
               data-copy-target="button"
               data-action="click->copy#copy">
-        コピー
+        <%= t('.copy_button') %>
       </button>
     </div>
   </div>
 
   <%# Step 2: エンドポイント URL %>
-  <p class="sketch-label" style="margin-bottom: 6px;">Step 2</p>
+  <p class="sketch-label" style="margin-bottom: 6px;"><%= t('.step2.label') %></p>
   <div class="sketch-box" style="margin-bottom: 20px;">
-    <p class="sketch-label" style="margin-bottom: 8px;">iPhone のショートカットアプリで使う URL</p>
+    <p class="sketch-label" style="margin-bottom: 8px;"><%= t('.step2.url_caption') %></p>
 
     <div data-controller="copy" data-copy-text-value="<%= @webhook_url %>">
       <%# 本番 URL は 47 文字あり 375px モバイル幅で 3-4 行に折り返すため font-size は 13px に詰める (Issue #48 指摘 1) %>
@@ -49,7 +49,7 @@
               class="sketch-btn sketch-btn-primary"
               data-copy-target="button"
               data-action="click->copy#copy">
-        コピー
+        <%= t('.copy_button') %>
       </button>
     </div>
   </div>
@@ -64,18 +64,18 @@
       意図: 「直近に動作している実績があるか」を見たい (= 古い履歴より最近の動作実績を信頼)。
       `current_user.webhook_deliveries.exists?` に変えれば全件判定になるが、追加クエリ発生 + 「最近壊れてる人にも案内出ない」問題があるため不採用。 %>
   <% if @webhook_deliveries.empty? %>
-    <p class="sketch-label" style="margin-bottom: 6px;">Step 3</p>
+    <p class="sketch-label" style="margin-bottom: 6px;"><%= t('.step3.label') %></p>
     <div class="sketch-box" style="margin-bottom: 32px;">
-      <p class="sketch-h" style="margin-bottom: 8px;">🎉 あとはショートカットを入れるだけ</p>
+      <p class="sketch-h" style="margin-bottom: 8px;"><%= t('.step3.heading') %></p>
       <p class="sketch-body-text" style="margin-bottom: 16px;">
-        下のボタンから iPhone に Shortcut を追加 → 初回実行時に「<strong>ヘルスケアへのアクセス</strong>」を許可 → Step 1 でコピーした値を貼り付ければ完了です。
+        <%= t('.step3.description_html').html_safe %>
       </p>
-      <%= link_to "ショートカットをインストール",
+      <%= link_to t('.step3.install_button'),
             "https://www.icloud.com/shortcuts/7e0199f480824ae1959a0833a443f564",
             class: "sketch-btn sketch-btn-primary",
             target: "_blank",
             rel: "noopener noreferrer" %>
-      <p class="sketch-small" style="margin: 8px 0 0;">タップで iCloud が開きます</p>
+      <p class="sketch-small" style="margin: 8px 0 0;"><%= t('.step3.install_note') %></p>
     </div>
   <% end %>
 
@@ -85,8 +85,8 @@
     <%# 受信ログがある時の再追加導線 (= Issue #48 指摘 0)。
         Step 3 を非表示にした代わりに、別端末でも追加したい人向けの控えめなリンク。 %>
     <p class="sketch-small" style="text-align: center; margin: 8px 0 24px; color: var(--muted);">
-      ショートカットを別の端末に追加したい場合は
-      <%= link_to "こちら",
+      <%= t('.re_install_link.prefix') %>
+      <%= link_to t('.re_install_link.anchor'),
             "https://www.icloud.com/shortcuts/7e0199f480824ae1959a0833a443f564",
             target: "_blank",
             rel: "noopener noreferrer",
@@ -101,14 +101,12 @@
       かつ既存の native-health セクション (下記) が JS で代替表示される。UX ループ解消が目的。 %>
   <% if @show_android_app_promo %>
     <div class="sketch-box" style="margin-bottom: 24px;">
-      <h2 class="sketch-h" style="margin-bottom: 8px;">Android Health Connect 連携</h2>
+      <h2 class="sketch-h" style="margin-bottom: 8px;"><%= t('.web_android_promo.heading') %></h2>
       <p class="sketch-body-text" style="margin-bottom: 12px;">
-        お手元の Android スマホから Health Connect 経由で歩数 / 距離 / 階段を自動同期できます。
-        同期されたデータは Web 版にログインしてダッシュボードで閲覧できます。
+        <%= t('.web_android_promo.description') %>
       </p>
       <p class="sketch-body-text" style="margin-bottom: 0;">
-        現在 Android アプリのインストール手順を準備中です。
-        それまでは <strong>サンプルデータ</strong>で雰囲気をお試しください。
+        <%= t('.web_android_promo.prep_note_html').html_safe %>
       </p>
     </div>
   <% end %>
@@ -121,16 +119,15 @@
 
   <%# 危険ゾーン: トークン再生成 %>
   <div class="sketch-box sketch-box-danger-soft" style="margin-bottom: 24px;">
-    <p class="sketch-h sketch-h-danger" style="margin-bottom: 8px;">トークンの再生成</p>
+    <p class="sketch-h sketch-h-danger" style="margin-bottom: 8px;"><%= t('.regenerate_token.heading') %></p>
     <p class="sketch-body-text" style="margin-bottom: 16px;">
-      ⚠️ <strong>トークンを再生成すると、現在 Apple Shortcuts に設定済みのトークンは無効になります。</strong>
-      再生成後は Shortcut 側の設定も更新する必要があります。
+      <%= t('.regenerate_token.warning_html').html_safe %>
     </p>
-    <%= button_to "トークンを再生成する",
+    <%= button_to t('.regenerate_token.button'),
           regenerate_webhook_token_path,
           method: :post,
           class: "sketch-btn",
-          data: { turbo_confirm: "本当に再生成しますか？ 現在の Shortcut が動かなくなります。" } %>
+          data: { turbo_confirm: t('.regenerate_token.confirm') } %>
   </div>
 
   <%# 危険ゾーン: アカウント削除 %>
@@ -138,15 +135,14 @@
        data-confirm-deletion-expected-name-value="<%= current_user.name %>">
 
     <div class="sketch-box sketch-box-danger" style="margin-bottom: 24px;">
-      <p class="sketch-h sketch-h-danger" style="margin-bottom: 8px;">⚠️ アカウントの削除</p>
+      <p class="sketch-h sketch-h-danger" style="margin-bottom: 8px;"><%= t('.account_deletion.heading') %></p>
       <p class="sketch-body-text" style="margin-bottom: 16px;">
-        アカウントを削除すると、歩数記録・連携設定を含む<strong>すべてのデータが即時に削除</strong>されます。
-        この操作は取り消せません。
+        <%= t('.account_deletion.description_html').html_safe %>
       </p>
       <button type="button"
               class="sketch-btn sketch-btn-danger"
               data-action="click->confirm-deletion#openModal">
-        アカウントを削除する
+        <%= t('.account_deletion.button') %>
       </button>
     </div>
 
@@ -161,16 +157,16 @@
       <div class="sketch-box"
            style="width: min(90vw, 24rem); background: var(--paper); position: relative;">
         <p id="deletion-modal-title" class="sketch-h sketch-h-danger" style="margin-bottom: 12px;">
-          ⚠️ 本当に退会しますか？
+          <%= t('.deletion_modal.title') %>
         </p>
         <p class="sketch-body-text" style="margin-bottom: 16px;">
-          確認のため、あなたの名前 <strong><%= current_user.name %></strong> を下に入力してください。
+          <%= t('.deletion_modal.confirmation_prompt_html', name: current_user.name).html_safe %>
         </p>
 
         <%= form_with url: account_deletion_path, method: :delete do |f| %>
           <div style="margin-bottom: 16px;">
             <label for="deletion-name-input" class="sketch-label" style="display: block; margin-bottom: 6px;">
-              名前を入力
+              <%= t('.deletion_modal.name_label') %>
             </label>
             <input id="deletion-name-input"
                    type="text"
@@ -185,13 +181,13 @@
             <button type="button"
                     class="sketch-btn"
                     data-action="click->confirm-deletion#closeModal">
-              キャンセル
+              <%= t('.deletion_modal.cancel_button') %>
             </button>
             <button type="submit"
                     class="sketch-btn sketch-btn-danger"
                     disabled
                     data-confirm-deletion-target="submitButton">
-              退会する
+              <%= t('.deletion_modal.submit_button') %>
             </button>
           </div>
         <% end %>
@@ -206,12 +202,12 @@
       (= 通勤通学カジュアル) ターゲットのため後者を選択。詳細経緯は Issue #90 / PR description 参照。 %>
   <div class="sketch-box" style="margin-bottom: 24px;">
     <p class="sketch-small" style="margin-bottom: 6px; color: var(--muted);">
-      退会前に規約を確認したい場合はこちら
+      <%= t('.policy_links.prompt') %>
     </p>
     <p class="sketch-body-text">
-      <%= link_to "プライバシーポリシー", privacy_path, style: "color: var(--ink); text-decoration: underline;" %>
+      <%= link_to t('.policy_links.privacy'), privacy_path, style: "color: var(--ink); text-decoration: underline;" %>
       /
-      <%= link_to "利用規約", terms_path, style: "color: var(--ink); text-decoration: underline;" %>
+      <%= link_to t('.policy_links.terms'), terms_path, style: "color: var(--ink); text-decoration: underline;" %>
     </p>
   </div>
 

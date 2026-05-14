@@ -1,0 +1,60 @@
+ja:
+  settings:
+    show:
+      title: "設定 — weight daily."
+      h1: "データ連携の設定"
+      lead: "iPhone は Apple Shortcuts、Android は Health Connect から、毎日の歩数を自動で取り込みます。"
+      copy_button: "コピー"
+      step1:
+        label: "Step 1"
+        token_caption: "あなた専用のトークン（秘密にしてください）"
+      step2:
+        label: "Step 2"
+        url_caption: "iPhone のショートカットアプリで使う URL"
+      step3:
+        label: "Step 3"
+        heading: "🎉 あとはショートカットを入れるだけ"
+        description_html: "下のボタンから iPhone に Shortcut を追加 → 初回実行時に「<strong>ヘルスケアへのアクセス</strong>」を許可 → Step 1 でコピーした値を貼り付ければ完了です。"
+        install_button: "ショートカットをインストール"
+        install_note: "タップで iCloud が開きます"
+      re_install_link:
+        prefix: "ショートカットを別の端末に追加したい場合は"
+        anchor: "こちら"
+      web_android_promo:
+        heading: "Android Health Connect 連携"
+        description: "お手元の Android スマホから Health Connect 経由で歩数 / 距離 / 階段を自動同期できます。同期されたデータは Web 版にログインしてダッシュボードで閲覧できます。"
+        prep_note_html: "現在 Android アプリのインストール手順を準備中です。それまでは <strong>サンプルデータ</strong>で雰囲気をお試しください。"
+      regenerate_token:
+        heading: "トークンの再生成"
+        warning_html: "⚠️ <strong>トークンを再生成すると、現在 Apple Shortcuts に設定済みのトークンは無効になります。</strong> 再生成後は Shortcut 側の設定も更新する必要があります。"
+        button: "トークンを再生成する"
+        confirm: "本当に再生成しますか？ 現在の Shortcut が動かなくなります。"
+      account_deletion:
+        heading: "⚠️ アカウントの削除"
+        description_html: "アカウントを削除すると、歩数記録・連携設定を含む<strong>すべてのデータが即時に削除</strong>されます。この操作は取り消せません。"
+        button: "アカウントを削除する"
+      deletion_modal:
+        title: "⚠️ 本当に退会しますか？"
+        confirmation_prompt_html: "確認のため、あなたの名前 <strong>%{name}</strong> を下に入力してください。"
+        name_label: "名前を入力"
+        cancel_button: "キャンセル"
+        submit_button: "退会する"
+      policy_links:
+        prompt: "退会前に規約を確認したい場合はこちら"
+        privacy: "プライバシーポリシー"
+        terms: "利用規約"
+    webhook_delivery_history:
+      label_html: "Shortcut からの送信ログ (直近 %{limit} 件)"
+      empty_state: "まだ Shortcut からの送信はありません。Step 3 のボタンからインストールしてください。"
+      last_sent_html: "最終送信: <strong>%{time_ago}前</strong>"
+      time_ago_suffix: "前"
+      count_unit: "件"
+    health_connect_section:
+      heading: "Android Health Connect 連携"
+      description: "Android アプリ版で Health Connect 経由で歩数 / 距離 / 階段を自動同期します。"
+      pre_sync_note_html: "※ 歩数アプリ (<strong>Google Fit</strong> や <strong>Samsung Health</strong> など) から Health Connect へデータが渡る設定になっているとスムーズに同期できます。0 歩のままの場合は、Health Connect アプリの「<strong>データとアクセス</strong>」 で書き込み設定をご確認ください。"
+      not_synced_yet: "まだ同期されていません"
+      checking: "確認中..."
+      request_permission_button: "歩数を取得する →"
+      sync_button: "📡 同期する"
+      recovery_button: "設定ページでトークンを再生成 →"
