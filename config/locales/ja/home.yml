@@ -93,7 +93,7 @@ ja:
       dont_show_again: "以降表示しない"
       close_button: "確認しました"
     banner_android:
-      body: "Android スマホから Health Connect 経由で歩数を自動送信できます。 ログイン不要で、いまはサンプルデータで雰囲気を見てみてください。"
+      body: "Android スマホから Health Connect 経由で歩数を自動送信できます。ログイン不要で、いまはサンプルデータで雰囲気を見てみてください。"
       cta: "設定を見る"
     banner_empty:
       body_html: "ようこそ！ <strong>iPhone の無料アプリ「ショートカット」</strong>(Apple Shortcuts) を設定すると、あなたの実データがここに表示されます。 下は完成イメージのサンプルデータです。"
