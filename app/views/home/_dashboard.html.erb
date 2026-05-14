@@ -74,19 +74,24 @@
 %>
 
 <%# ---- トップバー ---- %>
+<%
+  # 時間帯挨拶 (= 配列 index ではなく名前付き key に正規化、yml 側順序入替リスク回避)。
+  # 0..5 = morning / 6..11 = afternoon / 12..17 = evening / 18..23 = evening (= clamp)。
+  greeting_key = %w[morning afternoon evening][[Time.current.hour / 6, 2].min]
+%>
 <div class="sketch-topbar">
   <div>
     <div class="sketch-label">
-      <%= ["おはようございます", "こんにちは", "こんばんは"][[ [Time.current.hour / 6, 2].min, 0 ].max] %>
+      <%= t(".greetings.#{greeting_key}") %>
     </div>
     <div class="sketch-hh">
-      <%= display_name %>さん
-      <span class="sketch-small">／ Day <%= active_days %></span>
+      <%= display_name %><%= t('.user_suffix') %>
+      <span class="sketch-small"><%= t('.day_count', count: active_days) %></span>
     </div>
   </div>
   <div style="text-align: right;">
-    <div class="sketch-small">きょうの消費</div>
-    <div class="sketch-hh">+<%= today_kcal %> <span class="sketch-hl-yellow">kcal</span></div>
+    <div class="sketch-small"><%= t('.today_burn_label') %></div>
+    <div class="sketch-hh">+<%= today_kcal %> <span class="sketch-hl-yellow"><%= t('.kcal_unit') %></span></div>
   </div>
 </div>
 
@@ -94,22 +99,23 @@
      数値プレッシャー回避: 矢印・色分け・前月比計算なし、並列表示のみ (= memory three_step_philosophy 参照)。
      number_with_delimiter は delimiter "," を明示 (= ja ロケール由来の自動切替で誤って "." に変わる事故を防ぐ、Issue #73)。 %>
 <div class="sketch-box sketch-savings" style="margin-bottom: 14px;">
-  <div class="sketch-label">今月の貯カロリー</div>
+  <div class="sketch-label"><%= t('.savings.this_month_label') %></div>
   <div class="sketch-savings-main">
     <%= number_with_delimiter(calorie_savings[:this_month], delimiter: ",") %>
-    <span class="sketch-small">kcal</span>
+    <span class="sketch-small"><%= t('.kcal_unit') %></span>
   </div>
   <% if calorie_savings[:this_month].zero? && calorie_savings[:total].positive? %>
     <%# Issue #70: 月初に「今月: 0 kcal」が出るガッカリ感を、累計を頼みに能動的に解消する。
         強要表現は使わず「これまでの合計が支えてくれる」というニュートラルな励ましに留める。 %>
     <p class="sketch-small" style="margin: 4px 0 0; color: var(--ink-2);">
-      月の始まり。今日の一歩が貯まりはじめる。
-      これまでの合計 <strong><%= number_with_delimiter(calorie_savings[:total], delimiter: ",") %> kcal</strong> が支えてくれます。
+      <%= t('.savings.month_start_lead') %>
+      <%= t('.savings.month_start_support_html', total: number_with_delimiter(calorie_savings[:total], delimiter: ",")) %>
     </p>
   <% end %>
   <div class="sketch-small" style="margin-top: 6px;">
-    前月: <%= number_with_delimiter(calorie_savings[:last_month], delimiter: ",") %> kcal ／
-    これまでの合計: <%= number_with_delimiter(calorie_savings[:total], delimiter: ",") %> kcal
+    <%= t('.savings.prev_and_total',
+          prev: number_with_delimiter(calorie_savings[:last_month], delimiter: ","),
+          total: number_with_delimiter(calorie_savings[:total], delimiter: ",")) %>
   </div>
 </div>
 
@@ -119,14 +125,14 @@
   <%# 左: 消費カロリー 30 日チャート %>
   <div class="sketch-box">
     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-      <h2 class="sketch-h" style="margin: 0;">消費カロリー（30日）</h2>
-      <div class="sketch-small">「プラスα」の積み上げだけ</div>
+      <h2 class="sketch-h" style="margin: 0;"><%= t('.chart.heading') %></h2>
+      <div class="sketch-small"><%= t('.chart.subtitle') %></div>
     </div>
 
     <svg viewBox="0 0 <%= svg_width %> <%= svg_height %>"
          class="sketch-chart-svg"
          role="img"
-         aria-label="30日間の消費カロリーチャート">
+         aria-label="<%= t('.chart.aria_label') %>">
 
       <%# グリッド線 %>
       <g stroke="#000" stroke-opacity="0.08" stroke-width="1">
@@ -160,7 +166,7 @@
           <text x="<%= (bar[:x] + bar_width / 2.0).round(1) %>"
                 y="<%= [bar[:y] - 4, 12].max %>"
                 font-family="Patrick Hand" font-size="11"
-                text-anchor="middle" fill="#1a1a1a">今日</text>
+                text-anchor="middle" fill="#1a1a1a"><%= t('.chart.today_marker') %></text>
         <% end %>
       <% end %>
 
@@ -176,10 +182,10 @@
 
     <%# 凡例 %>
     <div style="display: flex; gap: 14px; margin-top: 6px; flex-wrap: wrap;" class="sketch-small">
-      <span><span class="sketch-sw" style="background: #7ac74f;"></span>その日のプラスα消費</span>
-      <span><span class="sketch-sw" style="background: #cfcfcf;"></span>記録なし・休息日</span>
-      <span><span class="sketch-sw" style="background: #ffd23f;"></span>本日</span>
-      <span><span class="sketch-sw" style="background: #ff7a45;"></span>7日移動平均</span>
+      <span><span class="sketch-sw" style="background: #7ac74f;"></span><%= t('.chart.legend.burn_extra') %></span>
+      <span><span class="sketch-sw" style="background: #cfcfcf;"></span><%= t('.chart.legend.rest') %></span>
+      <span><span class="sketch-sw" style="background: #ffd23f;"></span><%= t('.chart.legend.today') %></span>
+      <span><span class="sketch-sw" style="background: #ff7a45;"></span><%= t('.chart.legend.moving_average') %></span>
     </div>
   </div>
 
@@ -202,7 +208,7 @@
             「動いた」 に sketch-hl-yellow ハイライトで 2 点強調 (= +X kcal strong + 動いた yellow = 「数字 = 量」 + 「動詞 = 事実」)、
             プロジェクタ大画面 3 秒テストでの達成カード認識性向上 (= design-reviewer 提案)。 %>
         <div class="sketch-small">
-          今日 <strong>+<%= today_kcal %> kcal</strong> <span class="sketch-hl-yellow">動いた</span>ぶん、たとえば…
+          <%= t('.ai_card.action_lead_prefix_html', kcal: today_kcal) %> <span class="sketch-hl-yellow"><%= t('.ai_card.action_lead_verb') %></span><%= t('.ai_card.action_lead_suffix') %>
         </div>
         <ul style="margin: 8px 0 0 16px; padding: 0; list-style: disc;">
           <% advice.items.each do |item| %>
@@ -220,16 +226,16 @@
             ユーザーへの透明性 + 発表会での教材性アピール用。 %>
         <% if advice.ai_used %>
           <div class="sketch-small" style="margin-top: 6px; color: var(--muted); font-size: 12px;">
-            Powered by Claude (Anthropic)
+            <%= t('.ai_card.powered_by') %>
           </div>
         <% end %>
         <div style="margin-top: 10px;">
           <span class="sketch-btn" style="cursor: default; opacity: 0.6;"
-                title="この機能は近日公開予定です">
+                title="<%= t('.ai_card.coming_soon_title') %>">
             <%= advice.button_label %>
           </span>
           <%# title 属性は mobile でホバー不可のため、下に明示テキストを併置する %>
-          <div class="sketch-small" style="margin-top: 4px;">(近日公開予定)</div>
+          <div class="sketch-small" style="margin-top: 4px;"><%= t('.ai_card.coming_soon_note') %></div>
         </div>
       <% else %>
         <%# Issue #163: 消費 0 kcal (= しきい値未満) 時の空ステート。
@@ -244,8 +250,8 @@
     <%# ストリークカード %>
     <div class="sketch-box">
       <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 class="sketch-h" style="margin: 0;">🔥 ストリーク</h3>
-        <span class="sketch-small">今週</span>
+        <h3 class="sketch-h" style="margin: 0;"><%= t('.streak.heading') %></h3>
+        <span class="sketch-small"><%= t('.streak.this_week') %></span>
       </div>
 
       <div class="sketch-streak-row">
@@ -272,13 +278,13 @@
       </div>
 
       <div class="sketch-small" style="margin-top: 8px;">
-        連続 <strong><%= streak %> 日</strong>
+        <%= t('.streak.count_html', count: streak) %>
         <% if streak >= 14 %>
-          &#127881; 2週間継続達成！
+          <%= t('.streak.achievement_2weeks') %>
         <% elsif streak >= 7 %>
-          &#127881; 1週間継続達成！
+          <%= t('.streak.achievement_1week') %>
         <% elsif streak > 0 %>
-          — あと <%= 7 - streak %> 日で「1週間継続」
+          <%= t('.streak.progress', days: 7 - streak) %>
         <% end %>
       </div>
     </div>
@@ -289,20 +295,20 @@
 <%# ---- 下段 4 カード ---- %>
 <div class="sketch-bottom-grid">
   <div class="sketch-box filled">
-    <div class="sketch-label">⬆ 階段</div>
-    <div class="sketch-hh">+<%= today_flights %> <span class="sketch-small">段</span></div>
-    <div class="sketch-small">自動検出</div>
+    <div class="sketch-label"><%= t('.bottom_cards.flights.label') %></div>
+    <div class="sketch-hh">+<%= today_flights %> <span class="sketch-small"><%= t('.bottom_cards.flights.unit') %></span></div>
+    <div class="sketch-small"><%= t('.bottom_cards.flights.caption') %></div>
   </div>
 
   <div class="sketch-box filled">
-    <div class="sketch-label">🚶 余分歩き</div>
-    <div class="sketch-hh">+<%= today_dist %> <span class="sketch-small">km</span></div>
-    <div class="sketch-small">ルートから推定</div>
+    <div class="sketch-label"><%= t('.bottom_cards.distance.label') %></div>
+    <div class="sketch-hh">+<%= today_dist %> <span class="sketch-small"><%= t('.bottom_cards.distance.unit') %></span></div>
+    <div class="sketch-small"><%= t('.bottom_cards.distance.caption') %></div>
   </div>
 
   <div class="sketch-box filled">
-    <div class="sketch-label">🔥 消費</div>
-    <div class="sketch-hh">+<%= today_kcal %> <span class="sketch-small">kcal</span></div>
+    <div class="sketch-label"><%= t('.bottom_cards.kcal.label') %></div>
+    <div class="sketch-hh">+<%= today_kcal %> <span class="sketch-small"><%= t('.kcal_unit') %></span></div>
     <% if food_equivalent %>
       <%# Issue #236: 食品換算カードを 2 行構成 + 絵文字ハイライト化 (= プロジェクタ大画面 3 秒テストでのインパクト向上)。
           階層: 大 = +X kcal (sketch-hh) / 中 = 絵文字 (sketch-h) / 小 = 食品名 + 数量 (sketch-small)。
@@ -314,20 +320,23 @@
         <%= food_equivalent[:emoji] %>
       </div>
       <div class="sketch-small sketch-food-equivalent" style="text-align: center;">
-        ≒ <%= food_equivalent[:name] %> <%= food_equivalent[:count] %> <%= food_equivalent[:unit] %>ぶん
+        <%= t('.bottom_cards.kcal.food_equivalent_line',
+              name: food_equivalent[:name],
+              count: food_equivalent[:count],
+              unit: food_equivalent[:unit]) %>
       </div>
       <%# Issue #234: 3 ステップ思想 ① (= 罪悪感を減らす) を補強する短いコピー。
           「食べた予定」ではなく「動いた過去」への肯定として読ませる過去形語尾。
           sketch-food-equivalent は付けない (= 固定短文で ellipsis 不要、行 310-312 と同じ判断)。 %>
-      <div class="sketch-small" style="text-align: center; margin-top: 6px; color: var(--muted);">食べても帳消し！</div>
+      <div class="sketch-small" style="text-align: center; margin-top: 6px; color: var(--muted);"><%= t('.bottom_cards.kcal.encouragement') %></div>
     <% else %>
-      <div class="sketch-small">今日はまだ記録なし</div>
+      <div class="sketch-small"><%= t('.bottom_cards.kcal.empty_state') %></div>
     <% end %>
   </div>
 
   <div class="sketch-box accent">
-    <div class="sketch-label">きょうの合計歩数</div>
+    <div class="sketch-label"><%= t('.bottom_cards.steps.label') %></div>
     <div class="sketch-hh"><%= number_with_delimiter(today_steps, delimiter: ",") %></div>
-    <div class="sketch-small">スマホ連携で自動記録</div>
+    <div class="sketch-small"><%= t('.bottom_cards.steps.caption') %></div>
   </div>
 </div>

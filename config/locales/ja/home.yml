@@ -1,0 +1,104 @@
+# i18n 抽出 4 例目 / 最終 = 規約完成度テスト + 動的補間 (= Issue #330)。
+#
+# 確立された 3 例 (= legal / settings / about) の規約をすべて適用:
+#   - 4-5 階層 key 命名 (= 章立て構造あり = sections 中間ノード、なしは直下、legal.yml 由来)
+#   - _html suffix を要する箇所 (= <strong> 等 意味的強調) は yml 値内、装飾 class (= sketch-hl-*) は view 側に残しテキスト分割 (= about.yml 由来 = 規約進化 5 候補 1 例目)
+#   - 動的補間 %{var} は標準パターン (= settings.yml の delivery_history.label / deletion_modal.confirmation_prompt_html 由来)
+#
+# AI 由来文言は yml 化対象外 (= Issue #330 「不採用案 C」 + 動的生成のため SSOT は service 側):
+#   - advice.headline / advice.body / advice.button_label / advice.items[*].name/kcal/label
+#   - これら value は @advice 経由で view に渡る、ai_card には周辺の静的テキストのみ i18n 化
+#
+# week_days / 時間帯挨拶配列は 1 文字 / 短文の表示用ローカル定数として view に残置:
+#   - 後者は名前付き key で yml 化 (= greetings.morning/afternoon/evening、配列 index 順序入替リスク回避)
+#   - 前者 (= %w[月 火 水 木 金 土 日]) は単文字 + view 局所のため抽出非対象
+#
+# kcal 単位は dashboard 内で複数箇所反復するため共通 key (= dashboard.kcal_unit) を 1 つだけ定義し再利用 (= 単位語の SSOT)。
+ja:
+  home:
+    index:
+      sample_data_note: "※ 表示中の数値はサンプルデータです"
+      policy_links:
+        privacy: "プライバシーポリシー"
+        terms: "利用規約"
+    dashboard:
+      kcal_unit: "kcal"
+      user_suffix: "さん"
+      day_count: "／ Day %{count}"
+      greetings:
+        morning: "おはようございます"
+        afternoon: "こんにちは"
+        evening: "こんばんは"
+      today_burn_label: "きょうの消費"
+      savings:
+        this_month_label: "今月の貯カロリー"
+        month_start_lead: "月の始まり。今日の一歩が貯まりはじめる。"
+        month_start_support_html: "これまでの合計 <strong>%{total} kcal</strong> が支えてくれます。"
+        prev_and_total: "前月: %{prev} kcal ／ これまでの合計: %{total} kcal"
+      chart:
+        heading: "消費カロリー（30日）"
+        subtitle: "「プラスα」の積み上げだけ"
+        aria_label: "30日間の消費カロリーチャート"
+        today_marker: "今日"
+        legend:
+          burn_extra: "その日のプラスα消費"
+          rest: "記録なし・休息日"
+          today: "本日"
+          moving_average: "7日移動平均"
+      ai_card:
+        # action_lead は <strong> (= 意味的強調) は yml 内、<span class="sketch-hl-yellow"> (= 装飾 class) は view 側で分割。
+        action_lead_prefix_html: "今日 <strong>+%{kcal} kcal</strong>"
+        action_lead_verb: "動いた"
+        action_lead_suffix: "ぶん、たとえば…"
+        powered_by: "Powered by Claude (Anthropic)"
+        coming_soon_title: "この機能は近日公開予定です"
+        coming_soon_note: "(近日公開予定)"
+      streak:
+        heading: "🔥 ストリーク"
+        this_week: "今週"
+        count_html: "連続 <strong>%{count} 日</strong>"
+        achievement_2weeks: "🎉 2週間継続達成！"
+        achievement_1week: "🎉 1週間継続達成！"
+        progress: "— あと %{days} 日で「1週間継続」"
+      bottom_cards:
+        flights:
+          label: "⬆ 階段"
+          unit: "段"
+          caption: "自動検出"
+        distance:
+          label: "🚶 余分歩き"
+          unit: "km"
+          caption: "ルートから推定"
+        kcal:
+          label: "🔥 消費"
+          empty_state: "今日はまだ記録なし"
+          food_equivalent_line: "≒ %{name} %{count} %{unit}ぶん"
+          encouragement: "食べても帳消し！"
+        steps:
+          label: "きょうの合計歩数"
+          caption: "スマホ連携で自動記録"
+    welcome_modal:
+      title: "👋 weight daily へようこそ"
+      lead_html: "通勤通学で歩く・階段を選ぶ等の<strong>日常の小さな前向きな選択</strong>を、自動で拾って褒めてくれる Web アプリです。"
+      iphone:
+        heading: "📱 iPhone をお使いの方"
+        intro: "Apple Shortcuts で歩数を自動連携できます:"
+        steps:
+          - "Google でログイン"
+          - "Settings から Shortcut をインストール"
+          - "1 日 1 回自動で歩数が記録されます"
+      android:
+        heading: "🤖 Android をお使いの方"
+        body_html: "Android アプリ版は <strong>近日公開予定</strong>です。それまでは <strong>サンプルデータ</strong>でダッシュボードの機能をお試しください (ログイン不要)。"
+      dont_show_again: "以降表示しない"
+      close_button: "確認しました"
+    banner_android:
+      body: "Android スマホから Health Connect 経由で歩数を自動送信できます。 ログイン不要で、いまはサンプルデータで雰囲気を見てみてください。"
+      cta: "設定を見る"
+    banner_empty:
+      body_html: "ようこそ！ <strong>iPhone の無料アプリ「ショートカット」</strong>(Apple Shortcuts) を設定すると、あなたの実データがここに表示されます。 下は完成イメージのサンプルデータです。"
+      cta: "設定する →"
+    banner_guest:
+      body_html: "これは<strong>サンプルデータ</strong>です。Google でログインすると、自分の歩数データを記録できます。"
+      browser_note_html: "<strong>Safari / Chrome</strong> からアクセスすると Google ログインが使えます。LINE や X 等の内蔵ブラウザはご注意ください。"
+      login_button: "Google でログイン"

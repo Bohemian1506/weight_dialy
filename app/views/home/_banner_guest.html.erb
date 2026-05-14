@@ -4,7 +4,7 @@
     <span class="sketch-banner-icon">👀</span>
     <div>
       <p class="sketch-banner-text">
-        これは<strong>サンプルデータ</strong>です。Google でログインすると、自分の歩数データを記録できます。
+        <%= t('.body_html') %>
       </p>
       <%# Issue #143: SNS 内蔵ブラウザ (LINE / X (Twitter) / Instagram 等) では Google OAuth callback が
           外部ブラウザへ戻れず認証フローが破綻する (= PR #142 で `; wv)` bypass を通すが OAuth は詰まる対策)。
@@ -12,7 +12,7 @@
           コピーは **肯定形先置き** (= 「Safari/Chrome で使える」 を先) で 3 ステップ思想 ① 「罪悪感を減らす / できる前提」 トーンに整合。
           color: var(--muted) で sketch-banner-text (ink-2) との階層差を確保 (= 補足情報の視覚識別)。 %>
       <p class="sketch-small" style="margin-top: 4px; color: var(--muted);">
-        <strong>Safari / Chrome</strong> からアクセスすると Google ログインが使えます。LINE や X 等の内蔵ブラウザはご注意ください。
+        <%= t('.browser_note_html') %>
       </p>
     </div>
   </div>
@@ -21,7 +21,7 @@
     <%# OmniAuth ミドルウェアが /auth/:provider を処理するため named route なし。
         Capacitor アプリ内では capacitor-oauth-login controller が click を intercept して
         Browser.open(/auth/capacitor_start) に切り替える (= Phase 3 cookie storage 分離対応)。 %>
-    <%= button_to "Google でログイン", "/auth/google_oauth2",
+    <%= button_to t('.login_button'), "/auth/google_oauth2",
           method: :post,
           class: "sketch-btn sketch-btn-primary",
           data: { turbo: false, action: "click->capacitor-oauth-login#intercept" } %>
