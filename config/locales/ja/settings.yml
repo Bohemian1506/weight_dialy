@@ -1,3 +1,5 @@
+# sections: 中間ノードは不採用 (= form 中心で章立てなし、legal.yml と性質差で構造分岐)。
+# 詳細は PR #334 規約進化 4 点判断ログ参照。
 ja:
   settings:
     show:
@@ -44,10 +46,10 @@ ja:
         privacy: "プライバシーポリシー"
         terms: "利用規約"
     webhook_delivery_history:
-      label_html: "Shortcut からの送信ログ (直近 %{limit} 件)"
+      label: "Shortcut からの送信ログ (直近 %{limit} 件)"
       empty_state: "まだ Shortcut からの送信はありません。Step 3 のボタンからインストールしてください。"
       last_sent_html: "最終送信: <strong>%{time_ago}前</strong>"
-      time_ago_suffix: "前"
+      time_unit_ago: "前"
       count_unit: "件"
     health_connect_section:
       heading: "Android Health Connect 連携"

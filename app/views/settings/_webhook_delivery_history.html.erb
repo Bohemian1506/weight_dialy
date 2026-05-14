@@ -1,7 +1,7 @@
 <%# 送信ログ (直近 5 件)。Apple Shortcuts のクライアントは Webhook 422 を「ネットワーク切れ」と
     誤表示するため (Day 3-3 既知バグ)、ここでログを見せて自己解決を助ける。 %>
 <p class="sketch-label" style="margin-bottom: 6px;">
-  <%= t('.label_html', limit: SettingsController::WEBHOOK_HISTORY_LIMIT).html_safe %>
+  <%= t('.label', limit: SettingsController::WEBHOOK_HISTORY_LIMIT) %>
 </p>
 <div class="sketch-box" style="margin-bottom: 24px;">
   <% if @webhook_deliveries.empty? %>
@@ -12,7 +12,7 @@
     <%# Issue #58: セクション冒頭に最終送信時刻を 1 行で表示 (= 直近状態が即座に把握できる)。
         @webhook_deliveries は received_at desc 順で取得済みなので first が最新。 %>
     <p class="sketch-small" style="margin: 0 0 10px; color: var(--ink-2);">
-      <%= t('.last_sent_html', time_ago: time_ago_in_words(@webhook_deliveries.first.received_at)).html_safe %>
+      <%= t('.last_sent_html', time_ago: time_ago_in_words(@webhook_deliveries.first.received_at)) %>
     </p>
     <ul class="sketch-webhook-history">
       <% @webhook_deliveries.each do |delivery| %>
@@ -22,7 +22,7 @@
           </span>
           <span class="sketch-webhook-history-time"
                 title="<%= delivery.received_at.strftime("%Y-%m-%d %H:%M JST") %>">
-            <%= time_ago_in_words(delivery.received_at) %><%= t('.time_ago_suffix') %>
+            <%= time_ago_in_words(delivery.received_at) %><%= t('.time_unit_ago') %>
           </span>
           <% count = webhook_record_count_for_display(delivery) %>
           <% if count %>

@@ -68,7 +68,7 @@
     <div class="sketch-box" style="margin-bottom: 32px;">
       <p class="sketch-h" style="margin-bottom: 8px;"><%= t('.step3.heading') %></p>
       <p class="sketch-body-text" style="margin-bottom: 16px;">
-        <%= t('.step3.description_html').html_safe %>
+        <%= t('.step3.description_html') %>
       </p>
       <%= link_to t('.step3.install_button'),
             "https://www.icloud.com/shortcuts/7e0199f480824ae1959a0833a443f564",
@@ -106,7 +106,7 @@
         <%= t('.web_android_promo.description') %>
       </p>
       <p class="sketch-body-text" style="margin-bottom: 0;">
-        <%= t('.web_android_promo.prep_note_html').html_safe %>
+        <%= t('.web_android_promo.prep_note_html') %>
       </p>
     </div>
   <% end %>
@@ -121,7 +121,7 @@
   <div class="sketch-box sketch-box-danger-soft" style="margin-bottom: 24px;">
     <p class="sketch-h sketch-h-danger" style="margin-bottom: 8px;"><%= t('.regenerate_token.heading') %></p>
     <p class="sketch-body-text" style="margin-bottom: 16px;">
-      <%= t('.regenerate_token.warning_html').html_safe %>
+      <%= t('.regenerate_token.warning_html') %>
     </p>
     <%= button_to t('.regenerate_token.button'),
           regenerate_webhook_token_path,
@@ -137,7 +137,7 @@
     <div class="sketch-box sketch-box-danger" style="margin-bottom: 24px;">
       <p class="sketch-h sketch-h-danger" style="margin-bottom: 8px;"><%= t('.account_deletion.heading') %></p>
       <p class="sketch-body-text" style="margin-bottom: 16px;">
-        <%= t('.account_deletion.description_html').html_safe %>
+        <%= t('.account_deletion.description_html') %>
       </p>
       <button type="button"
               class="sketch-btn sketch-btn-danger"
@@ -160,7 +160,7 @@
           <%= t('.deletion_modal.title') %>
         </p>
         <p class="sketch-body-text" style="margin-bottom: 16px;">
-          <%= t('.deletion_modal.confirmation_prompt_html', name: current_user.name).html_safe %>
+          <%= t('.deletion_modal.confirmation_prompt_html', name: current_user.name) %>
         </p>
 
         <%= form_with url: account_deletion_path, method: :delete do |f| %>
