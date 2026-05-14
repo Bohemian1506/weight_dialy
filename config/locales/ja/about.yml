@@ -5,10 +5,12 @@
 ja:
   about:
     show:
-      title: "weight_dialy について"
-      h1_prefix: "weight "
+      title: "weight daily. について"
+      # h1 は sketch-swoosh 装飾 span のためにテキストを 3 分割 (= 装飾 class は view 側責務、yml はテキストのみ)。
+      # 前後の半角スペースは view 側で制御 (= 翻訳時のスペース有無見落とし防止)。
+      h1_prefix: "weight"
       h1_brand: "daily."
-      h1_suffix: " について"
+      h1_suffix: "について"
       lead_first: "通勤通学のついで歩きや、エスカレーターの代わりに階段。"
       lead_second: "日常の小さな前向きな選択を自動で拾って褒める Web アプリです。"
       home_button: "ホームへ戻る"

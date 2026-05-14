@@ -9,7 +9,7 @@ RSpec.describe 'About', type: :request do
     end
 
     it 'includes the application name' do
-      expect(response.body).to include('weight_dialy')
+      expect(response.body).to include('weight daily.')
     end
 
     it 'includes a link back to the home page' do
