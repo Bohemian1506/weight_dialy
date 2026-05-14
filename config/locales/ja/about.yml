@@ -1,0 +1,19 @@
+# 規約進化 5 候補 (= 1 例目観測): 装飾 HTML タグと UI 文言の分離。
+# - 意味的強調 (= <strong>) は yml 内 (= _html suffix)
+# - 装飾 class (= <span class="sketch-swoosh">) / レイアウト要素 (= <br>) は view 側に残し、テキストを分割
+# 詳細は PR #337 規約進化判断ログ参照。
+ja:
+  about:
+    show:
+      title: "weight daily. について"
+      # h1 は sketch-swoosh 装飾 span のためにテキストを 3 分割 (= 装飾 class は view 側責務、yml はテキストのみ)。
+      # 前後の半角スペースは view 側で制御 (= 翻訳時のスペース有無見落とし防止)。
+      h1_prefix: "weight"
+      h1_brand: "daily."
+      h1_suffix: "について"
+      lead_first: "通勤通学のついで歩きや、エスカレーターの代わりに階段。"
+      lead_second: "日常の小さな前向きな選択を自動で拾って褒める Web アプリです。"
+      home_button: "ホームへ戻る"
+      policy_links:
+        privacy: "プライバシーポリシー"
+        terms: "利用規約"
