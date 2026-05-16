@@ -76,10 +76,14 @@
 
 <%# ---- トップバー ---- %>
 <%
-  # 時間帯挨拶 (= 配列 index ではなく名前付き key に正規化、yml 側順序入替リスク回避)。
-  # 0..5 = morning / 6..11 = afternoon / 12..23 = evening (= 正午以降はこんばんは、元実装踏襲)。
-  # 12-17 を昼として "afternoon" 扱いにする調整は別 Issue に切り出す (= 表示変化を伴うため i18n 抽出 PR スコープ外)。
-  greeting_key = %w[morning afternoon evening][[Time.current.hour / 6, 2].min]
+  # 時間帯挨拶 (= 名前付き key に正規化、yml 側順序入替リスク回避)。
+  # 5..10 = morning / 11..16 = afternoon / else = evening。
+  # else は夜 (17-23) と深夜 (0-4) の 2 区間を意図的に evening へ寄せる。
+  greeting_key = case Time.current.hour
+                 when 5..10  then "morning"
+                 when 11..16 then "afternoon"
+                 else             "evening"
+                 end
 %>
 <div class="sketch-topbar">
   <div>
