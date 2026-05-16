@@ -274,6 +274,33 @@ RSpec.describe "Home", type: :request do
         expect(response.body).to include("ログアウト")
       end
     end
+
+    # ─────────────────────────────────────────────────
+    # 時間帯挨拶 (Issue #347): hour に応じた挨拶文言の切替
+    # 5..10 = おはようございます / 11..16 = こんにちは / それ以外 (= 夜 17-23 / 深夜 0-4) = こんばんは
+    # 元バグが「12 時から evening」の境界バグだったため、各区分の境界値を網羅する。
+    # ─────────────────────────────────────────────────
+    context "時間帯挨拶 (Issue #347、ゲスト状態でも表示される)" do
+      {
+        "朝 5 時 (morning 下限)"      => [ 5,  "おはようございます" ],
+        "朝 10 時 (morning 上限)"     => [ 10, "おはようございます" ],
+        "昼 11 時 (afternoon 下限)"   => [ 11, "こんにちは" ],
+        "昼 16 時 (afternoon 上限)"   => [ 16, "こんにちは" ],
+        "夕方 17 時 (evening 下限)"   => [ 17, "こんばんは" ],
+        "深夜 3 時 (evening が深夜帯も吸収)" => [ 3,  "こんばんは" ],
+        "深夜 23 時 (evening 夜帯)"   => [ 23, "こんばんは" ]
+      }.each do |label, (hour, greeting)|
+        context label do
+          # travel_to で時刻を固定し、CI 実行時刻に依存しない再現性を担保する。
+          around { |ex| travel_to(Time.zone.local(2026, 5, 15, hour, 0)) { ex.run } }
+          before { get root_path }
+
+          it "「#{greeting}」を表示する" do
+            expect(response.body).to include(greeting)
+          end
+        end
+      end
+    end
   end
 
   # ---------------------------------------------------------------------------
